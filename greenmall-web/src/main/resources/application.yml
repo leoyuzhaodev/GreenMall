@@ -1,0 +1,19 @@
+server:
+  # 端口
+  port: 8080
+  servlet:
+    # 访问路径
+    context-path: /greenmall
+spring:
+  application:
+    # 应用名称
+    name: GreenMall
+  datasource:
+    # 数据库连接配置
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/greenmall
+    username: root
+    password: 245683yzf
+  mybatis:
+    # mybatis 别名配置
+    type-aliases-package: com.yzf.greenmall.entity
