@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="layui/css/layui.css" media="all">
+</head>
+<body>
+<!-- 商品基本信息表单 -->
+<br>
+<div style="margin-right: 20px;">
+    <form lay-filter="goodsForm" class="layui-form" action="">
+        <!-- ------------------商品基本信息------------------ -->
+        <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+            <legend>商品基本信息</legend>
+        </fieldset>
+        <!-- 商品名称 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">商品名称</label>
+            <div class="layui-input-block">
+                <input type="text" width="50%" name="title" lay-verify="title" autocomplete="off"
+                       placeholder="请输入商品名称" class="layui-input">
+            </div>
+        </div>
+        <!-- 售卖标题 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">售卖标题</label>
+            <div class="layui-input-block">
+                <input type="text" name="subTitle" lay-verify="subTitle" lay-reqtext="售卖标题是必填项，岂能为空？"
+                       placeholder="请输入售卖标题" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <!-- 一级分类 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">一级分类</label>
+            <div class="layui-input-block">
+                <select id="cid1" name="cid1" lay-filter="category" lay-verify="cid1" lay-search>
+                    <option value=""></option>
+                    <option value="0">写作</option>
+                    <option value="1" selected="">阅读</option>
+                    <option value="2">游戏</option>
+                    <option value="3">音乐</option>
+                    <option value="4">旅行</option>
+                </select>
+            </div>
+        </div>
+        <!-- 二级分类 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">二级分类</label>
+            <div class="layui-input-block">
+                <select id="cid2" name="cid2" lay-filter="category" lay-verify="cid2" lay-search>
+                    <option value=""></option>
+                    <option value="0">写作</option>
+                    <option value="1" selected="">阅读</option>
+                    <option value="2">游戏</option>
+                    <option value="3">音乐</option>
+                    <option value="4">旅行</option>
+                </select>
+            </div>
+        </div>
+        <!-- 三级分类 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">三级分类</label>
+            <div class="layui-input-block">
+                <select id="cid3" name="cid3" lay-filter="category" lay-verify="cid3" lay-search>
+                    <option class="selectTip" value="请选择分类"></option>
+                    <option value="0">写作</option>
+                    <option value="1" selected="">阅读</option>
+                    <option value="2">游戏</option>
+                    <option value="3">音乐</option>
+                    <option value="4">旅行</option>
+                </select>
+            </div>
+        </div>
+        <!-- ------------------商品详情信息------------------ -->
+        <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+            <legend>商品详情信息</legend>
+        </fieldset>
+        <!-- 价格 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">商品价格</label>
+            <div class="layui-input-block">
+                <input type="number" name="price" lay-verify="price" autocomplete="off"
+                       placeholder="请输入价格(价格大于0，最多有两位小数。)"
+                       class="layui-input">
+            </div>
+        </div>
+        <!-- 自动生成参数 -->
+        <div id="dynamicParams">
+
+        </div>
+
+        <!-- 商品打包 -->
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">商品打包</label>
+            <div class="layui-input-block">
+                <textarea name="packingList" lay-verify="packingList" placeholder="商品打包"
+                          class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <!-- 售后保障 -->
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">售后保障</label>
+            <div class="layui-input-block">
+                <textarea name="afterService" lay-verify="afterService" placeholder="售后保障" class="layui-textarea">七天无理由退换货。</textarea>
+            </div>
+        </div>
+
+        <!-- 商品图片上传 -->
+        <div class="layui-form-item" style="margin-top: 15px;">
+            <label class="layui-form-label">商品图片</label>
+            <div class="layui-input-block">
+                <div class="layui-upload">
+                    <blockquote class="layui-elem-quote layui-quote-nm" style="margin-top: 10px;">
+                        预览图：<span style="color: grey">单击图片取消上传</span>
+                        <div class="layui-upload-list" id="demo2"></div>
+                    </blockquote>
+                    <button type="button" class="layui-btn" id="test2">商品图片上传</button>
+                </div>
+            </div>
+        </div>
+        <!-- 富文本 -->
+        <div class="layui-form-item" style="margin-top: 15px;">
+            <label class="layui-form-label">商品详情</label>
+            <div class="layui-input-block">
+                <div id="description"></div>
+            </div>
+        </div>
+        <!-- 立即提交 -->
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>
+                <button type="submit" class="layui-btn" id="testEvent">测试事件</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+        <br/>
+    </form>
+
+    <!-- 动态生成规格参数的模板 -->
+    <div id="paramTemplate" style="display: none;" class="layui-form-item">
+        <label class="layui-form-label"><span id="paramName">参数名称</span></label>
+        <div class="layui-input-block">
+            <input type="text||number" lay-verify="required" lay-reqtext="[参数名称]是必填项，岂能为空？"
+                   autocomplete="off" placeholder="请输入[参数名称]"
+                   class="layui-input">
+        </div>
+    </div>
+</div>
+
+<input id="methodCall" type="hidden" onclick="saveGoods()"/>
+<script src="layui/layui.js" charset="utf-8"></script>
+<script src="layui/GreenMall.js" charset="utf-8"></script>
+<script>
+    layui.use(['upload', 'form', 'table', 'element'], function () {
+        var table = layui.table;
+        var $ = layui.jquery
+        var element = layui.element;
+        var form = layui.form;
+        var upload = layui.upload;
+        // 富文本
+        const E = window.wangEditor;
+        const editor = new E('#description');
+        var images = [];
+        var goods = null;
+
+        /*
+        * 待处理事宜
+        * 1,处理分类级联 √
+        * 2,处理参数动态加载 √
+        * 3,处理商品图片上传 √
+        * 4,处理商品详情（图片上传，html获取/展示）√
+        * 5,表单验证 √
+        * 6,处理商品图片的问题
+        * */
+
+        /* 1,处理分类级联 */
+
+        /**
+         * 加载一级分类数据
+         */
+        function loadCid1() {
+            $.get(
+                "/category/cid1",
+                {},
+                "json",
+                function (data) {
+                    // {id:"1",name:"种植业"}
+                    loadSelect($("#cid1"), data);
+                }
+            );
+        }
+
+        /**
+         * 加载二级分类数据
+         * param:
+         *  fid:分类父id
+         */
+        function loadCid2(fid) {
+            $.get(
+                "/category/cid2",
+                {},
+                "json",
+                function (data) {
+                    // {id:"1",name:"种植业"}
+                    loadSelect($("#cid2"), data);
+                }
+            );
+        }
+
+        /**
+         * 加载三级分类数据
+         * param:
+         *  fid:分类父id
+         */
+        function loadCid3(fid) {
+            $.get(
+                "/category/cid3",
+                {},
+                "json",
+                function (data) {
+                    // [{id:"1",name:"种植业"}]
+                    loadSelect($("#cid3"), data);
+                }
+            );
+        }
+
+        /**
+         * param:
+         *  selectObj:select 的jquery对象
+         *  data:下拉的数据
+         */
+        function loadSelect($selectObj, data) {
+            for (var i = 0; i < data.length; i++) {
+                addOption($selectObj, data[i].id, data[i].name);
+            }
+            // 重载select选择框
+            form.render('select');
+        }
+
+        /**
+         * 监听 select
+         */
+        form.on('select(category)', function (data) {
+            // console.log(data.elem); //得到select原始DOM对象
+            //console.log(data.othis); //得到美化后的DOM对象
+            // 1，将原始的 DOM 对象转化为 jquery 对象
+            var $select = $(data.elem);
+            // 2，获取选中值
+            var selectVal = data.value;
+            // 3，得到select的信息
+            var selectName = $select.attr("name");
+            if (selectName == "cid1") {
+                console.log(selectName);
+                // 置空 cid3
+                $("#cid3").find(".selectTip").siblings().remove();
+                // 加载 cid2
+                loadCid2(selectVal);
+            } else if (selectName == "cid2") {
+                // 加载 cid3
+                loadCid3(selectVal);
+            }
+        });
+
+        /**
+         * 为指定的select添加option
+         * param:
+         *  selectObj:select的jquery对象
+         *  selectVal:添加的值
+         */
+        function addOption($selectObj, selectId, selectName) {
+            $selectObj.append("<option value='" + selectId + "'>" + selectName + "</option>")
+        }
+
+        /* 2,处理参数动态加载 */
+        var params = [
+            {
+                id: "1",
+                name: "重量",
+                numeric: 1,
+                unit: "kg"
+            },
+            {
+                id: "2",
+                name: "产地",
+                numeric: 0,
+                unit: "无"
+            }
+        ]
+
+        loadParams(params);
+
+        /**
+         * 加载动态的参数
+         * params:
+         *  params:动态参数数据
+         */
+        function loadParams(params) {
+            if (params != null) {
+                for (var i = 0; i < params.length; i++) {
+                    var param = params[i];
+                    // 1，拷贝模板
+                    var $param = $("#paramTemplate").clone();
+                    // 2，设置参数名称
+                    $param.find("#paramName").text(param.name + "(" + param.unit + ")");
+                    // 3，设置输入框类型
+                    if (param.numeric == 1) {
+                        $param.find("input").attr("type", "number");
+                    } else {
+                        $param.find("input").attr("type", "text");
+                    }
+                    // 4，设置输入框名称
+                    $param.find("input").attr("pname", "param&" + param.id);
+                    // 5，设置校验提示
+                    $param.find("input").attr("lay-reqtext", param.name + "是必填项，岂能为空？");
+                    // 6，设置 placeholder
+                    $param.find("input").attr("placeholder", "请输入规格参数：" + param.name);
+                    // 7，设置模板可显示
+                    $param.css("display", "block");
+                    // 7，将模板加入表单中
+                    $("#dynamicParams").append($param);
+                }
+            }
+        }
+
+        /**
+         * 获取规格参数数据
+         */
+        function getParamsValue() {
+            var paramsValue = [];
+            for (var i = 0; i < params.length; i++) {
+                var param = params[i];
+                var paramVal = $("input[pname='param&" + param.id + "']").val();
+                paramsValue.push({
+                    id: param.id,
+                    value: paramVal
+                })
+            }
+            return paramsValue;
+        }
+
+
+        /* **************************************** 表单操作 **************************************** */
+
+        /**
+         * 验证商品的基本信息
+         */
+        function validateBaseInfo() {
+
+        }
+
+        /**
+         * 监听提交
+         */
+        form.on('submit(demo1)', function (data) {
+            // 获取规格参数数据
+            data.field["params"] = getParamsValue();
+            // 获取商品图片数据
+            if (images.length <= 0) {
+                layer.msg("您还没有上传商品图片哦!");
+            } else {
+                data.field["images"] = images.join(",");
+            }
+            // 删除file属性
+            delete data.field.file;
+            // 获取商品详情
+            data.field["description"] = editor.txt.html();
+            // 添加商品数据到后台
+            addGoods(data.field);
+            return false;
+        });
+
+        /**
+         * 添加商品
+         */
+        function addGoods(goods) {
+            console.log("添加商品：" + goods);
+            // 提交表单数据到后台
+            $.ajax({
+                url: "http://manager.greenmall.com/goods/add",
+                data: JSON.stringify(goods),//将数据转化为json格式
+                dataType: 'json',//接收后台数据的格式
+                type: "POST",
+                contentType: "application/json;charset=utf-8",//发送给后台数据的格式
+                //发送成功后执行，response中存的是从后台返回的json数据，名字可以随意改
+                success: function (response) {
+                    // {statue:1"",info:""}
+                    if (response.statue == 1) {
+
+                    } else {
+
+                    }
+                },
+                error: function () {
+                }
+            })
+        }
+
+        /**
+         * 表单验证
+         */
+        form.verify({
+            title: function (value, item) { //value：表单的值、item：表单的DOM对象
+                if (isEmpty(value)) {
+                    return "商品名称不能为空"
+                }
+                if (!new RegExp("^[a-zA-Z0-9_\u4e00-\u9fa5\\s·]+$").test(value)) {
+                    return '商品名称不能有特殊字符';
+                }
+                if (/^\d+\d+\d$/.test(value)) {
+                    return '商品名称不能全为数字';
+                }
+            }
+            , subTitle: function (value, item) { //value：表单的值、item：表单的DOM对象
+                if (isEmpty(value)) {
+                    return "售卖标题不能为空"
+                }
+                if (!new RegExp("^[a-zA-Z0-9_\u4e00-\u9fa5\\s·]+$").test(value)) {
+                    return '售卖标题不能有特殊字符';
+                }
+                if (/^\d+\d+\d$/.test(value)) {
+                    return '售卖标题不能全为数字';
+                }
+            }, cid1: function (value, item) { //value：表单的值、item：表单的DOM对象
+                if (isEmpty(value)) {
+                    return "一级分类不能为空"
+                }
+            }, cid2: function (value, item) { //value：表单的值、item：表单的DOM对象
+                if (isEmpty(value)) {
+                    return "二级分类不能为空"
+                }
+            }, cid3: function (value, item) { //value：表单的值、item：表单的DOM对象
+                if (isEmpty(value)) {
+                    return "三级分类不能为空"
+                }
+            }, price: function (value, item) {
+                var test = /^(?!0+(?:\.0+)?$)(?:[1-9]\d*|0)(?:\.\d{1,2})?$/;
+                if (!(test.exec(value))) {
+                    return "请输入正确的价格！";
+                }
+            }, packingList: function (value, item) {
+                if (isEmpty(value)) {
+                    return "商品打包不能为空！";
+                }
+            }, afterService: function (value, item) {
+                if (isEmpty(value)) {
+                    return "售后服务不能为空！";
+                }
+            }
+        });
+
+        /* **************************************** 图片上传操作 **************************************** */
+
+        upload.render({
+            elem: '#test2'
+            , url: 'http://manager.greenmall.com/goods/wangEditorImage' //改成您自己的上传接口
+            , multiple: true
+            , size: 1024 * 2 //限定大小
+            , accept: 'images' // 只允许上传图片
+            , before: function (obj) {
+                //预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('#demo2').append('<img style="margin-right: 10px;cursor:pointer;" width="100" height="100" src="' + result + '" alt="' + file.name + '" class="layui-upload-img gmimage">')
+                });
+            }
+            , error: function (index, upload) {
+                // 上传请求失败
+                console.log("index:" + index);
+                deleteCurImage();
+            }
+            , done: function (res) {
+                if (res.errno != 0) {
+                    // 图片上传失败
+                    deleteCurImage();
+                    layer.msg("服务器内部错误，图片上传失败！");
+                } else {
+                    //上传完毕
+                    images.push(res.data[0]);
+                    // console.log("文件回调：" + res.data[0]);
+                }
+            }
+        });
+
+        // 刪除当前上传的图片
+        function deleteCurImage() {
+            $("#demo2 .gmimage").last().remove();
+        }
+
+        // 单击图片取消上传
+        $("#demo2").on("click", ".gmimage", function () {
+            var $image = $(this);
+            var deleteIndex = $("#demo2 .gmimage").index(this);
+            layer.confirm('您确定取消上传吗?', {icon: 3, title: '提示'}, function (index) {
+                // 删除图片
+                $image.remove();
+                // 删除上传数组中的值
+                images.splice(deleteIndex, 1);
+                // 关闭窗口
+                layer.close(index);
+            });
+        });
+
+        /* **************************************** 富文本操作 **************************************** */
+        /**
+         * 加载富文本控件
+         */
+        function loadRichText() {
+            // const editor = new E(document.getElementById('description'));
+            editor.config.showLinkImg = false;
+            // 设置图片上传路径
+            editor.config.uploadImgServer = 'http://manager.greenmall.com/goods/wangEditorImage';
+            // 设置图片大小
+            editor.config.uploadImgMaxSize = 2 * 1024 * 1024;
+            // 一次最多上传 1 个图片
+            editor.config.uploadImgMaxLength = 1;
+            // 跨域传递
+            editor.config.withCredentials = true;
+            // 自定义文件名
+            editor.config.uploadFileName = 'file';
+            // 回调函数
+            editor.config.uploadImgHooks = {
+                // 上传图片之前
+                before: function (xhr) {
+                    console.log(xhr)
+                    // 可阻止图片上传
+                    return {
+                        prevent: false,
+                        msg: '需要提示给用户的错误信息'
+                    }
+                },
+                customInsert: function (insertImgFn, result) {
+                    // result 即服务端返回的接口
+                    console.log('customInsert', result)
+                    // insertImgFn 可把图片插入到编辑器，传入图片 src ，执行函数即可
+                    insertImgFn(result.data[0])
+                },
+                error: function (xhr, editor, resData) {
+                    layer.msg("服务器内部错误，图片上传失败！");
+                    console.log('error', xhr, resData)
+                },
+                success: function (xhr) {
+                    // 图片上传并返回了结果，图片插入已成功
+                    console.log('success', xhr)
+                },
+                timeout: function (xhr) {
+                    // 上传图片超时
+                    console.log('timeout')
+                }
+
+            }
+            // 创建富文本编辑器
+            editor.create();
+        }
+
+        $("#testEvent").click(function () {
+            var text = editor.txt.html();
+            console.log(text);
+            return false;
+        });
+
+        loadRichText();
+    });
+
+    /**
+     * 保存商品信息
+     */
+    function saveGoods() {
+        console.log("保存商品");
+    }
+
+
+</script>
+<script type="text/javascript" src="layui/wangEditor.min.js"></script>
+
+</body>
+</html>

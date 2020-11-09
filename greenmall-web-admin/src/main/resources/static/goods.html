@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>商品管理</title>
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <link rel="stylesheet" href="layui/css/GreenMall.css">
+</head>
+<body>
+<!-- 面包屑 -->
+<div id="breadcrumb">
+    <span class="layui-breadcrumb">
+      <a href="/static">首页</a>
+      <a href="javascript:void(0);">商品管理</a>
+      <a><cite>商品列表</cite></a>
+    </span>
+</div>
+<div style="padding: 20px; background-color: #F2F2F2;">
+    <div class="layui-row layui-col-space15">
+        <!-- 商品数据表格 -->
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">商品数据表</div>
+                <div class="layui-card-body">
+                    <table class="layui-hide" id="test" lay-filter="test"></table>
+
+                    <script type="text/html" id="toolbarDemo">
+                        <div class="layui-btn-container">
+                            <button class="layui-btn layui-btn-sm" lay-event="addGoods">新增商品</button>
+                            <button class="layui-btn layui-btn-sm" lay-event="getCheckLength">批量下架</button>
+                            <button class="layui-btn layui-btn-sm" lay-event="isAll">批量删除</button>
+                        </div>
+                    </script>
+
+                    <script type="text/html" id="barDemo">
+                        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+                        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+                        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="up">上架</a>
+                        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="down">下架</a>
+                    </script>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<script src="layui/layui.js"></script>
+<script>
+    //JavaScript代码区域
+    layui.use(['jquery', 'element', 'table', 'layer'], function () {
+        var $ = layui.jquery;
+        var element = layui.element;
+        var table = layui.table;
+        var layer = layui.layer;
+
+        table.render({
+            elem: '#test'
+            , url: 'data/goods.json'
+            , toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+            , defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+                title: '提示'
+                , layEvent: 'LAYTABLE_TIPS'
+                , icon: 'layui-icon-tips'
+            }]
+            , title: '用户数据表'
+            , cols: [[
+                {type: 'checkbox', fixed: 'left'}
+                , {field: 'id', title: 'ID', width: 80, fixed: 'left'}
+                , {field: 'title', title: '商品名称', width: 120}
+                , {field: 'subTitle', title: '售卖标题', width: 150}
+                , {field: 'category', title: '分类', width: 150}
+                , {field: 'saleable', title: '上架', width: 80}
+                , {field: 'createTime', title: '创建时间', width: 150}
+                , {field: 'lastCreateTime', title: '最后更新时间', width: 150}
+                , {field: 'valid', title: '是否删除', width: 120}
+                , {fixed: 'right', title: '操作', toolbar: '#barDemo', width: 250}
+            ]]
+            , page: true
+        });
+
+        //头工具栏事件
+        table.on('toolbar(test)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch (obj.event) {
+                case 'addGoods':
+                    var data = checkStatus.data;
+                    layer.open({
+                        type: 2,
+                        area: ['800px', '580px'],
+                        title: '添加商品',
+                        content: 'goods_form.html',
+                        btn: ['保存']
+                        , yes: function (index, layero) {
+                            // 调用
+                            layero.find('iframe')[0].contentWindow.saveGoods();
+                        }
+                    });
+                    break;
+                case 'getCheckLength':
+                    var data = checkStatus.data;
+                    layer.msg('选中了：' + data.length + ' 个');
+                    break;
+                case 'isAll':
+                    layer.msg(checkStatus.isAll ? '全选' : '未全选');
+                    break;
+
+                //自定义头工具栏右侧图标 - 提示
+                case 'LAYTABLE_TIPS':
+                    layer.alert('这是工具栏右侧自定义的一个图标按钮');
+                    break;
+            }
+            ;
+        });
+
+        //监听行工具事件
+        table.on('tool(test)', function (obj) {
+            var data = obj.data;
+            //console.log(obj)
+            if (obj.event === 'del') {
+                layer.confirm('真的删除行么', function (index) {
+                    obj.del();
+                    layer.close(index);
+                });
+            } else if (obj.event === 'edit') {
+                layer.prompt({
+                    formType: 2
+                    , value: data.email
+                }, function (value, index) {
+                    obj.update({
+                        email: value
+                    });
+                    layer.close(index);
+                });
+            }
+        });
+
+    });
+</script>
+</body>
+</html>

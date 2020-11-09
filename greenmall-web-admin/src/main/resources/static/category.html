@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>商品分类管理</title>
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        /* 商品分类 */
+        #goodsCategoryTree {
+            width: 100%;
+            height: 466px;
+            border: 1px solid gainsboro;
+            overflow: scroll;
+            padding: 5px;
+        }
+    </style>
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <link rel="stylesheet" href="layui/css/GreenMall.css">
+</head>
+<body>
+<!-- 面包屑 -->
+<div id="breadcrumb">
+    <span class="layui-breadcrumb">
+      <a href="/">首页</a>
+      <a href="javascript:void(0);">商品管理</a>
+      <a><cite>商品分类管理</cite></a>
+    </span>
+</div>
+
+<!-- 面板 -->
+<div style="padding: 20px; background-color: #F2F2F2;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md9">
+            <div class="layui-card">
+                <div class="layui-card-header">商品分类数据表</div>
+                <div class="layui-card-body">
+                    <!-- 搜索 -->
+                    <div class="demoTable">
+                        搜索ID/搜索名称：
+                        <div class="layui-inline">
+                            <input class="layui-input" placeholder="分类ID/分类名称" name="id" id="demoReload"
+                                   autocomplete="off">
+                        </div>
+                        <button class="layui-btn" data-type="reload">搜索</button>
+                    </div>
+                    <!-- 数据表格 -->
+                    <table class="layui-hide" id="goodsCategoryTable" lay-filter="goodsCategoryTable"></table>
+                    <!-- 数据表格操作 -->
+                    <script type="text/html" id="barDemo">
+                        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+                        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+                    </script>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md3">
+            <div class="layui-card">
+                <div class="layui-card-header">商品分类结构</div>
+                <div class="layui-card-body">
+                    <!-- 商品分类树 -->
+                    <div id="goodsCategoryTree" class="demo-tree demo-tree-box">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<script src="layui/layui.js"></script>
+<script>
+    //JavaScript代码区域
+    layui.use(['jquery', 'element', 'tree', 'util', 'table'], function () {
+        var $ = layui.jquery;
+        var element = layui.element;
+        var tree = layui.tree;
+        var layer = layui.layer;
+        var util = layui.util;
+        var table = layui.table;
+
+        /* **********************************商品分类数据树********************************** */
+        // 分类树测试数据
+        /*
+        农产品常规分类有三到四级，第一层包含农产品几大品类，如蔬菜、水果、禽畜、花卉苗木等；
+        第二层是每一个大品类的小品类，如蔬菜里面的根茎、茄果；水果中的浆果、仁果、瓜果类；
+        粮油里面的谷类、豆类等；
+        第三层就当前常说的产品，如苹果、白菜、梨；第四层就是每个产品中的品种，
+        如苹果中红富士、国光、红星、秦冠、藤木、黄元帅、金冠等。
+        * */
+        var data1 = [{
+            title: '种植业'
+            , id: 1
+            , children: [{
+                title: '粮油'
+                , id: 1000
+                , children: [{
+                    title: '谷类'
+                    , id: 10001
+                }]
+            }, {
+                title: '瓜果'
+                , id: 1001
+            }]
+        }, {
+            title: '养殖业'
+            , id: 2
+            , children: [{
+                title: '禽类及副产品'
+                , id: 2000
+            }, {
+                title: '畜牧及其副产品'
+                , id: 2001
+            }]
+        }]
+
+        var data2 = [{
+            title: '种植业1'
+            , id: 1
+            , children: [{
+                title: '粮油'
+                , id: 1000
+                , children: [{
+                    title: '谷类'
+                    , id: 10001
+                }]
+            }, {
+                title: '瓜果'
+                , id: 1001
+            }]
+        }, {
+            title: '养殖业'
+            , id: 2
+            , children: [{
+                title: '禽类及副产品'
+                , id: 2000
+            }, {
+                title: '畜牧及其副产品'
+                , id: 2001
+            }]
+        }]
+
+        //开启节点操作图标
+        tree.render({
+            elem: '#goodsCategoryTree'
+            , id: "categoryTree"
+            , data: data1 // json数据
+            , edit: ['add', 'update', 'del'] //操作节点的图标
+            , click: function (obj) {
+                layer.msg(JSON.stringify(obj.data));
+            },
+            operate: function (obj) {
+                var type = obj.type; //得到操作类型：add、edit、del
+                var data = obj.data; //得到当前节点的数据
+                var elem = obj.elem; //得到当前节点元素
+
+                //Ajax 操作
+                var id = data.id; //得到节点索引
+                if (type === 'add') {
+                    // 增加节点
+                    // 返回 key 值,如果值为 -1 表明数据并未添加到数据库中
+                    return -1;
+                } else if (type === 'update') {
+                    // 修改节点
+                    // console.log(elem.find('.layui-tree-txt').html()); 得到修改后的内容
+                    // 发送 ajax 请求后台
+                    // 如果节点的id为-1，那么就新增该节点。
+                    $.post(
+                        "/category/update",
+                        {name: data.title, id: data.id},
+                        "json",
+                        function (data) {
+                            // data {state:1/2/3/4/5, msg:""}
+                            // 修改成功或者失败消息回执
+                            layer.msg('hello');
+                            // 重载表格数据
+                            reloadTable();
+                        }
+                    );
+                } else if (type === 'del') {
+                    // 删除节点
+                    $.post(
+                        "/category/delete",
+                        {id: data.id},
+                        "json",
+                        function (data) {
+                            // data {state:1/2/3/4/5, msg:""}
+                            // 修改成功或者失败消息回执
+                            layer.msg('hello');
+                            // 重载表格数据
+                            reloadTable();
+                        }
+                    );
+                }
+            }
+        });
+
+        // 重载分类树
+        function reloadTree() {
+            $.get(
+                "/category/tree",
+                {},
+                "json",
+                function (data) {
+                    //可以重载所有基础参数
+                    tree.reload('categoryTree', {
+                        data: data
+                    });
+                }
+            );
+        }
+
+        // 页面加载完成之后重载树结构
+        reloadTree();
+
+        /* **********************************商品分类数据表********************************** */
+        //方法级渲染
+        table.render({
+            elem: '#goodsCategoryTable'
+            , url: 'data/categoryTable.json'
+            , cols: [[
+                {checkbox: true, fixed: true}
+                , {field: 'id', title: 'ID', width: 100, sort: false, fixed: true}
+                , {field: 'name', title: '名称', width: 150}
+                , {field: 'father', title: '上级分类', width: 150}
+                , {field: 'level', title: '层级', width: 150, sort: false}
+                , {fixed: 'right', title: '操作', toolbar: '#barDemo', width: 250}
+            ]]
+            , id: 'testReload'
+            , page: true
+            , height: 420
+        });
+
+        // 商品分类修改，删除
+        table.on('tool(goodsCategoryTable)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'del') {
+                layer.confirm('真的删除行么', function (index) {
+                    obj.del();
+                    // 发送 ajax 请求后台
+                    $.post(
+                        "/category/delete",
+                        {id: data.id},
+                        "json",
+                        function (data) {
+                            // data {state:1/2/3/4/5, msg:""}
+                            // 修改成功或者失败消息回执
+                            layer.msg('hello');
+                            // 重载树结构
+                            reloadTree();
+                        }
+                    );
+                    layer.close(index);
+                });
+            } else if (obj.event === 'edit') {
+                layer.prompt({
+                    formType: 0
+                    , value: data.name // 商品分类名称
+                    , maxlength: 20 // 商品分类名称最大长度
+                    , anim: 0
+                }, function (value, index) {
+
+                    // 更新数据表格中的数据
+                    obj.update({
+                        name: value
+                    });
+
+                    // 发送 ajax 请求后台
+                    $.post(
+                        "/category/update", // url
+                        {name: data.name, id: data.id}, // 待发送 Key/value 参数
+                        "json",// 接口返回数据类型
+                        function (data) {
+                            // data {state:1/2/3/4/5, msg:""}
+                            // 修改成功或者失败消息回执
+                            layer.msg('hello');
+                            // 重载树结构
+                            reloadTree();
+                        }
+                    );
+
+                    // 关闭弹框
+                    layer.close(index);
+                });
+            }
+        });
+
+        // 商品分类数据重载 表格初始化url?page=1&limit=10&key=%E5%8F%91
+        // 需要响应的数据格式为
+        // data/categoryTable.json 中的数据
+        var $ = layui.$, active = {
+            reload: function () {
+                var demoReload = $('#demoReload');
+                //执行重载
+                table.reload('testReload', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    , where: { //设定异步数据接口的额外参数
+                        key: demoReload.val() ? demoReload.val() : ""// 分类名称或者分类id
+                    }
+                }, 'data');
+            }
+        };
+
+        $('.demoTable .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        // 重载表格
+        function reloadTable() {
+            $('.demoTable .layui-btn').click();
+        }
+
+    });
+</script>
+</body>
+</html>

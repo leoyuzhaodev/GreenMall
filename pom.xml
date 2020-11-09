@@ -16,6 +16,7 @@
         <module>greenmall-service</module>
         <module>greenmall-common</module>
         <module>greenmall-web</module>
+        <module>greenmall-web-admin</module>
     </modules>
     <groupId>com.yzf</groupId>
     <artifactId>greenmall</artifactId>

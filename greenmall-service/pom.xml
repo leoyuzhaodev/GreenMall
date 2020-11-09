@@ -31,6 +31,16 @@
             <artifactId>greenmall-dao</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
+        <!-- FastDFS -->
+        <dependency>
+            <groupId>com.github.tobato</groupId>
+            <artifactId>fastdfs-client</artifactId>
+        </dependency>
+        <!-- spring-web -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
