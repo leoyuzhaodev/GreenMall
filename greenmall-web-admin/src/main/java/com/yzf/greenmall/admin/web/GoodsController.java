@@ -1,6 +1,9 @@
 package com.yzf.greenmall.admin.web;
 
 import com.yzf.greenmall.bo.GoodsBo;
+import com.yzf.greenmall.common.LayuiPage;
+import com.yzf.greenmall.common.Message;
+import com.yzf.greenmall.common.QueryPage;
 import com.yzf.greenmall.common.WangEditorImage;
 import com.yzf.greenmall.entity.Goods;
 import com.yzf.greenmall.entity.GoodsDetail;
@@ -14,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -69,20 +69,64 @@ public class GoodsController {
     }
 
     /**
-     * 添加商品
+     * 添加商品/编辑商品
      *
      * @param goodsBo
      * @return
      */
-    @PostMapping(path = "/add")
-    public ResponseEntity<Void> add(@RequestBody GoodsBo goodsBo) {
+    @PostMapping(path = "/update")
+    public ResponseEntity<Message> add(@RequestBody GoodsBo goodsBo) {
         try {
-            this.goodsService.add(goodsBo);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+            this.goodsService.update(goodsBo);
+            return Message.generateResponseEntity(Message.MESSAGE_STATE_SUCCESS, "商品添加成功");
         } catch (Exception e) {
             LOGGER.info("添加商品：服务器内部错误：{}", e.getMessage());
             e.printStackTrace();
         }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品添加失败");
     }
+
+    /**
+     * 根据商品id查询商品以及商品详情
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping(path = "/queryGoodsBoById")
+    public ResponseEntity<GoodsBo> queryGoodsBoById(@RequestParam("id") Long id) {
+        try {
+            GoodsBo goodsBo = this.goodsService.findGoodsBoById(id);
+            return ResponseEntity.ok(goodsBo);
+        } catch (Exception e) {
+            LOGGER.info("根据商品id查询商品以及商品详情:服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    // 分页浏览
+
+    /**
+     * 分页查询商品
+     *
+     * @param queryPage
+     * @return
+     */
+    @GetMapping(path = "/queryGoodsByPage")
+    public ResponseEntity<LayuiPage<Goods>> findGoodsByPage(QueryPage queryPage) {
+        try {
+            LayuiPage<Goods> goods = this.goodsService.findGoodsByPage(queryPage);
+            return ResponseEntity.ok(goods);
+        } catch (Exception e) {
+            LOGGER.info("分页查询商品:服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    // 删除商品
+
+    // 上架/下架商品
+
+
 }

@@ -30,6 +30,13 @@ public class Goods implements Serializable {
     @Transient
     private GoodsDetail goodsDetail;
 
+    public Goods() {
+    }
+
+    public Goods(Long id) {
+        this.id = id;
+    }
+
     public Goods(String title, String subTitle, Long cid1, Long cid2, Long cid3) {
         this.title = title;
         this.subTitle = subTitle;

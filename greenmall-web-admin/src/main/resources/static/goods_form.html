@@ -6,13 +6,13 @@
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link rel="stylesheet" href="layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="http://manager.greenmall.com/layui/css/layui.css" media="all">
 </head>
 <body>
 <!-- 商品基本信息表单 -->
 <br>
 <div style="margin-right: 20px;">
-    <form lay-filter="goodsForm" class="layui-form" action="">
+    <form id="goodsForm" lay-filter="goodsForm" class="layui-form" action="">
         <!-- ------------------商品基本信息------------------ -->
         <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
             <legend>商品基本信息</legend>
@@ -126,7 +126,7 @@
     </form>
 
     <!-- 动态生成规格参数的模板 -->
-    <div id="paramTemplate" style="display: none;" class="layui-form-item">
+    <div id="paramTemplate" style="display: none;" class="layui-form-item paramTemplate">
         <label class="layui-form-label"><span id="paramName">参数名称</span></label>
         <div class="layui-input-block">
             <input type="text||number" lay-verify="required" lay-reqtext="[参数名称]是必填项，岂能为空？"
@@ -137,8 +137,9 @@
 </div>
 
 <input id="methodCall" type="hidden" onclick="saveGoods()"/>
-<script src="layui/layui.js" charset="utf-8"></script>
-<script src="layui/GreenMall.js" charset="utf-8"></script>
+<script src="http://manager.greenmall.com/layui/layui.js" charset="utf-8"></script>
+<script src="http://manager.greenmall.com/layui/GreenMall.js" charset="utf-8"></script>
+<script type="text/javascript" src="http://manager.greenmall.com/layui/wangEditor.min.js"></script>
 <script>
     layui.use(['upload', 'form', 'table', 'element'], function () {
         var table = layui.table;
@@ -150,6 +151,9 @@
         const E = window.wangEditor;
         const editor = new E('#description');
         var images = [];
+        var isParamsReady = 0; // 标识规格参数是否加载完成
+        var isSelect3Ready = 0; // 标识三级分类是否加载完成
+        var goodsId = -1;
 
         /* **************************************** 表单操作 **************************************** */
         /**
@@ -168,6 +172,12 @@
             delete data.field.file;
             // 获取商品详情
             data.field["description"] = editor.txt.html();
+            // 设置商品id
+            if (goodsId != -1) {
+                data.field["id"] = goodsId;
+                data.field["goodsId"] = goodsId;
+            }
+            console.log(data.field);
             // 添加商品数据到后台
             addGoods(data.field);
             return false;
@@ -180,14 +190,14 @@
             // console.log("添加商品：" + goods);
             // 提交表单数据到后台
             $.ajax({
-                url: "http://manager.greenmall.com/goods/add",
+                url: "http://manager.greenmall.com/goods/update",
                 data: JSON.stringify(goods),//将数据转化为json格式
                 dataType: 'json',//接收后台数据的格式
                 type: "POST",
                 contentType: "application/json;charset=utf-8",//发送给后台数据的格式
                 //发送成功后执行，response中存的是从后台返回的json数据，名字可以随意改
-                success: function (response) {
-                    layer.msg("商品保存成功");
+                success: function (data) {
+                    layer.msg(data.info);
                 },
                 error: function () {
                 }
@@ -252,15 +262,11 @@
         /**
          * 加载一级分类数据
          */
-        loadCid1();
-
         function loadCid1() {
             $.get(
-                "/category/queryCategoryByFID",
+                "http://manager.greenmall.com/category/queryCategoryByFID",
                 {"fId": 0},
                 function (data) {
-                    alert("loadCid1");
-                    // {id:"1",name:"种植业"}
                     loadSelect($("#cid1"), data);
                 },
                 "json"
@@ -276,7 +282,7 @@
             clearSelect($("#cid2"));
             clearSelect($("#cid3"));
             $.get(
-                "/category/queryCategoryByFID",
+                "http://manager.greenmall.com/category/queryCategoryByFID",
                 {"fId": fid},
                 function (data) {
                     // {id:"1",name:"种植业"}
@@ -294,7 +300,7 @@
         function loadCid3(fid) {
             clearSelect($("#cid3"));
             $.get(
-                "/category/queryCategoryByFID",
+                "http://manager.greenmall.com/category/queryCategoryByFID",
                 {"fId": fid},
                 function (data) {
                     // [{id:"1",name:"种植业"}]
@@ -315,6 +321,8 @@
             }
             // 重载select选择框
             form.render('select');
+            // 分类下拉框完成加载 isSelect3Ready + 1，分类下拉框全部加载完成 isSelect3Ready = 3；
+            isSelect3Ready++;
         }
 
         /**
@@ -345,7 +353,7 @@
                     loadCid3(selectVal);
                 } else if (selectName == "cid3") {
                     // 动态加载规格参数
-
+                    loadParamsData(selectVal);
                 }
             }
         });
@@ -361,7 +369,8 @@
         }
 
         /* *********************** 处理参数动态加载 *********************** */
-        var params = [
+
+        /*var params = [
             {
                 id: "1",
                 name: "重量",
@@ -374,9 +383,23 @@
                 numeric: 0,
                 unit: "无"
             }
-        ]
+         ]*/
 
-        loadParams(params);
+        /**
+         * 根据三级分类从数据库中获取规格参数数据
+         */
+        function loadParamsData(cid3) {
+            // 清空之前的
+            $("#goodsForm").find(".paramTemplate").remove();
+            $.get(
+                "http://manager.greenmall.com/param/queryParamsByCid",
+                {"cid3": cid3},
+                function (data) {
+                    loadParams(data);
+                },
+                "json"
+            );
+        }
 
         /**
          * 加载动态的参数
@@ -407,6 +430,22 @@
                     $param.css("display", "block");
                     // 7，将模板加入表单中
                     $("#dynamicParams").append($param);
+                }
+            }
+            // isParamsReady = 1 标识规格参数加载完成
+            isParamsReady = 1;
+        }
+
+        /**
+         * 回显规格参数值
+         */
+        function loadParamValue(paramStr) {
+            if (!isEmpty(paramStr)) {
+                var params = JSON.parse(paramStr);
+                for (var i = 0; i < params.length; i++) {
+                    var param = params[i];
+                    var $param = $("input[pname='param&" + param.id + "']");
+                    $param.val(param.value);
                 }
             }
         }
@@ -478,6 +517,17 @@
             });
         });
 
+        /**
+         * 回显图片
+         */
+        function loadImages(images) {
+            for (var i = 0; i < images.length; i++) {
+                var image = images[i];
+                $('#demo2').append('<img style="margin-right: 10px;cursor:pointer;" ' +
+                    'width="100" height="100" src="' + image + '" alt="" class="layui-upload-img gmimage">');
+            }
+        }
+
         /* **************************************** 富文本操作 **************************************** */
         /**
          * 加载富文本控件
@@ -530,13 +580,89 @@
             editor.create();
         }
 
+        loadRichText();
+
+        /**
+         * 设置富文本
+         */
+        function setRichText(content) {
+            editor.txt.html(content);
+        }
+
         $("#testEvent").click(function () {
             var text = editor.txt.html();
             // console.log(text);
             return false;
         });
 
-        loadRichText();
+
+        /* **************************************** 初始化表单数据 **************************************** */
+
+        // loadFormData();
+
+        /**
+         * 初始化表单
+         */
+        function loadFormData() {
+            // 1，加载三级分类中的一级分类
+            loadCid1();
+        }
+
+        /**
+         * 回显表单的值
+         */
+        function loadFormValue(data) {
+            // 1，回显三级分类
+            // 1.1，加载一级分类
+            loadCid1();
+            loadCid2(data.cid1);
+            loadCid3(data.cid2);
+            // 2，加载规格参数
+            // 2.1，加载规格参数控件
+            loadParamsData(data.cid3);
+            // 3，回显商品图片
+            images = data.images.split(",");
+            loadImages(images);
+            // 4，回显富文本
+            setRichText(data.description);
+            // 5，保存商品id
+            goodsId = data.id;
+            // 6，给表单赋值，监控分类下拉框和规格参数是否加载完成，如果加载完成就回填表单。
+            var timer = window.setInterval(function () {
+                if (isParamsReady == 1 && isSelect3Ready == 3) {
+                    // 加载规格参数的数据
+                    loadParamValue(data.params);
+                    // 加载表单
+                    form.val("goodsForm", {
+                        "title": data.title
+                        , "subTitle": data.subTitle
+                        , "cid1": data.cid1
+                        , "cid2": data.cid2
+                        , "cid3": data.cid3
+                        , "price": data.price
+                        , "packingList": data.packingList
+                        , "afterService": data.afterService
+                    });
+                    // 清除计时器
+                    clearInterval(timer);
+                }
+            }, 50 * 1);
+        }
+
+        /**
+         * 根据商品id加载数据
+         */
+        function loadFormDataById(goodsId) {
+            $.get(
+                "http://manager.greenmall.com/goods/queryGoodsBoById",
+                {"id": goodsId},
+                function (data) {
+                    loadFormValue(data);
+                },
+                "json"
+            );
+        }
+
     });
 
     /**
@@ -548,7 +674,7 @@
 
 
 </script>
-<script type="text/javascript" src="layui/wangEditor.min.js"></script>
+
 
 </body>
 </html>
