@@ -38,12 +38,7 @@
             <label class="layui-form-label">一级分类</label>
             <div class="layui-input-block">
                 <select id="cid1" name="cid1" lay-filter="category" lay-verify="cid1" lay-search>
-                    <option value=""></option>
-                    <option value="0">写作</option>
-                    <option value="1" selected="">阅读</option>
-                    <option value="2">游戏</option>
-                    <option value="3">音乐</option>
-                    <option value="4">旅行</option>
+                    <option class="selectTip" value="请选择分类"></option>
                 </select>
             </div>
         </div>
@@ -52,12 +47,7 @@
             <label class="layui-form-label">二级分类</label>
             <div class="layui-input-block">
                 <select id="cid2" name="cid2" lay-filter="category" lay-verify="cid2" lay-search>
-                    <option value=""></option>
-                    <option value="0">写作</option>
-                    <option value="1" selected="">阅读</option>
-                    <option value="2">游戏</option>
-                    <option value="3">音乐</option>
-                    <option value="4">旅行</option>
+                    <option class="selectTip" value="请选择分类"></option>
                 </select>
             </div>
         </div>
@@ -67,11 +57,6 @@
             <div class="layui-input-block">
                 <select id="cid3" name="cid3" lay-filter="category" lay-verify="cid3" lay-search>
                     <option class="selectTip" value="请选择分类"></option>
-                    <option value="0">写作</option>
-                    <option value="1" selected="">阅读</option>
-                    <option value="2">游戏</option>
-                    <option value="3">音乐</option>
-                    <option value="4">旅行</option>
                 </select>
             </div>
         </div>
@@ -165,32 +150,120 @@
         const E = window.wangEditor;
         const editor = new E('#description');
         var images = [];
-        var goods = null;
 
-        /*
-        * 待处理事宜
-        * 1,处理分类级联 √
-        * 2,处理参数动态加载 √
-        * 3,处理商品图片上传 √
-        * 4,处理商品详情（图片上传，html获取/展示）√
-        * 5,表单验证 √
-        * 6,处理商品图片的问题
-        * */
+        /* **************************************** 表单操作 **************************************** */
+        /**
+         * 监听提交
+         */
+        form.on('submit(demo1)', function (data) {
+            // 获取规格参数数据
+            data.field["params"] = getParamsValue();
+            // 获取商品图片数据
+            if (images.length <= 0) {
+                layer.msg("您还没有上传商品图片哦!");
+            } else {
+                data.field["images"] = images.join(",");
+            }
+            // 删除file属性
+            delete data.field.file;
+            // 获取商品详情
+            data.field["description"] = editor.txt.html();
+            // 添加商品数据到后台
+            addGoods(data.field);
+            return false;
+        });
 
-        /* 1,处理分类级联 */
+        /**
+         * 添加商品
+         */
+        function addGoods(goods) {
+            // console.log("添加商品：" + goods);
+            // 提交表单数据到后台
+            $.ajax({
+                url: "http://manager.greenmall.com/goods/add",
+                data: JSON.stringify(goods),//将数据转化为json格式
+                dataType: 'json',//接收后台数据的格式
+                type: "POST",
+                contentType: "application/json;charset=utf-8",//发送给后台数据的格式
+                //发送成功后执行，response中存的是从后台返回的json数据，名字可以随意改
+                success: function (response) {
+                    layer.msg("商品保存成功");
+                },
+                error: function () {
+                }
+            })
+        }
+
+        /**
+         * 表单验证
+         */
+        form.verify({
+            title: function (value, item) { //value：表单的值、item：表单的DOM对象
+                if (isEmpty(value)) {
+                    return "商品名称不能为空"
+                }
+                if (!new RegExp("^[a-zA-Z0-9_\u4e00-\u9fa5\\s·]+$").test(value)) {
+                    return '商品名称不能有特殊字符';
+                }
+                if (/^\d+\d+\d$/.test(value)) {
+                    return '商品名称不能全为数字';
+                }
+            }
+            , subTitle: function (value, item) { //value：表单的值、item：表单的DOM对象
+                if (isEmpty(value)) {
+                    return "售卖标题不能为空"
+                }
+                if (!new RegExp("^[a-zA-Z0-9_\u4e00-\u9fa5\\s·]+$").test(value)) {
+                    return '售卖标题不能有特殊字符';
+                }
+                if (/^\d+\d+\d$/.test(value)) {
+                    return '售卖标题不能全为数字';
+                }
+            }, cid1: function (value, item) { //value：表单的值、item：表单的DOM对象
+                if (isEmpty(value)) {
+                    return "一级分类不能为空"
+                }
+            }, cid2: function (value, item) { //value：表单的值、item：表单的DOM对象
+                if (isEmpty(value)) {
+                    return "二级分类不能为空"
+                }
+            }, cid3: function (value, item) { //value：表单的值、item：表单的DOM对象
+                if (isEmpty(value)) {
+                    return "三级分类不能为空"
+                }
+            }, price: function (value, item) {
+                var test = /^(?!0+(?:\.0+)?$)(?:[1-9]\d*|0)(?:\.\d{1,2})?$/;
+                if (!(test.exec(value))) {
+                    return "请输入正确的价格！";
+                }
+            }, packingList: function (value, item) {
+                if (isEmpty(value)) {
+                    return "商品打包不能为空！";
+                }
+            }, afterService: function (value, item) {
+                if (isEmpty(value)) {
+                    return "售后服务不能为空！";
+                }
+            }
+        });
+
+        /* *********************** 处理商品分类级联 *********************** */
 
         /**
          * 加载一级分类数据
          */
+        loadCid1();
+
         function loadCid1() {
             $.get(
-                "/category/cid1",
-                {},
-                "json",
+                "/category/queryCategoryByFID",
+                {"fId": 0},
                 function (data) {
+                    alert("loadCid1");
                     // {id:"1",name:"种植业"}
                     loadSelect($("#cid1"), data);
-                }
+                },
+                "json"
             );
         }
 
@@ -200,14 +273,16 @@
          *  fid:分类父id
          */
         function loadCid2(fid) {
+            clearSelect($("#cid2"));
+            clearSelect($("#cid3"));
             $.get(
-                "/category/cid2",
-                {},
-                "json",
+                "/category/queryCategoryByFID",
+                {"fId": fid},
                 function (data) {
                     // {id:"1",name:"种植业"}
                     loadSelect($("#cid2"), data);
-                }
+                },
+                "json"
             );
         }
 
@@ -217,14 +292,15 @@
          *  fid:分类父id
          */
         function loadCid3(fid) {
+            clearSelect($("#cid3"));
             $.get(
-                "/category/cid3",
-                {},
-                "json",
+                "/category/queryCategoryByFID",
+                {"fId": fid},
                 function (data) {
                     // [{id:"1",name:"种植业"}]
                     loadSelect($("#cid3"), data);
-                }
+                },
+                "json"
             );
         }
 
@@ -242,6 +318,13 @@
         }
 
         /**
+         * 置空select
+         */
+        function clearSelect($select) {
+            $select.find(".selectTip").siblings().remove();
+        }
+
+        /**
          * 监听 select
          */
         form.on('select(category)', function (data) {
@@ -253,15 +336,17 @@
             var selectVal = data.value;
             // 3，得到select的信息
             var selectName = $select.attr("name");
-            if (selectName == "cid1") {
-                console.log(selectName);
-                // 置空 cid3
-                $("#cid3").find(".selectTip").siblings().remove();
-                // 加载 cid2
-                loadCid2(selectVal);
-            } else if (selectName == "cid2") {
-                // 加载 cid3
-                loadCid3(selectVal);
+            if (!isEmpty(selectVal)) {
+                if (selectName == "cid1") {
+                    // 加载 cid2
+                    loadCid2(selectVal);
+                } else if (selectName == "cid2") {
+                    // 加载 cid3
+                    loadCid3(selectVal);
+                } else if (selectName == "cid3") {
+                    // 动态加载规格参数
+
+                }
             }
         });
 
@@ -275,7 +360,7 @@
             $selectObj.append("<option value='" + selectId + "'>" + selectName + "</option>")
         }
 
-        /* 2,处理参数动态加载 */
+        /* *********************** 处理参数动态加载 *********************** */
         var params = [
             {
                 id: "1",
@@ -339,118 +424,8 @@
                     value: paramVal
                 })
             }
-            return paramsValue;
+            return JSON.stringify(paramsValue);
         }
-
-
-        /* **************************************** 表单操作 **************************************** */
-
-        /**
-         * 验证商品的基本信息
-         */
-        function validateBaseInfo() {
-
-        }
-
-        /**
-         * 监听提交
-         */
-        form.on('submit(demo1)', function (data) {
-            // 获取规格参数数据
-            data.field["params"] = getParamsValue();
-            // 获取商品图片数据
-            if (images.length <= 0) {
-                layer.msg("您还没有上传商品图片哦!");
-            } else {
-                data.field["images"] = images.join(",");
-            }
-            // 删除file属性
-            delete data.field.file;
-            // 获取商品详情
-            data.field["description"] = editor.txt.html();
-            // 添加商品数据到后台
-            addGoods(data.field);
-            return false;
-        });
-
-        /**
-         * 添加商品
-         */
-        function addGoods(goods) {
-            console.log("添加商品：" + goods);
-            // 提交表单数据到后台
-            $.ajax({
-                url: "http://manager.greenmall.com/goods/add",
-                data: JSON.stringify(goods),//将数据转化为json格式
-                dataType: 'json',//接收后台数据的格式
-                type: "POST",
-                contentType: "application/json;charset=utf-8",//发送给后台数据的格式
-                //发送成功后执行，response中存的是从后台返回的json数据，名字可以随意改
-                success: function (response) {
-                    // {statue:1"",info:""}
-                    if (response.statue == 1) {
-
-                    } else {
-
-                    }
-                },
-                error: function () {
-                }
-            })
-        }
-
-        /**
-         * 表单验证
-         */
-        form.verify({
-            title: function (value, item) { //value：表单的值、item：表单的DOM对象
-                if (isEmpty(value)) {
-                    return "商品名称不能为空"
-                }
-                if (!new RegExp("^[a-zA-Z0-9_\u4e00-\u9fa5\\s·]+$").test(value)) {
-                    return '商品名称不能有特殊字符';
-                }
-                if (/^\d+\d+\d$/.test(value)) {
-                    return '商品名称不能全为数字';
-                }
-            }
-            , subTitle: function (value, item) { //value：表单的值、item：表单的DOM对象
-                if (isEmpty(value)) {
-                    return "售卖标题不能为空"
-                }
-                if (!new RegExp("^[a-zA-Z0-9_\u4e00-\u9fa5\\s·]+$").test(value)) {
-                    return '售卖标题不能有特殊字符';
-                }
-                if (/^\d+\d+\d$/.test(value)) {
-                    return '售卖标题不能全为数字';
-                }
-            }, cid1: function (value, item) { //value：表单的值、item：表单的DOM对象
-                if (isEmpty(value)) {
-                    return "一级分类不能为空"
-                }
-            }, cid2: function (value, item) { //value：表单的值、item：表单的DOM对象
-                if (isEmpty(value)) {
-                    return "二级分类不能为空"
-                }
-            }, cid3: function (value, item) { //value：表单的值、item：表单的DOM对象
-                if (isEmpty(value)) {
-                    return "三级分类不能为空"
-                }
-            }, price: function (value, item) {
-                var test = /^(?!0+(?:\.0+)?$)(?:[1-9]\d*|0)(?:\.\d{1,2})?$/;
-                if (!(test.exec(value))) {
-                    return "请输入正确的价格！";
-                }
-            }, packingList: function (value, item) {
-                if (isEmpty(value)) {
-                    return "商品打包不能为空！";
-                }
-            }, afterService: function (value, item) {
-                if (isEmpty(value)) {
-                    return "售后服务不能为空！";
-                }
-            }
-        });
 
         /* **************************************** 图片上传操作 **************************************** */
 
@@ -468,7 +443,7 @@
             }
             , error: function (index, upload) {
                 // 上传请求失败
-                console.log("index:" + index);
+                // console.log("index:" + index);
                 deleteCurImage();
             }
             , done: function (res) {
@@ -524,7 +499,7 @@
             editor.config.uploadImgHooks = {
                 // 上传图片之前
                 before: function (xhr) {
-                    console.log(xhr)
+                    // console.log(xhr)
                     // 可阻止图片上传
                     return {
                         prevent: false,
@@ -533,21 +508,21 @@
                 },
                 customInsert: function (insertImgFn, result) {
                     // result 即服务端返回的接口
-                    console.log('customInsert', result)
+                    // console.log('customInsert', result)
                     // insertImgFn 可把图片插入到编辑器，传入图片 src ，执行函数即可
                     insertImgFn(result.data[0])
                 },
                 error: function (xhr, editor, resData) {
                     layer.msg("服务器内部错误，图片上传失败！");
-                    console.log('error', xhr, resData)
+                    // console.log('error', xhr, resData)
                 },
                 success: function (xhr) {
                     // 图片上传并返回了结果，图片插入已成功
-                    console.log('success', xhr)
+                    // console.log('success', xhr)
                 },
                 timeout: function (xhr) {
                     // 上传图片超时
-                    console.log('timeout')
+                    // console.log('timeout')
                 }
 
             }
@@ -557,7 +532,7 @@
 
         $("#testEvent").click(function () {
             var text = editor.txt.html();
-            console.log(text);
+            // console.log(text);
             return false;
         });
 

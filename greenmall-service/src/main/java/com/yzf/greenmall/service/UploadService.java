@@ -2,6 +2,11 @@ package com.yzf.greenmall.service;
 
 import com.github.tobato.fastdfs.domain.StorePath;
 import com.github.tobato.fastdfs.service.FastFileStorageClient;
+import com.yzf.greenmall.bo.GoodsBo;
+import com.yzf.greenmall.entity.Goods;
+import com.yzf.greenmall.entity.GoodsDetail;
+import com.yzf.greenmall.mapper.GoodsDetailMapper;
+import com.yzf.greenmall.mapper.GoodsMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +19,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,6 +36,7 @@ public class UploadService {
 
     private static final List<String> CONTENT_TYPES = Arrays.asList("image/jpeg", "image/gif");
 
+    // 日志
     private static final Logger LOGGER = LoggerFactory.getLogger(UploadService.class);
 
     /**
@@ -62,11 +69,12 @@ public class UploadService {
             // 生成 url 地址返回
             return "http://image.greenmall.com/" + storePath.getFullPath();
         } catch (IOException e) {
-            LOGGER.info("服务器内部错误：{}", e.getMessage());
+            LOGGER.info("文件上传：服务器内部错误：{}", e.getMessage());
             e.printStackTrace();
         }
         return null;
     }
+
 
 }
 
