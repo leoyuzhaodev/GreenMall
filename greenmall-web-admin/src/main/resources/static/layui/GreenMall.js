@@ -1,5 +1,8 @@
 /* 通用工具 */
 
+/* 发送请求的基础url */
+const baseUrl = "http://manager.greenmall.com"
+
 /**
  * 判断字符串是否为空
  * @param obj
@@ -22,4 +25,42 @@ function isEmpty(obj) {
 function renderTime(date) {
     var dateee = new Date(date).toJSON();
     return new Date(+new Date(dateee) + 8 * 3600 * 1000).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
+}
+
+/**
+ * 发送post请求
+ * @param url
+ * @param jsonData
+ * @param successF
+ * @param errorF
+ */
+function greenMallPost(url, jsonData, successF, errorF) {
+    $.ajax({
+        url: baseUrl+url,
+        data: JSON.stringify(jsonData),
+        dataType: 'json',
+        type: "POST",
+        contentType: "application/json;charset=utf-8",
+        success: successF,
+        error: errorF
+    })
+}
+
+/**
+ * 发送post请求
+ * @param url
+ * @param jsonData
+ * @param successF
+ * @param errorF
+ */
+function greenMallGet(url, jsonData, successF, errorF) {
+    $.ajax({
+        url: url,
+        data: JSON.stringify(jsonData),
+        dataType: 'json',
+        type: "GET",
+        contentType: "application/json;charset=utf-8",
+        success: successF,
+        error: errorF
+    })
 }

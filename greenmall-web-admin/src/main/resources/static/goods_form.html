@@ -14,7 +14,7 @@
 <div style="margin-right: 20px;">
     <form id="goodsForm" lay-filter="goodsForm" class="layui-form" action="">
         <!-- ------------------商品基本信息------------------ -->
-        <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <fieldset class="layui-elem-field layui-field-title" style="">
             <legend>商品基本信息</legend>
         </fieldset>
         <!-- 商品名称 -->
@@ -125,9 +125,6 @@
         <br/>
     </form>
 
-    <!-- 标识新增或者编辑-->
-    <input id="isEdit" value="-1" type="hidden"/>
-
     <!-- 动态生成规格参数的模板 -->
     <div id="paramTemplate" style="display: none;" class="layui-form-item paramTemplate">
         <label class="layui-form-label"><span id="paramName">参数名称</span></label>
@@ -161,6 +158,8 @@
         var goodsId = -1;
         // 获取窗口索引
         var parentIndex = parent.layer.getFrameIndex(window.name);
+        // 判断编辑或者新增的标识
+        var isEdit = -1;
 
         /* **************************************** 表单操作 **************************************** */
         /**
@@ -664,7 +663,7 @@
          * 根据页面标识判断是新增还是编辑
          */
         function initFormData() {
-            var isEdit = $("#isEdit").val();
+            isEdit = parent.layui.$('#operateGoodsId').val();
             if (isEdit == -1) {
                 loadFormData();
             } else {
@@ -685,19 +684,6 @@
                 },
                 "json"
             );
-        }
-
-        /**
-         * 与父窗口通信关闭弹层并返回相关信息
-         * edit&0/1
-         * add&0/1
-         */
-        function closeGoodsFrame(value) {
-
-            // 设置通信数据
-
-            // 调用父窗口方法
-
         }
 
         // 页面入口

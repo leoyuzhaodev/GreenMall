@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.jnlp.FileSaveService;
 import java.util.Arrays;
 import java.util.List;
 
@@ -74,7 +75,8 @@ public class GoodsService {
                 throw new RuntimeException("需要编辑的商品不存在，商品id：" + record.getId());
             } else {
                 // 1，更新商品
-                goodsMapper.updateByPrimaryKeySelective(goodsBo.generateEditGoods());
+                Goods goods = goodsBo.generateEditGoods();
+                goodsMapper.updateByPrimaryKeySelective(goods);
                 // 2，更新商品详情
                 goodsDetailMapper.updateByPrimaryKeySelective(goodsBo);
             }
@@ -103,6 +105,9 @@ public class GoodsService {
     public LayuiPage<Goods> findGoodsByPage(QueryPage queryPage) {
 
         // 1，获取查询条件
+        if (CollectionUtils.isEmpty(queryPage.getQueryMap())) {
+            queryPage.setQueryMap(Goods.originalQueryMap());
+        }
         Example example = queryPage.generateExample(Goods.class);
         // 2，分页查询
         PageHelper.startPage(queryPage.getPage(), queryPage.getLimit());
@@ -121,8 +126,107 @@ public class GoodsService {
             goods.setCategory(StringUtils.join(names, ">"));
         });
 
-
         // 3，封装分页信息，并返回
         return new LayuiPage<Goods>().initLayuiPage(goodsList);
+    }
+
+    /**
+     * 删除商品
+     *
+     * @param id
+     */
+    public void delete(Long id) {
+        if (id != null) {
+            Goods record = new Goods(id);
+            record.setValid(false);
+            record.setSaleable(false);
+            goodsMapper.updateByPrimaryKeySelective(record);
+        }
+    }
+
+    /**
+     * 撤销删除商品
+     *
+     * @param id
+     */
+    public void revocation(Long id) {
+        if (id != null) {
+            Goods record = new Goods(id);
+            record.setValid(true);
+            goodsMapper.updateByPrimaryKeySelective(record);
+        }
+    }
+
+    /**
+     * 上架商品
+     *
+     * @param id
+     */
+    public void goodsUp(Long id) {
+        if (id != null) {
+            Goods record = new Goods(id);
+            record.setSaleable(true);
+            record.setValid(true);
+            goodsMapper.updateByPrimaryKeySelective(record);
+        }
+    }
+
+
+    /**
+     * 下架商品
+     *
+     * @param id
+     */
+    public void goodsDown(Long id) {
+        if (id != null) {
+            Goods record = new Goods(id);
+            record.setSaleable(false);
+            goodsMapper.updateByPrimaryKeySelective(record);
+        }
+    }
+
+    /**
+     * 批量删除
+     *
+     * @param ids
+     */
+    public void deleteBatch(List<Long> ids) {
+        ids.forEach(id -> {
+            delete(id);
+        });
+    }
+
+    /**
+     * 商品批量撤销删除
+     *
+     * @param ids
+     */
+    public void revocationBatch(List<Long> ids) {
+        ids.forEach(id -> {
+            revocation(id);
+        });
+    }
+
+    /**
+     * 商品批量上架
+     *
+     * @param ids
+     */
+    public void upBatch(List<Long> ids) {
+        ids.forEach(id -> {
+            goodsUp(id);
+        });
+    }
+
+    /**
+     * 商品批量下架
+     *
+     * @param ids
+     * @return
+     */
+    public void downBatch(List<Long> ids) {
+        ids.forEach(id -> {
+            goodsDown(id);
+        });
     }
 }

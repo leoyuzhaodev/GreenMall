@@ -29,8 +29,8 @@ public class GoodsBo extends GoodsDetail implements Serializable {
     public Goods generateGoods() {
         Goods goods = new Goods(this.title, this.subTitle, this.cid1, this.cid2, this.cid3);
         goods.setSaleable(true);
-        goods.setCreateTime(new Date());
-        goods.setLastUpdateTime(new Date());
+        goods.setCreateTime(new Date(System.currentTimeMillis()));
+        goods.setLastUpdateTime(new Date(System.currentTimeMillis()));
         goods.setValid(true);
         goods.setSalesVolume(0);
         return goods;
@@ -44,7 +44,7 @@ public class GoodsBo extends GoodsDetail implements Serializable {
     public Goods generateEditGoods() {
         Goods goods = new Goods(this.title, this.subTitle, this.cid1, this.cid2, this.cid3);
         goods.setId(id);
-        goods.setLastUpdateTime(new Date());
+        goods.setLastUpdateTime(new Date(System.currentTimeMillis()));
         return goods;
     }
 

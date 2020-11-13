@@ -5,6 +5,8 @@ import lombok.Data;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @description:基础商品信息
@@ -24,7 +26,7 @@ public class Goods implements Serializable {
     private Long cid3;// 3级类目
     private Boolean saleable;// 是否上架，true:可销售/上架 false:不可销售/下架
     private Date createTime;// 创建时间
-    private Date lastUpdateTime;// 最后修改时间
+    private Date lastUpdateTime;// 最后修改时间 last_update_time lastUpdateTime
     private Boolean valid;// 是否有效，逻辑删除用，true:有效 false:无效
     private Integer salesVolume;// 销量
     @Transient
@@ -45,5 +47,19 @@ public class Goods implements Serializable {
         this.cid1 = cid1;
         this.cid2 = cid2;
         this.cid3 = cid3;
+    }
+
+    /**
+     * 生成初始的查询map
+     *
+     * @return
+     */
+    public static Map<String, String> originalQueryMap() {
+        Map<String, String> queryMap = new HashMap<>();
+        queryMap.put("title,subTitle", "");
+        queryMap.put("saleable", "1");
+        queryMap.put("valid", "1");
+        queryMap.put("valid", "1");
+        return queryMap;
     }
 }

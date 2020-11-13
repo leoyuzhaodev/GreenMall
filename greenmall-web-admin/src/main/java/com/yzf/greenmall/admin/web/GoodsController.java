@@ -20,6 +20,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 /**
  * @description:GoodsController
  * @author:leo_yuzhao
@@ -78,12 +80,12 @@ public class GoodsController {
     public ResponseEntity<Message> add(@RequestBody GoodsBo goodsBo) {
         try {
             this.goodsService.update(goodsBo);
-            return Message.generateResponseEntity(Message.MESSAGE_STATE_SUCCESS, "商品添加成功");
+            return Message.generateResponseEntity(Message.MESSAGE_STATE_SUCCESS, "商品保存成功");
         } catch (Exception e) {
             LOGGER.info("添加商品：服务器内部错误：{}", e.getMessage());
             e.printStackTrace();
         }
-        return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品添加失败");
+        return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品保存失败");
     }
 
     /**
@@ -122,9 +124,150 @@ public class GoodsController {
         return ResponseEntity.notFound().build();
     }
 
-    // 删除商品
+    /**
+     * 删除商品
+     *
+     * @param id
+     * @return
+     */
+    @PostMapping(path = "/delete")
+    public ResponseEntity<Message> delete(@RequestParam(name = "id", required = true) Long id) {
+        try {
+            this.goodsService.delete(id);
+            return Message.generateResponseEntity(Message.MESSAGE_STATE_SUCCESS, "商品删除成功");
+        } catch (Exception e) {
+            LOGGER.info("商品删除：服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品删除失败");
+    }
 
-    // 上架/下架商品
+    /**
+     * 撤销删除商品
+     *
+     * @param id
+     * @return
+     */
+    @PostMapping(path = "/revocation")
+    public ResponseEntity<Message> revocation(@RequestParam(name = "id", required = true) Long id) {
+        try {
+            this.goodsService.revocation(id);
+            return Message.generateResponseEntity(Message.MESSAGE_STATE_SUCCESS, "商品撤销删除成功");
+        } catch (Exception e) {
+            LOGGER.info("商品撤销删除：服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品撤销删除失败");
+    }
+
+    /**
+     * 商品上架
+     *
+     * @param id
+     * @return
+     */
+    @PostMapping(path = "/goodsUp")
+    public ResponseEntity<Message> goodsUp(@RequestParam(name = "id", required = true) Long id) {
+        try {
+            this.goodsService.goodsUp(id);
+            return Message.generateResponseEntity(Message.MESSAGE_STATE_SUCCESS, "商品上架成功");
+        } catch (Exception e) {
+            LOGGER.info("商品上架：服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品上架失败");
+    }
+
+    /**
+     * 商品下架
+     *
+     * @param id
+     * @return
+     */
+    @PostMapping(path = "/goodsDown")
+    public ResponseEntity<Message> goodsDown(@RequestParam(name = "id", required = true) Long id) {
+        try {
+            this.goodsService.goodsDown(id);
+            return Message.generateResponseEntity(Message.MESSAGE_STATE_SUCCESS, "商品下架成功");
+        } catch (Exception e) {
+            LOGGER.info("商品下架：服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品下架失败");
+    }
+
+    /**
+     * 商品批量删除
+     *
+     * @param ids
+     * @return
+     */
+    @PostMapping(path = "/deleteBatch")
+    public ResponseEntity<Message> deleteBatch(@RequestBody(required = true) List<Long> ids) {
+        try {
+            this.goodsService.deleteBatch(ids);
+            return Message.generateResponseEntity(Message.MESSAGE_STATE_SUCCESS, "商品批量删除成功");
+        } catch (Exception e) {
+            LOGGER.info("批量删除：服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品批量删除失败");
+    }
+
+
+    /**
+     * 商品批量撤销删除
+     *
+     * @param ids
+     * @return
+     */
+    @PostMapping(path = "/revocationBatch")
+    public ResponseEntity<Message> revocationBatch(@RequestBody(required = true) List<Long> ids) {
+        try {
+            this.goodsService.revocationBatch(ids);
+            return Message.generateResponseEntity(Message.MESSAGE_STATE_SUCCESS, "商品批量撤销删除成功");
+        } catch (Exception e) {
+            LOGGER.info("商品批量撤销删除失败：服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品批量撤销删除失败");
+    }
+
+    /**
+     * 商品批量上架
+     *
+     * @param ids
+     * @return
+     */
+    @PostMapping(path = "/upBatch")
+    public ResponseEntity<Message> upBatch(@RequestBody(required = true) List<Long> ids) {
+        try {
+            this.goodsService.upBatch(ids);
+            return Message.generateResponseEntity(Message.MESSAGE_STATE_SUCCESS, "商品批量上架成功");
+        } catch (Exception e) {
+            LOGGER.info("商品批量上架失败：服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品批量上架失败");
+    }
+
+    /**
+     * 商品批量下架
+     *
+     * @param ids
+     * @return
+     */
+    @PostMapping(path = "/downBatch")
+    public ResponseEntity<Message> downBatch(@RequestBody(required = true) List<Long> ids) {
+        try {
+            this.goodsService.downBatch(ids);
+            return Message.generateResponseEntity(Message.MESSAGE_STATE_SUCCESS, "商品批量下架除成功");
+        } catch (Exception e) {
+            LOGGER.info("商品批量下架失败：服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品批量下架失败");
+    }
 
 
 }
