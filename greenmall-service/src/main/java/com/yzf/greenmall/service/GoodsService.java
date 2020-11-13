@@ -1,7 +1,6 @@
 package com.yzf.greenmall.service;
 
 import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.yzf.greenmall.bo.GoodsBo;
 import com.yzf.greenmall.common.LayuiPage;
 import com.yzf.greenmall.common.QueryPage;
@@ -9,6 +8,7 @@ import com.yzf.greenmall.entity.Goods;
 import com.yzf.greenmall.entity.GoodsDetail;
 import com.yzf.greenmall.mapper.GoodsDetailMapper;
 import com.yzf.greenmall.mapper.GoodsMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,6 +34,9 @@ public class GoodsService {
 
     @Autowired
     private GoodsDetailMapper goodsDetailMapper;
+
+    @Autowired
+    private CategoryService categoryService;
 
     // 日志
     private static final Logger LOGGER = LoggerFactory.getLogger(GoodsService.class);
@@ -100,13 +104,23 @@ public class GoodsService {
 
         // 1，获取查询条件
         Example example = queryPage.generateExample(Goods.class);
-
         // 2，分页查询
         PageHelper.startPage(queryPage.getPage(), queryPage.getLimit());
         List<Goods> goodsList = goodsMapper.selectByExample(example);
+
         if (CollectionUtils.isEmpty(goodsList)) {
-            return null;
+            return new LayuiPage<Goods>();
         }
+
+        // 封装商品分类信息
+        goodsList.forEach(goods -> {
+            // 根据多个分类id查询分类
+            List<String> categoriesNames = categoryService.findCategoriesNameByIds(Arrays.asList(goods.getCid1(), goods.getCid2(), goods.getCid3()));
+            String[] names = categoriesNames.toArray(new String[3]);
+            // 设置三级分类
+            goods.setCategory(StringUtils.join(names, ">"));
+        });
+
 
         // 3，封装分页信息，并返回
         return new LayuiPage<Goods>().initLayuiPage(goodsList);

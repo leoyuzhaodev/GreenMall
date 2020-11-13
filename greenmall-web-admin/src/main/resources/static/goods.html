@@ -15,6 +15,7 @@
       <a><cite>商品列表</cite></a>
     </span>
 </div>
+<!-- 主题内容 -->
 <div style="padding: 20px; background-color: #F2F2F2;">
     <div class="layui-row layui-col-space15">
         <!-- 商品数据表格 -->
@@ -22,8 +23,36 @@
             <div class="layui-card">
                 <div class="layui-card-header">商品数据表</div>
                 <div class="layui-card-body">
-                    <table class="layui-hide" id="test" lay-filter="test"></table>
+                    <!-- 搜索 -->
+                    <div class="demoTable">
+                        <form class="layui-form">
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <div class="layui-input-inline">
+                                        <input placeholder="商品名称/售卖标题" class="layui-input" name="title,subTitle"
+                                               id="demoReload"
+                                               autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+                                    <div class="layui-input-inline" style="width: 80px">
+                                        <input type="checkbox" name="saleable" lay-skin="switch" lay-text="未上架|已上架">
+                                    </div>
+                                    <div class="layui-input-inline" style="width: 80px">
+                                        <input type="checkbox" name="valid" lay-skin="switch" lay-text="已删除|未删除">
+                                    </div>
+                                    <button id="goodsSerach" lay-submit lay-filter="reload" class="layui-btn"
+                                            data-type="reload">搜索
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
 
+
+                    </div>
+                    <!-- 数据表格 -->
+                    <table class="layui-hide" id="test" lay-filter="test"></table>
+                    <!-- 功能键 -->
                     <script type="text/html" id="toolbarDemo">
                         <div class="layui-btn-container">
                             <button class="layui-btn layui-btn-sm" lay-event="addGoods">新增商品</button>
@@ -31,7 +60,7 @@
                             <button class="layui-btn layui-btn-sm" lay-event="isAll">批量删除</button>
                         </div>
                     </script>
-
+                    <!-- 行内操作 -->
                     <script type="text/html" id="barDemo">
                         <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
                         <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
@@ -42,22 +71,32 @@
             </div>
         </div>
 
-
     </div>
 </div>
-
+<!-- 通信控件 -->
+<input id="editOrAdd" value="" type="hidden">
 <script src="layui/layui.js"></script>
+<script src="layui/GreenMall.js"></script>
 <script>
     //JavaScript代码区域
-    layui.use(['jquery', 'element', 'table', 'layer'], function () {
+    layui.use(['form', 'jquery', 'element', 'table', 'layer'], function () {
         var $ = layui.jquery;
         var element = layui.element;
         var table = layui.table;
         var layer = layui.layer;
+        var form = layui.form;
+        var searchData = {
+            "title,subTitle": "",
+            "valid": 1,
+            "saleable": 1
+        }
 
+        // 加载表格
         table.render({
             elem: '#test'
-            , url: 'data/goods.json'
+            , url: 'http://manager.greenmall.com/goods/queryGoodsByPage'
+            , method: "post" // 指定请求方式
+            , contentType: 'application/json;charset=utf-8' // 指定请求数据类型
             , toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
             , defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
                 title: '提示'
@@ -69,15 +108,32 @@
                 {type: 'checkbox', fixed: 'left'}
                 , {field: 'id', title: 'ID', width: 80, fixed: 'left'}
                 , {field: 'title', title: '商品名称', width: 120}
-                , {field: 'subTitle', title: '售卖标题', width: 150}
-                , {field: 'category', title: '分类', width: 150}
-                , {field: 'saleable', title: '上架', width: 80}
-                , {field: 'createTime', title: '创建时间', width: 150}
-                , {field: 'lastCreateTime', title: '最后更新时间', width: 150}
-                , {field: 'valid', title: '是否删除', width: 120}
+                , {field: 'subTitle', title: '售卖标题', width: 120}
+                , {field: 'category', title: '分类', width: 170}
+                , {
+                    field: 'createTime', title: '创建时间', width: 170, templet: function (res) {
+                        return renderTime(res.createTime)
+                    }
+                }
+                , {
+                    field: 'lastCreateTime', title: '最后更新时间', width: 170, templet: function (res) {
+                        return renderTime(res.lastCreateTime)
+                    }
+                }
+                , {
+                    field: 'saleable', title: '上架否', width: 80, templet: function (res) {
+                        return '<bold>' + (res.saleable == true ? "已上架" : "已下架") + '</bold>'
+                    }
+                }
+                , {
+                    field: 'valid', title: '删除否', width: 80, templet: function (res) {
+                        return '<bold>' + (res.valid == true ? "未删除" : "已删除") + '</bold>'
+                    }
+                }
                 , {fixed: 'right', title: '操作', toolbar: '#barDemo', width: 250}
             ]]
             , page: true
+            , id: "goodsReload"
         });
 
         //头工具栏事件
@@ -95,6 +151,8 @@
                         , yes: function (index, layero) {
                             // 调用
                             layero.find('iframe')[0].contentWindow.saveGoods();
+                            // 刷新表单
+                            reloadTable();
                         }
                     });
                     break;
@@ -135,6 +193,54 @@
                 });
             }
         });
+
+        // 表格重载
+        var $ = layui.$, active = {
+            reload: function () {
+                //执行重载
+                table.reload('goodsReload', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    , where: {
+                        queryMap: searchData
+                    }
+                }, 'data');
+            }
+        };
+
+        // 搜索表单监听
+        form.on('submit(reload)', function (data) {
+
+            // 获取表单数据
+            var searchFromData = data.field;
+
+            searchData['title,subTitle'] = searchFromData['title,subTitle'];
+            if (!(undefined == searchFromData['valid'])) {
+                searchData['valid'] = 0;
+            } else {
+                searchData['valid'] = 1;
+            }
+
+            if (!(undefined == searchFromData['saleable'])) {
+                searchData['saleable'] = 0;
+            } else {
+                searchData['saleable'] = 1;
+            }
+
+            // 执行重载
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+
+            //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+            return false;
+        });
+
+        // 刷新表单
+        function reloadTable() {
+            $("#goodsSerach").click();
+        }
+
 
     });
 </script>

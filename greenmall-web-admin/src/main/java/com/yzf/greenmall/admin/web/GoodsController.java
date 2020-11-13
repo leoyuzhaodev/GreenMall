@@ -104,19 +104,17 @@ public class GoodsController {
         return ResponseEntity.notFound().build();
     }
 
-    // 分页浏览
-
     /**
      * 分页查询商品
      *
      * @param queryPage
      * @return
      */
-    @GetMapping(path = "/queryGoodsByPage")
-    public ResponseEntity<LayuiPage<Goods>> findGoodsByPage(QueryPage queryPage) {
+    @PostMapping(path = "/queryGoodsByPage")
+    public ResponseEntity<LayuiPage<Goods>> findGoodsByPage(@RequestBody QueryPage<Goods> queryPage) {
         try {
-            LayuiPage<Goods> goods = this.goodsService.findGoodsByPage(queryPage);
-            return ResponseEntity.ok(goods);
+            LayuiPage<Goods> goodsPage = this.goodsService.findGoodsByPage(queryPage);
+            return ResponseEntity.ok(goodsPage);
         } catch (Exception e) {
             LOGGER.info("分页查询商品:服务器内部错误：{}", e.getMessage());
             e.printStackTrace();

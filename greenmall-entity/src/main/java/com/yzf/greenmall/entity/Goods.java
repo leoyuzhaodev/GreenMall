@@ -28,6 +28,8 @@ public class Goods implements Serializable {
     private Boolean valid;// 是否有效，逻辑删除用，true:有效 false:无效
     private Integer salesVolume;// 销量
     @Transient
+    private String category;
+    @Transient
     private GoodsDetail goodsDetail;
 
     public Goods() {

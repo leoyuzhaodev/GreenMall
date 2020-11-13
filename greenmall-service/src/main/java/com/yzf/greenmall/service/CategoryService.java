@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @description:CategoryService
@@ -22,6 +24,7 @@ public class CategoryService {
 
     /**
      * 根据父id查询分类
+     *
      * @param fId
      * @return
      */
@@ -32,4 +35,16 @@ public class CategoryService {
         return categories;
     }
 
+    /**
+     * 根据多个分类id，查询多个分类名称
+     * @param idList
+     * @return
+     */
+    public List<String> findCategoriesNameByIds(List<Long> idList) {
+        List<Category> categories = categoryMapper.selectByIdList(idList);
+        List<String> categoryNames = categories.stream().map(category -> {
+            return category.getName();
+        }).collect(Collectors.toList());
+        return categoryNames;
+    }
 }

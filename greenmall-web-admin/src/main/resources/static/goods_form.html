@@ -115,15 +115,18 @@
             </div>
         </div>
         <!-- 立即提交 -->
-        <div class="layui-form-item">
+        <div class="layui-form-item" style="display: none">
             <div class="layui-input-block">
-                <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>
+                <button id="submitGoods" type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>
                 <button type="submit" class="layui-btn" id="testEvent">测试事件</button>
                 <button type="reset" class="layui-btn layui-btn-primary">重置</button>
             </div>
         </div>
         <br/>
     </form>
+
+    <!-- 标识新增或者编辑-->
+    <input id="isEdit" value="-1" type="hidden"/>
 
     <!-- 动态生成规格参数的模板 -->
     <div id="paramTemplate" style="display: none;" class="layui-form-item paramTemplate">
@@ -139,6 +142,7 @@
 <input id="methodCall" type="hidden" onclick="saveGoods()"/>
 <script src="http://manager.greenmall.com/layui/layui.js" charset="utf-8"></script>
 <script src="http://manager.greenmall.com/layui/GreenMall.js" charset="utf-8"></script>
+<script src="http://manager.greenmall.com/layui/jquery-3.5.1.min.js" charset="utf-8"></script>
 <script type="text/javascript" src="http://manager.greenmall.com/layui/wangEditor.min.js"></script>
 <script>
     layui.use(['upload', 'form', 'table', 'element'], function () {
@@ -151,9 +155,12 @@
         const E = window.wangEditor;
         const editor = new E('#description');
         var images = [];
+        var params = null; // 保存规格参数
         var isParamsReady = 0; // 标识规格参数是否加载完成
         var isSelect3Ready = 0; // 标识三级分类是否加载完成
         var goodsId = -1;
+        // 获取窗口索引
+        var parentIndex = parent.layer.getFrameIndex(window.name);
 
         /* **************************************** 表单操作 **************************************** */
         /**
@@ -197,7 +204,9 @@
                 contentType: "application/json;charset=utf-8",//发送给后台数据的格式
                 //发送成功后执行，response中存的是从后台返回的json数据，名字可以随意改
                 success: function (data) {
-                    layer.msg(data.info);
+                    // layer.msg(data.info);
+                    parent.layer.msg(data.info);
+                    parent.layer.close(parentIndex);
                 },
                 error: function () {
                 }
@@ -395,6 +404,8 @@
                 "http://manager.greenmall.com/param/queryParamsByCid",
                 {"cid3": cid3},
                 function (data) {
+                    params = data;
+                    console.log("params:" + params);
                     loadParams(data);
                 },
                 "json"
@@ -650,6 +661,19 @@
         }
 
         /**
+         * 根据页面标识判断是新增还是编辑
+         */
+        function initFormData() {
+            var isEdit = $("#isEdit").val();
+            if (isEdit == -1) {
+                loadFormData();
+            } else {
+                loadFormDataById(isEdit);
+            }
+        }
+
+
+        /**
          * 根据商品id加载数据
          */
         function loadFormDataById(goodsId) {
@@ -663,13 +687,29 @@
             );
         }
 
+        /**
+         * 与父窗口通信关闭弹层并返回相关信息
+         * edit&0/1
+         * add&0/1
+         */
+        function closeGoodsFrame(value) {
+
+            // 设置通信数据
+
+            // 调用父窗口方法
+
+        }
+
+        // 页面入口
+        initFormData();
+
     });
 
     /**
      * 保存商品信息
      */
     function saveGoods() {
-        console.log("保存商品");
+        $("#submitGoods").click();
     }
 
 
