@@ -1,5 +1,6 @@
 package com.yzf.greenmall.admin.web;
 
+import com.yzf.greenmall.bo.CategoryTreeBo;
 import com.yzf.greenmall.bo.GoodsBo;
 import com.yzf.greenmall.common.LayuiPage;
 import com.yzf.greenmall.common.Message;
@@ -268,6 +269,5 @@ public class GoodsController {
         }
         return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品批量下架失败");
     }
-
 
 }

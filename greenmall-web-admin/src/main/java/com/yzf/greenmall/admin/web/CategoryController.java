@@ -1,5 +1,6 @@
 package com.yzf.greenmall.admin.web;
 
+import com.yzf.greenmall.bo.CategoryTreeBo;
 import com.yzf.greenmall.entity.Category;
 import com.yzf.greenmall.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,5 +32,14 @@ public class CategoryController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping(path = "/queryCategoryTree")
+    public ResponseEntity<List<CategoryTreeBo>> queryCategoryByFID() {
+        List<CategoryTreeBo> categoryTreeBos = categoryService.loadCategoryTreeBo();
+        if (CollectionUtils.isEmpty(categoryTreeBos)) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(categoryTreeBos);
     }
 }
