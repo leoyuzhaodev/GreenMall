@@ -32,7 +32,7 @@
 </div>
 
 <!-- 面板 -->
-<div style="padding: 20px; background-color: #F2F2F2;">
+<div style="padding: 20px 20px; background-color: #F2F2F2;">
     <div class="layui-row layui-col-space15">
         <div class="layui-col-md9">
             <div class="layui-card">
@@ -114,7 +114,7 @@
             elem: '#goodsCategoryTree'
             , id: "categoryTree"
             , data: [] // json数据
-            , edit: ['add', 'update', 'del'] //操作节点的图标
+            , edit: [] //操作节点的图标
             , click: function (obj) {
                 layer.msg(JSON.stringify(obj.data));
             },
@@ -224,6 +224,9 @@
                         , yes: function (index, layero) {
                             categoryLayerIndex = index;
                             $("#updateCategory").click();
+                        }, success: function (layero, index) {
+                            // 解禁分类级别
+                            controlSelect($("select[name='level']"), "0");
                         }, end: function (layero, index) {
                             resetCategoryForm();
                         }
@@ -238,20 +241,19 @@
             var categoryId = data.id;
             if (obj.event === 'del') {
                 layer.confirm('真的删除行么', function (index) {
-                    obj.del();
                     // 发送 ajax 请求后台
-                    $.post(
-                        "http://manager.greenmall.com/category/delete",
-                        {id: data.id},
-                        "json",
+                    greenMallPost("/category/delete", {id: categoryId},
                         function (data) {
-                            // data {state:1/2/3/4/5, msg:""}
-                            // 修改成功或者失败消息回执
-                            layer.msg('hello');
-                            // 重载树结构
+                            // 成功回调
+                            layer.msg(data.info);
                             reloadTree();
+                            reloadTable();
+                        },
+                        function () {
+                            // 失败回调
+                            layer.msg("删除失败");
                         }
-                    );
+                    )
                     layer.close(index);
                 });
             } else if (obj.event === 'edit') {
@@ -274,9 +276,6 @@
                                 // 1,根据分类分类级别加载上级分类
                                 console.log("data.level:" + data.level);
                                 if (data.level != 1) {
-                                    // 解除上级分类的禁用状态
-                                    $("select[name='parentId']").removeAttr("disabled");
-                                    form.render('select');
                                     loadFather(data.level - 1, $("select[name='parentId']"));
                                 }
                                 // 2,回显表单
@@ -310,9 +309,11 @@
             $("#categoryForm")[0].reset();
             // 清空上级分类
             clearSelect($("select[name='parentId']"));
-            // 禁用上级分类
-            $("select[name='parentId']").attr("disabled", "disabled");
-            form.render('select');
+            // 禁用上级分类，分类级别
+            controlSelect($("select[name='parentId']"), "1");
+            controlSelect($("#level"), "1");
+            // 清除编辑标记
+            editCategoryId = -1;
         }
 
         var $ = layui.$, active = {
@@ -355,6 +356,21 @@
                 } else if (value.length > 10) {
                     return '分类名称长度<=10'
                 }
+                // 发送同步请求，判断分类名称是否重复
+                var isRepeat = "0";
+                greenMallGet("/category/isNameRepeat", {"name": value, "id": editCategoryId},
+                    function (data) {
+                        // 成功回调
+                        isRepeat = data.info;
+                    }, function () {
+                        // 失败回调
+                        isRepeat = "1";
+                    }, false
+                )
+                if (isRepeat != "0") {
+                    return "分类名称重复";
+                }
+
             }
             , level: function (value) {
                 if (value.length <= 0) {
@@ -378,7 +394,7 @@
             var level = data.value;
             if (level == 1) {
                 // 禁用上级分类
-                $("select[name='parentId']").attr("disabled", "disabled");
+                controlSelect($("select[name='parentId']"), "1");
                 // 清空上级分类选项
                 clearSelect($("select[name='parentId']"));
                 $("select[name='parentId']").val("");
@@ -386,13 +402,28 @@
                 form.render('select');
             } else {
                 // 解禁上级分类
-                $("select[name='parentId']").removeAttr("disabled");
+                controlSelect($("select[name='parentId']"), "0");
                 // 加载上级分类选项
                 loadFather(level - 1, $("select[name='parentId']"));
             }
 
 
         });
+
+        /**
+         * 控制下拉选项
+         * type:1禁用 0解禁
+         */
+        function controlSelect($select, type) {
+            if (type == "1") {
+                // 禁用分类
+                $select.attr("disabled", "disabled");
+            } else if (type = "0") {
+                // 解禁分类
+                $select.removeAttr("disabled");
+            }
+            form.render('select');
+        }
 
         /**
          * 加载父分类
@@ -461,7 +492,9 @@
             greenMallPost("/category/update", categoryFromData, function (data) {
                 // 成功回调
                 // 重载表格数据
-                reloadTable()
+                reloadTable();
+                // 重载分类树
+                reloadTree();
                 // 打印提示消息
                 layer.msg(data.info);
                 // 关闭弹框
@@ -497,7 +530,7 @@
     <div class="layui-form-item">
         <label class="layui-form-label">分类级别</label>
         <div class="layui-input-block">
-            <select name="level" lay-filter="level" lay-verify="level">
+            <select disabled="disabled" id="level" name="level" lay-filter="level" lay-verify="level">
                 <option value="1">一级分类</option>
                 <option value="2">二级分类</option>
                 <option value="3">三级分类</option>

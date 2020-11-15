@@ -1,12 +1,15 @@
 package com.yzf.greenmall.service;
 
 import com.github.pagehelper.PageHelper;
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import com.yzf.greenmall.bo.CategoryTreeBo;
 import com.yzf.greenmall.common.LayuiPage;
+import com.yzf.greenmall.common.Message;
 import com.yzf.greenmall.common.QueryPage;
 import com.yzf.greenmall.entity.Category;
 import com.yzf.greenmall.entity.Goods;
 import com.yzf.greenmall.mapper.CategoryMapper;
+import com.yzf.greenmall.mapper.GoodsMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,9 @@ public class CategoryService {
 
     @Autowired
     private CategoryMapper categoryMapper;
+
+    @Autowired
+    private GoodsMapper goodsMapper;
 
     /**
      * 根据父id查询分类
@@ -190,7 +196,9 @@ public class CategoryService {
             // 2，新增
             categoryMapper.insert(category);
         } else {
-            // 编辑
+            // 编辑: 在编辑时一律不能修改【上级分类】【分类级别】
+            category.setLevel(null);
+            category.setParentId(null);
             categoryMapper.updateByPrimaryKeySelective(category);
         }
     }
@@ -204,5 +212,80 @@ public class CategoryService {
     public Category findCategoryById(Long id) {
         Category category = categoryMapper.selectByPrimaryKey(id);
         return category;
+    }
+
+    /**
+     * 判断分类名称是否重复
+     *
+     * @param name
+     * @return
+     */
+    public boolean isNameRepeat(String name, Long id) {
+        Category record = new Category();
+        record.setName(name);
+        int i = categoryMapper.selectCount(record);
+        if (id == -1) {
+            // 新增重复查询
+            if (i <= 0) {
+                return false;
+            }
+        } else {
+            // 更新重复查询
+            if (i > 0) {
+                Category category = categoryMapper.selectByPrimaryKey(id);
+                if (name.equals(category.getName())) {
+                    // 和自己名称重复不算重复
+                    return false;
+                } else {
+                    // 重复
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * 删除分类
+     *
+     * @param category
+     * @return
+     */
+    public Message delete(Category category) {
+
+        if (category.getId() == null) {
+            throw new RuntimeException("需要删除的商品分类id为空，无法删进行删除。");
+        }
+
+        // 根据id查询category
+        Category delCategory = categoryMapper.selectByPrimaryKey(category.getId());
+
+        // 判断该分类是否为三级分类
+        if (delCategory.getLevel() == 3) {
+            // 三级分类：判断是否存在商品引用
+            Goods record = new Goods();
+            record.setCid3(delCategory.getId());
+            int i = goodsMapper.selectCount(record);
+            if (i > 0) {
+                return new Message(Message.MESSAGE_STATE_SUCCESS, "该分类存在商品引用，无法删除。");
+            } else {
+                categoryMapper.deleteByPrimaryKey(delCategory.getId());
+                return new Message(Message.MESSAGE_STATE_SUCCESS, "删除成功！");
+            }
+        } else {
+            // 非三级分类：判断是否存在子分类
+            Category record = new Category();
+            record.setParentId(delCategory.getId());
+            int i = categoryMapper.selectCount(record);
+            if (i > 0) {
+                return new Message(Message.MESSAGE_STATE_SUCCESS, "该分类下存在子分类，无法删除。");
+            } else {
+                categoryMapper.deleteByPrimaryKey(delCategory.getId());
+                return new Message(Message.MESSAGE_STATE_SUCCESS, "删除成功！");
+            }
+        }
     }
 }

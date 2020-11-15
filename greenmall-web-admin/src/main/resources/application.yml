@@ -28,3 +28,6 @@ fdfs:
     - 192.168.230.128:22122
 
 # 日志配置
+logging:
+  level:
+    root: info

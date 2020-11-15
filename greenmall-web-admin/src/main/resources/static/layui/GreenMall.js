@@ -36,7 +36,7 @@ function renderTime(date) {
  */
 function greenMallPost(url, jsonData, successF, errorF) {
     $.ajax({
-        url: baseUrl+url,
+        url: baseUrl + url,
         data: JSON.stringify(jsonData),
         dataType: 'json',
         type: "POST",
@@ -53,13 +53,13 @@ function greenMallPost(url, jsonData, successF, errorF) {
  * @param successF
  * @param errorF
  */
-function greenMallGet(url, jsonData, successF, errorF) {
+function greenMallGet(url, jsonData, successF, errorF, isAsync) {
     $.ajax({
-        url: url,
-        data: JSON.stringify(jsonData),
+        url: baseUrl + url,
+        data: jsonData,
         dataType: 'json',
         type: "GET",
-        contentType: "application/json;charset=utf-8",
+        async: isAsync,
         success: successF,
         error: errorF
     })

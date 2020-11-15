@@ -124,4 +124,41 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
+    /**
+     * 判断分类名称是否重复
+     *
+     * @param name
+     * @return
+     */
+    @GetMapping(path = "/isNameRepeat")
+    public ResponseEntity<Message> isNameRepeat(@RequestParam(required = true) String name, @RequestParam(required = true) Long id) {
+        try {
+            boolean flag = this.categoryService.isNameRepeat(name, id);
+            return ResponseEntity.ok(new Message(Message.MESSAGE_STATE_SUCCESS, flag ? "1" : "0"));
+        } catch (Exception e) {
+            LOGGER.info("判断分类名称是否重复：服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    /**
+     * 删除商品分类
+     *
+     * @param category
+     * @return
+     */
+    @PostMapping(path = "/delete")
+    public ResponseEntity<Message> delete(@RequestBody Category category) {
+        try {
+            Message message = this.categoryService.delete(category);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            LOGGER.info("判断分类名称是否重复：服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+
 }
