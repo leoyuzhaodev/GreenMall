@@ -27,6 +27,7 @@
                     <div class="demoTable">
                         <form class="layui-form">
                             <div class="layui-form-item">
+                                搜索商品名称/售卖标题：
                                 <div class="layui-inline">
                                     <div class="layui-input-inline">
                                         <input placeholder="商品名称/售卖标题" class="layui-input" name="title,subTitle"
@@ -47,8 +48,6 @@
                                 </div>
                             </div>
                         </form>
-
-
                     </div>
                     <!-- 数据表格 -->
                     <table class="layui-hide" id="test" lay-filter="test"></table>
@@ -156,7 +155,7 @@
 
             // 批量操作前的判断
             var checkLength = checkStatus.data.length;
-            if (checkLength <= 0) {
+            if (checkLength <= 0 && obj.event != 'addGoods') {
                 layer.msg("您未选中操作数据！");
                 return;
             }

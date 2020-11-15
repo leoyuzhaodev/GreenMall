@@ -25,8 +25,10 @@ public class Category implements Serializable {
     private Long parentId;
     // 注意isParent生成的getter和setter方法需要手动加上Is
     private Boolean isParent;
+    private Byte level;
+
     @Transient
-    private String level;
+    private String ancient; // 父级节点
 
 
     /**
@@ -41,15 +43,18 @@ public class Category implements Serializable {
     }
 
     /**
-     * 初始化分类的级别
+     * 初始化 isParent
      */
-    public void initLevel() {
-        if (this.parentId == 0) {
-            this.level = Category.CATEGORY_LEVEL_ONE;
-        } else if (this.parentId != 0 && this.isParent) {
-            this.level = Category.CATEGORY_LEVEL_TWO;
+    public void initIsParent() {
+        if (this.level == 3) {
+            this.isParent = false;
         } else {
-            this.level = Category.CATEGORY_LEVEL_THREE;
+            this.isParent = true;
+            // 如果是一级分类必须初始化 parentId
+            if (this.level == 1) {
+                this.parentId = 0L;
+            }
         }
     }
+
 }

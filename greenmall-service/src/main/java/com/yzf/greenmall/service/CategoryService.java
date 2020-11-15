@@ -14,10 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -66,31 +63,55 @@ public class CategoryService {
      * @return
      */
     public LayuiPage<Category> findCategoryByPage(QueryPage queryPage) {
-       /* // 1，获取查询条件
+        // 1，获取查询条件
         if (CollectionUtils.isEmpty(queryPage.getQueryMap())) {
             queryPage.setQueryMap(Category.originalQueryMap());
         }
-        Example example = queryPage.generateExample(Goods.class);
+        Example example = queryPage.generateExample(Category.class);
         // 2，分页查询
         PageHelper.startPage(queryPage.getPage(), queryPage.getLimit());
-        List<Goods> goodsList = goodsMapper.selectByExample(example);
+        List<Category> categoryList = categoryMapper.selectByExample(example);
 
-        if (CollectionUtils.isEmpty(goodsList)) {
-            return new LayuiPage<Goods>();
+        if (CollectionUtils.isEmpty(categoryList)) {
+            return new LayuiPage<Category>();
         }
 
         // 封装商品分类信息
-        goodsList.forEach(goods -> {
-            // 根据多个分类id查询分类
-            List<String> categoriesNames = categoryService.findCategoriesNameByIds(Arrays.asList(goods.getCid1(), goods.getCid2(), goods.getCid3()));
-            String[] names = categoriesNames.toArray(new String[3]);
-            // 设置三级分类
-            goods.setCategory(StringUtils.join(names, ">"));
+        categoryList.forEach(category -> {
+            loadAncient(category);
         });
 
         // 3，封装分页信息，并返回
-        return new LayuiPage<Goods>().initLayuiPage(goodsList);*/
-        return null;
+        return new LayuiPage<Category>().initLayuiPage(categoryList);
+    }
+
+    /**
+     * 加载当前节点的祖先节点
+     *
+     * @param category
+     */
+    public void loadAncient(Category category) {
+        // 设置当前分类的父分类
+        if (category.getIsParent() && category.getParentId() == 0) {
+            // 一级分类
+            category.setAncient("无");
+        } else if (category.getIsParent()) {
+            // 二级分类
+            Category ancient = categoryMapper.selectByPrimaryKey(category.getParentId());
+            category.setAncient(ancient.getName());
+        } else {
+            // 三级分类
+            ArrayList<String> cNames = new ArrayList<>();
+            Category cur = category;
+            while (cur.getParentId() != 0) {
+                // 获取当前分类的父分类
+                Category ancient = categoryMapper.selectByPrimaryKey(cur.getParentId());
+                cNames.add(ancient.getName());
+                cur = ancient;
+            }
+            Collections.reverse(cNames);
+            category.setAncient(StringUtils.join(cNames, ">"));
+        }
     }
 
     /**
@@ -142,4 +163,46 @@ public class CategoryService {
         return categoryTreeBos;
     }
 
+    /**
+     * 根据分类级别查询商品分类
+     *
+     * @param level
+     * @return
+     */
+    public List<Category> findCategoryByLevel(Byte level) {
+        Category record = new Category();
+        record.setLevel(level);
+        List<Category> categories = categoryMapper.select(record);
+        return categories;
+    }
+
+    /**
+     * 添加商品分类/编辑商品分类
+     * {"name":"afafsd","level":"2","parentId":"1"}
+     *
+     * @param category
+     */
+    public void update(Category category) {
+        if (category.getId() == null) {
+            // 新增
+            // 1，初始化isParent
+            category.initIsParent();
+            // 2，新增
+            categoryMapper.insert(category);
+        } else {
+            // 编辑
+            categoryMapper.updateByPrimaryKeySelective(category);
+        }
+    }
+
+    /**
+     * 根据分类id查找分类
+     *
+     * @param id
+     * @return
+     */
+    public Category findCategoryById(Long id) {
+        Category category = categoryMapper.selectByPrimaryKey(id);
+        return category;
+    }
 }

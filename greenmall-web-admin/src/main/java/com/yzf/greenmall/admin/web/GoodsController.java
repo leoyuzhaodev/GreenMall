@@ -83,7 +83,7 @@ public class GoodsController {
             this.goodsService.update(goodsBo);
             return Message.generateResponseEntity(Message.MESSAGE_STATE_SUCCESS, "商品保存成功");
         } catch (Exception e) {
-            LOGGER.info("添加商品：服务器内部错误：{}", e.getMessage());
+            LOGGER.info("添加/编辑商品：服务器内部错误：{}", e.getMessage());
             e.printStackTrace();
         }
         return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品保存失败");

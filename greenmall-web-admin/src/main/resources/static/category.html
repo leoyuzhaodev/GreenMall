@@ -40,12 +40,24 @@
                 <div class="layui-card-body">
                     <!-- 搜索 -->
                     <div class="demoTable">
-                        搜索ID/搜索名称：
-                        <div class="layui-inline">
-                            <input class="layui-input" placeholder="分类ID/分类名称" name="id" id="demoReload"
-                                   autocomplete="off">
-                        </div>
-                        <button class="layui-btn" data-type="reload">搜索</button>
+                        <form class="layui-form">
+                            搜索ID/搜索名称：
+                            <div class="layui-inline">
+                                <input class="layui-input" placeholder="分类ID/分类名称" name="id,name" id="demoReload"
+                                       autocomplete="off">
+                            </div>
+                            <div class="layui-inline">
+                                <select name="level" lay-verify="">
+                                    <option value="">请选择分类层级</option>
+                                    <option value="1">一级</option>
+                                    <option value="2">二级</option>
+                                    <option value="3">三级</option>
+                                </select>
+                            </div>
+                            <button id="categorySearch" lay-submit lay-filter="reload" class="layui-btn"
+                                    data-type="reload">搜索
+                            </button>
+                        </form>
                     </div>
                     <!-- 数据表格 -->
                     <table class="layui-hide" id="goodsCategoryTable" lay-filter="goodsCategoryTable"></table>
@@ -53,6 +65,12 @@
                     <script type="text/html" id="barDemo">
                         <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
                         <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+                    </script>
+                    <!-- 功能键 -->
+                    <script type="text/html" id="toolbarDemo">
+                        <div class="layui-btn-container">
+                            <button class="layui-btn layui-btn-sm" lay-event="addCategory">新增分类</button>
+                        </div>
                     </script>
                 </div>
             </div>
@@ -70,81 +88,26 @@
 
     </div>
 </div>
-
-
 <script src="http://manager.greenmall.com/layui/layui.js"></script>
 <script src="http://manager.greenmall.com/layui/GreenMall.js"></script>
-
+<script src="http://manager.greenmall.com/layui/jquery-3.5.1.min.js" charset="utf-8"></script>
 <script>
     //JavaScript代码区域
-    layui.use(['jquery', 'element', 'tree', 'util', 'table'], function () {
+    layui.use(['form', 'jquery', 'element', 'tree', 'util', 'table'], function () {
         var $ = layui.jquery;
         var element = layui.element;
         var tree = layui.tree;
         var layer = layui.layer;
         var util = layui.util;
+        var form = layui.form;
         var table = layui.table;
+        var searchFromData = {};
+        var categoryLayerIndex = -1;
+        var isFatherReady = -1;
+        var editCategoryId = -1;
 
         /* **********************************商品分类数据树********************************** */
         // 分类树测试数据
-        /*
-        农产品常规分类有三到四级，第一层包含农产品几大品类，如蔬菜、水果、禽畜、花卉苗木等；
-        第二层是每一个大品类的小品类，如蔬菜里面的根茎、茄果；水果中的浆果、仁果、瓜果类；
-        粮油里面的谷类、豆类等；
-        第三层就当前常说的产品，如苹果、白菜、梨；第四层就是每个产品中的品种，
-        如苹果中红富士、国光、红星、秦冠、藤木、黄元帅、金冠等。
-        * */
-        var data1 = [{
-            title: '种植业'
-            , id: 1
-            , children: [{
-                title: '粮油'
-                , id: 1000
-                , children: [{
-                    title: '谷类'
-                    , id: 10001
-                }]
-            }, {
-                title: '瓜果'
-                , id: 1001
-            }]
-        }, {
-            title: '养殖业'
-            , id: 2
-            , children: [{
-                title: '禽类及副产品'
-                , id: 2000
-            }, {
-                title: '畜牧及其副产品'
-                , id: 2001
-            }]
-        }]
-
-        var data2 = [{
-            title: '种植业1'
-            , id: 1
-            , children: [{
-                title: '粮油'
-                , id: 1000
-                , children: [{
-                    title: '谷类'
-                    , id: 10001
-                }]
-            }, {
-                title: '瓜果'
-                , id: 1001
-            }]
-        }, {
-            title: '养殖业'
-            , id: 2
-            , children: [{
-                title: '禽类及副产品'
-                , id: 2000
-            }, {
-                title: '畜牧及其副产品'
-                , id: 2001
-            }]
-        }]
 
         //开启节点操作图标
         tree.render({
@@ -207,7 +170,7 @@
                 "http://manager.greenmall.com/category/queryCategoryTree",
                 {},
                 function (data) {
-                    console.log("分类树数据：" + data);
+                    // console.log("分类树数据：" + data);
                     //可以重载所有基础参数
                     tree.reload('categoryTree', {
                         data: data
@@ -216,18 +179,30 @@
             );
         }
 
-
         /* **********************************商品分类数据表********************************** */
-        //方法级渲染
+
         table.render({
             elem: '#goodsCategoryTable'
-            , url: 'data/categoryTable.json'
+            , url: 'http://manager.greenmall.com/category/queryCategoryByPage'
+            , method: "post" // 指定请求方式
+            , contentType: 'application/json;charset=utf-8'
+            , toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
             , cols: [[
                 {checkbox: true, fixed: true}
                 , {field: 'id', title: 'ID', width: 100, sort: false, fixed: true}
                 , {field: 'name', title: '名称', width: 150}
-                , {field: 'father', title: '上级分类', width: 150}
-                , {field: 'level', title: '层级', width: 150, sort: false}
+                , {field: 'ancient', title: '上级分类', width: 200}
+                , {
+                    field: 'level', title: '层级', width: 150, sort: false, templet: function (res) {
+                        if (res.level == 1) {
+                            return "一级";
+                        } else if (res.level == 2) {
+                            return "二级";
+                        } else {
+                            return "三级";
+                        }
+                    }
+                }
                 , {fixed: 'right', title: '操作', toolbar: '#barDemo', width: 250}
             ]]
             , id: 'testReload'
@@ -235,15 +210,38 @@
             , height: 420
         });
 
-        // 商品分类修改，删除
+        // 监听表格头部工具栏：新增分类
+        table.on('toolbar(goodsCategoryTable)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch (obj.event) {
+                case 'addCategory':
+                    layer.open({
+                        type: 1,
+                        area: ['500px', '360px'],
+                        title: "添加分类",
+                        content: $('#categoryForm'),
+                        btn: ['保存']
+                        , yes: function (index, layero) {
+                            categoryLayerIndex = index;
+                            $("#updateCategory").click();
+                        }, end: function (layero, index) {
+                            resetCategoryForm();
+                        }
+                    });
+                    break;
+            }
+        });
+
+        // 监听表格行内工具栏：分类修改，删除
         table.on('tool(goodsCategoryTable)', function (obj) {
             var data = obj.data;
+            var categoryId = data.id;
             if (obj.event === 'del') {
                 layer.confirm('真的删除行么', function (index) {
                     obj.del();
                     // 发送 ajax 请求后台
                     $.post(
-                        "/category/delete",
+                        "http://manager.greenmall.com/category/delete",
                         {id: data.id},
                         "json",
                         function (data) {
@@ -257,70 +255,268 @@
                     layer.close(index);
                 });
             } else if (obj.event === 'edit') {
-                layer.prompt({
-                    formType: 0
-                    , value: data.name // 商品分类名称
-                    , maxlength: 20 // 商品分类名称最大长度
-                    , anim: 0
-                }, function (value, index) {
+                // 打开弹框
+                layer.open({
+                    type: 1,
+                    area: ['500px', '360px'],
+                    title: "添加分类",
+                    content: $('#categoryForm'),
+                    btn: ['保存']
+                    , yes: function (index, layero) {
+                        categoryLayerIndex = index;
+                        $("#updateCategory").click();
+                    }, success: function (layero, index) {
+                        // 加载数据
+                        $.get("http://manager.greenmall.com/category/queryCategoryById", {id: categoryId},
+                            function (data) {
+                                // 保存需要编辑的category的id
+                                editCategoryId = data.id;
+                                // 1,根据分类分类级别加载上级分类
+                                console.log("data.level:" + data.level);
+                                if (data.level != 1) {
+                                    // 解除上级分类的禁用状态
+                                    $("select[name='parentId']").removeAttr("disabled");
+                                    form.render('select');
+                                    loadFather(data.level - 1, $("select[name='parentId']"));
+                                }
+                                // 2,回显表单
+                                var timer = window.setInterval(function () {
+                                    if (isFatherReady == 1 || data.level == 1) {
+                                        // 加载表单
+                                        form.val("categoryForm", {
+                                            "name": data.name,
+                                            "parentId": data.parentId,
+                                            "level": data.level
+                                        });
+                                        // 清除计时器
+                                        clearInterval(timer);
+                                    }
+                                }, 50 * 1);
+                            }, "json"
+                        );
 
-                    // 更新数据表格中的数据
-                    obj.update({
-                        name: value
-                    });
-
-                    // 发送 ajax 请求后台
-                    $.post(
-                        "/category/update", // url
-                        {name: data.name, id: data.id}, // 待发送 Key/value 参数
-                        "json",// 接口返回数据类型
-                        function (data) {
-                            // data {state:1/2/3/4/5, msg:""}
-                            // 修改成功或者失败消息回执
-                            layer.msg('hello');
-                            // 重载树结构
-                            reloadTree();
-                        }
-                    );
-
-                    // 关闭弹框
-                    layer.close(index);
+                    }, end: function (layero, index) {
+                        resetCategoryForm();
+                    }
                 });
             }
         });
 
-        // 商品分类数据重载 表格初始化url?page=1&limit=10&key=%E5%8F%91
-        // 需要响应的数据格式为
-        // data/categoryTable.json 中的数据
+        /**
+         * 重置表单
+         */
+        function resetCategoryForm() {
+            // 重置表单
+            $("#categoryForm")[0].reset();
+            // 清空上级分类
+            clearSelect($("select[name='parentId']"));
+            // 禁用上级分类
+            $("select[name='parentId']").attr("disabled", "disabled");
+            form.render('select');
+        }
+
         var $ = layui.$, active = {
             reload: function () {
-                var demoReload = $('#demoReload');
                 //执行重载
                 table.reload('testReload', {
                     page: {
                         curr: 1 //重新从第 1 页开始
                     }
-                    , where: { //设定异步数据接口的额外参数
-                        key: demoReload.val() ? demoReload.val() : ""// 分类名称或者分类id
+                    , where: {
+                        queryMap: searchFromData
                     }
                 }, 'data');
             }
         };
 
-        $('.demoTable .layui-btn').on('click', function () {
-            var type = $(this).data('type');
-            active[type] ? active[type].call(this) : '';
-        });
-
         // 重载表格
         function reloadTable() {
-            $('.demoTable .layui-btn').click();
+            $('#categorySearch').click();
         }
 
+        // 搜索表单监听
+        form.on('submit(reload)', function (data) {
+            // 获取表单数据
+            searchFromData = data.field;
+            // 执行重载
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+            //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+            return false;
+        });
+
+        /* **********************************分类添加********************************** */
+
+        // 分类表单验证
+        form.verify({
+            name: function (value) {
+                if (value.length <= 0) {
+                    return '分类名称不能为空';
+                } else if (value.length > 10) {
+                    return '分类名称长度<=10'
+                }
+            }
+            , level: function (value) {
+                if (value.length <= 0) {
+                    return '分类级别不能为空';
+                }
+            }
+            , parentId: function (value) {
+                var data = form.val('categoryForm');
+                var levelVal = data["level"];
+                if (levelVal != 1) {
+                    if (value.length <= 0) {
+                        return '上级分类不能为空';
+                    }
+                }
+            }
+        });
+
+        // 分类级别下拉框监听
+        form.on('select(level)', function (data) {
+
+            var level = data.value;
+            if (level == 1) {
+                // 禁用上级分类
+                $("select[name='parentId']").attr("disabled", "disabled");
+                // 清空上级分类选项
+                clearSelect($("select[name='parentId']"));
+                $("select[name='parentId']").val("");
+                // 重載表单select
+                form.render('select');
+            } else {
+                // 解禁上级分类
+                $("select[name='parentId']").removeAttr("disabled");
+                // 加载上级分类选项
+                loadFather(level - 1, $("select[name='parentId']"));
+            }
+
+
+        });
+
+        /**
+         * 加载父分类
+         * param:
+         *  fid:分类父id
+         */
+        function loadFather(level, $select) {
+            // 清空上级分类选项
+            clearSelect($select);
+            $select.val("");
+            $.get(
+                "http://manager.greenmall.com/category/level",
+                {"level": level},
+                function (data) {
+                    // [{id:"1",name:"种植业"}]
+                    loadSelect($select, data);
+                },
+                "json"
+            );
+        }
+
+        /**
+         * 加载下拉框数据
+         * param:
+         *  selectObj:select 的jquery对象
+         *  data:下拉的数据
+         */
+        function loadSelect($selectObj, data) {
+            // data:[{id:1,name:"xxx"}]
+            for (var i = 0; i < data.length; i++) {
+                addOption($selectObj, data[i].id, data[i].name);
+            }
+            // 重载select选择框
+            form.render('select');
+            // 更改下拉框加载完成标识
+            isFatherReady = 1;
+        }
+
+        /**
+         * 置空select
+         */
+        function clearSelect($select) {
+            $select.find(".selectTip").siblings().remove();
+        }
+
+        /**
+         * 为指定的select添加option
+         * param:
+         *  selectObj:select的jquery对象
+         *  selectVal:添加的值
+         */
+        function addOption($selectObj, selectId, selectName) {
+            $selectObj.append("<option value='" + selectId + "'>" + selectName + "</option>")
+        }
+
+        // 分类添加表单监听
+        form.on('submit(updateCategory)', function (data) {
+            // 获取表单数据
+            var categoryFromData = data.field;
+            if (editCategoryId != -1) {
+                categoryFromData["id"] = editCategoryId;
+            }
+            // 执行重载
+            // console.log("分类表单数据：" + JSON.stringify(categoryFromData));
+            // 发送请求增加商品分类
+            greenMallPost("/category/update", categoryFromData, function (data) {
+                // 成功回调
+                // 重载表格数据
+                reloadTable()
+                // 打印提示消息
+                layer.msg(data.info);
+                // 关闭弹框
+                if (categoryLayerIndex != -1) {
+                    layer.close(categoryLayerIndex);
+                    categoryLayerIndex = -1;
+                }
+            }, function () {
+                // 失败回调
+            })
+            //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+            return false;
+        });
+
+        /* **********************************页面加载********************************** */
         // 页面加载完成之后重载树结构
         reloadTree();
-
     });
 </script>
 </body>
+<!-- 新增/编辑商品分类表单 -->
+<form id="categoryForm" lay-filter="categoryForm" class="layui-form"
+      style="padding: 20px 30px 20px 0px;display: none" action="">
+    <!-- 分类名称 -->
+    <div class="layui-form-item">
+        <label class="layui-form-label">分类名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="name" lay-verify="name" autocomplete="off" placeholder="请输入标题"
+                   class="layui-input">
+        </div>
+    </div>
+    <!--分类级别-->
+    <div class="layui-form-item">
+        <label class="layui-form-label">分类级别</label>
+        <div class="layui-input-block">
+            <select name="level" lay-filter="level" lay-verify="level">
+                <option value="1">一级分类</option>
+                <option value="2">二级分类</option>
+                <option value="3">三级分类</option>
+            </select>
+        </div>
+    </div>
+    <!--分类级别-->
+    <div class="layui-form-item">
+        <label class="layui-form-label">上级分类</label>
+        <div class="layui-input-block">
+            <select disabled="disabled" name="parentId" lay-filter="parentId" lay-verify="parentId">
+                <option class="selectTip" value="">请选择上级分类</option>
+                <option value="1">一级分类</option>
+                <option value="2">二级分类</option>
+                <option value="3">三级分类</option>
+            </select>
+        </div>
+    </div>
+    <button style="display: none" id="updateCategory" lay-submit lay-filter="updateCategory" class="layui-btn"
+            data-type="reload"/>
+</form>
 </html>

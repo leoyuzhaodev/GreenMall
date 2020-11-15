@@ -47,7 +47,7 @@ function greenMallPost(url, jsonData, successF, errorF) {
 }
 
 /**
- * 发送post请求
+ * 发送get请求
  * @param url
  * @param jsonData
  * @param successF
