@@ -27,10 +27,10 @@
                     <div class="demoTable">
                         <form class="layui-form">
                             <div class="layui-form-item">
-                                搜索商品名称/售卖标题：
+                                ID/搜索名称/标题：
                                 <div class="layui-inline">
                                     <div class="layui-input-inline">
-                                        <input placeholder="商品名称/售卖标题" class="layui-input" name="title,subTitle"
+                                        <input placeholder="ID/名称/标题" class="layui-input" name="title,subTitle,id"
                                                id="demoReload"
                                                autocomplete="off">
                                     </div>
@@ -98,7 +98,7 @@
         var layer = layui.layer;
         var form = layui.form;
         var searchData = {
-            "title,subTitle": "",
+            "title,subTitle,id": "",
             "valid": 1,
             "saleable": 1
         }
@@ -250,7 +250,7 @@
                         layero.find('iframe')[0].contentWindow.saveGoods();
                         // 刷新表单
                         reloadTable();
-                        // 重置
+                    }, end: function () {
                         $("#operateGoodsId").val("-1");
                     }
                 });
@@ -338,7 +338,7 @@
             // 获取表单数据
             var searchFromData = data.field;
 
-            searchData['title,subTitle'] = searchFromData['title,subTitle'];
+            searchData['title,subTitle,id'] = searchFromData['title,subTitle,id'];
             if (!(undefined == searchFromData['valid'])) {
                 searchData['valid'] = 0;
             } else {
@@ -359,7 +359,7 @@
             return false;
         });
 
-        // 刷新表单
+        // 刷新数据表格
         function reloadTable() {
             $("#goodsSerach").click();
         }

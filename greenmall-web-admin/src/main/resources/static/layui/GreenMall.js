@@ -64,3 +64,9 @@ function greenMallGet(url, jsonData, successF, errorF, isAsync) {
         error: errorF
     })
 }
+
+//验证是否有特殊字符
+function hasSpecialChar(t) {
+    var reg = new RegExp('^([A-Za-z]|[\u4E00-\u9FA5])+$')
+    return reg.test(t) ? false : true;
+}

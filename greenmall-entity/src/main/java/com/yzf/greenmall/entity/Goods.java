@@ -56,7 +56,7 @@ public class Goods implements Serializable {
      */
     public static Map<String, String> originalQueryMap() {
         Map<String, String> queryMap = new HashMap<>();
-        queryMap.put("title,subTitle", "");
+        queryMap.put("title,subTitle,id", "");
         queryMap.put("saleable", "1");
         queryMap.put("valid", "1");
         queryMap.put("valid", "1");

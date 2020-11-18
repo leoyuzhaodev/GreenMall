@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,6 +25,8 @@ public class Param implements Serializable {
     private String unit; // 规格此参数单位，没有单位填：无
     @Transient
     private String cNames;
+    @Transient
+    private List<Category> categories;
 
     /**
      * 生成初始的查询map

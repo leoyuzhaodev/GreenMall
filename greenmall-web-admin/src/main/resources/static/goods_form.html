@@ -423,7 +423,7 @@
                     // 1，拷贝模板
                     var $param = $("#paramTemplate").clone();
                     // 2，设置参数名称
-                    $param.find("#paramName").text(param.name + "(" + param.unit + ")");
+                    $param.find("#paramName").text(param.name);
                     // 3，设置输入框类型
                     if (param.numeric == 1) {
                         $param.find("input").attr("type", "number");
@@ -435,7 +435,7 @@
                     // 5，设置校验提示
                     $param.find("input").attr("lay-reqtext", param.name + "是必填项，岂能为空？");
                     // 6，设置 placeholder
-                    $param.find("input").attr("placeholder", "请输入规格参数：" + param.name);
+                    $param.find("input").attr("placeholder", "请输入规格参数：" + param.name + "，单位：" + param.unit);
                     // 7，设置模板可显示
                     $param.css("display", "block");
                     // 7，将模板加入表单中
@@ -664,13 +664,13 @@
          */
         function initFormData() {
             isEdit = parent.layui.$('#operateGoodsId').val();
+            // console.log("isEdit:" + isEdit);
             if (isEdit == -1) {
                 loadFormData();
             } else {
                 loadFormDataById(isEdit);
             }
         }
-
 
         /**
          * 根据商品id加载数据

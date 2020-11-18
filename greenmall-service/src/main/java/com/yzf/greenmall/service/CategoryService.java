@@ -233,6 +233,9 @@ public class CategoryService {
             // 更新重复查询
             if (i > 0) {
                 Category category = categoryMapper.selectByPrimaryKey(id);
+                if (category == null) {
+                    throw new RuntimeException("判断规格参数名称是否重复,查询id无效");
+                }
                 if (name.equals(category.getName())) {
                     // 和自己名称重复不算重复
                     return false;
