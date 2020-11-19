@@ -36,13 +36,13 @@ public class GoodsSearch implements Serializable {
     private Date createTime;// 创建时间
     private Long salesVolume;// 销量
     private Double price; // 商品价格，注意通用 Mapper 不支持基本数据类型
-    private Double evaluationScores; // 总评分均分
+    private Integer evaluationScores; // 总评分均分
 
     public GoodsSearch() {
 
     }
 
-    public GoodsSearch(Long id, String subTitle, String all, String images, Long cid1, Long cid2, Long cid3, Date createTime, Long salesVolume, Double price, Double evaluationScores) {
+    public GoodsSearch(Long id, String subTitle, String all, String images, Long cid1, Long cid2, Long cid3, Date createTime, Long salesVolume, Double price) {
         this.id = id;
         this.subTitle = subTitle;
         this.all = all;
@@ -73,8 +73,7 @@ public class GoodsSearch implements Serializable {
                 goods.getCid3(),
                 goods.getCreateTime(),
                 goods.getSalesVolume() == null ? 0 : goods.getSalesVolume(),
-                goods.getGoodsDetail().getPrice(),
-                0D
+                goods.getGoodsDetail().getPrice()
         );
         return goodsSearch;
     }

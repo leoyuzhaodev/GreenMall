@@ -43,6 +43,15 @@ public class GoodsService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoodsService.class);
 
     /**
+     * 查询所有商品
+     *
+     * @return
+     */
+    public List<Goods> findAll() {
+        return goodsMapper.selectAll();
+    }
+
+    /**
      * 添加商品
      *
      * @param goodsBo

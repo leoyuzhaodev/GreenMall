@@ -5,12 +5,15 @@ import com.yzf.greenmall.common.PageResult;
 import com.yzf.greenmall.common.SearchRequest;
 import com.yzf.greenmall.entity.Goods;
 import com.yzf.greenmall.entity.GoodsDetail;
+import com.yzf.greenmall.entity.SalesVolume;
 import com.yzf.greenmall.mapper.GoodsDetailMapper;
 import com.yzf.greenmall.mapper.GoodsMapper;
 import com.yzf.greenmall.repository.GoodsRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -46,6 +49,9 @@ public class GoodsSearchService {
     private CategoryService categoryService;
 
     @Autowired
+    private SalesVolumeService salesVolumeService;
+
+    @Autowired
     private GoodsDetailMapper goodsDetailMapper;
 
     /**
@@ -61,6 +67,10 @@ public class GoodsSearchService {
                 List<String> categoriesName = categoryService.findCategoriesNameByIds(Arrays.asList(goods.getCid1(), goods.getCid2(), goods.getCid3()));
                 goods.setCategory(StringUtils.join(categoriesName, " "));
                 GoodsSearch goodsSearch = GoodsSearch.generateGoodsSearch(goods);
+                // 查询该商品的总销量
+                goodsSearch.setSalesVolume(salesVolumeService.getGoodsAllSalesVolume(goods.getId()));
+                // 设置该商品的评分 todo:建立评论表
+                goodsSearch.setEvaluationScores((int) (Math.random() * 10));
                 goodsSearches.add(goodsSearch);
             }
             // 3，将数据存入数据库中
@@ -93,12 +103,19 @@ public class GoodsSearchService {
         queryBuilder.withQuery(QueryBuilders.matchQuery("all", key).operator(Operator.AND));
 
         // 4，过滤搜索结果 id,images,price,subtitle
-        queryBuilder.withSourceFilter(new FetchSourceFilter(new String[]{"id", "images", "price", "subTitle"}, null));
+        queryBuilder.withSourceFilter(new FetchSourceFilter(new String[]{"id", "images", "price", "subTitle", "salesVolume", "evaluationScores"}, null));
 
         // 5，分页
         int page = request.getPage();
         int pageSize = request.getSize();
         queryBuilder.withPageable(PageRequest.of(page - 1, pageSize));
+
+        // 6，按字段进行排序
+        String sortBy = request.getSortBy();
+        Boolean isAsc = request.getIsAsc();
+        if (!StringUtils.isBlank(sortBy) && !sortBy.equals("default")) {
+            queryBuilder.withSort(SortBuilders.fieldSort(sortBy).order(isAsc ? SortOrder.ASC : SortOrder.DESC));
+        }
 
         // 6，查询获取结果
         Page<GoodsSearch> goodsSearchPage = this.goodsRepository.search(queryBuilder.build());

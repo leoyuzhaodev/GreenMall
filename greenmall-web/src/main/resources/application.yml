@@ -22,6 +22,9 @@ spring:
     elasticsearch:
       cluster-name: elasticsearch
       cluster-nodes: 192.168.230.128:9300
+  jackson:
+    # 配置json处理时忽略空值
+    default-property-inclusion: non_null
 # FastDFS 相关配置
 fdfs:
   so-timeout: 1501 # 超时时间

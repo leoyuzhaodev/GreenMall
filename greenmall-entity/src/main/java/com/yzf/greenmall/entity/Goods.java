@@ -29,6 +29,7 @@ public class Goods implements Serializable {
     private Date createTime;// 创建时间
     private Date lastUpdateTime;// 最后修改时间 last_update_time lastUpdateTime
     private Boolean valid;// 是否有效，逻辑删除用，true:有效 false:无效
+    @Transient
     private Long salesVolume;// 销量
     @Transient
     private String category;
