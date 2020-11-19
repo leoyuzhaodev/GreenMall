@@ -7,7 +7,7 @@ server:
 spring:
   application:
     # 应用名称
-    name: GreenMall
+    name: GreenMallAdmin
   datasource:
     # 数据库连接配置
     driver-class-name: com.mysql.jdbc.Driver
@@ -17,6 +17,9 @@ spring:
   mybatis:
     # mybatis 别名配置
     type-aliases-package: com.yzf.greenmall.entity
+  jackson:
+    # 配置json处理时忽略空值
+    default-property-inclusion: non_null
 # FastDFS 相关配置
 fdfs:
   so-timeout: 1501 # 超时时间
@@ -26,7 +29,6 @@ fdfs:
     height: 60
   tracker-list: # tracker地址：你的虚拟机服务器地址+端口（默认是22122）
     - 192.168.230.128:22122
-
 # 日志配置
 logging:
   level:

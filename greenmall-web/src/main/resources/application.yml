@@ -3,11 +3,11 @@ server:
   port: 8080
   servlet:
     # 访问路径
-    context-path: /greenmall
+    context-path: /
 spring:
   application:
     # 应用名称
-    name: GreenMall
+    name: GreenMallWeb
   datasource:
     # 数据库连接配置
     driver-class-name: com.mysql.jdbc.Driver
@@ -17,3 +17,17 @@ spring:
   mybatis:
     # mybatis 别名配置
     type-aliases-package: com.yzf.greenmall.entity
+  data:
+    # elasticsearch 配置
+    elasticsearch:
+      cluster-name: elasticsearch
+      cluster-nodes: 192.168.230.128:9300
+# FastDFS 相关配置
+fdfs:
+  so-timeout: 1501 # 超时时间
+  connect-timeout: 601 # 连接超时时间
+  thumb-image: # 缩略图
+    width: 60
+    height: 60
+  tracker-list: # tracker地址：你的虚拟机服务器地址+端口（默认是22122）
+    - 192.168.230.128:22122
