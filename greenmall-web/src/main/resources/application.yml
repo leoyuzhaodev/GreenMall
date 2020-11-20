@@ -25,6 +25,17 @@ spring:
   jackson:
     # 配置json处理时忽略空值
     default-property-inclusion: non_null
+  # redis
+  redis:
+    host: 192.168.230.128
+  # rabbitmq
+  rabbitmq:
+    host: 192.168.230.128
+    username: leorab
+    password: 123456
+    virtual-host: /greenmall
+    # 生产者确认机制，确保消息会正确发送，如果发送失败会有错误回执，从而触发重试
+    publisher-confirms: true
 # FastDFS 相关配置
 fdfs:
   so-timeout: 1501 # 超时时间
@@ -34,3 +45,10 @@ fdfs:
     height: 60
   tracker-list: # tracker地址：你的虚拟机服务器地址+端口（默认是22122）
     - 192.168.230.128:22122
+# 阿里短信配置
+greenmall:
+  sms:
+    accessKeyId: LTAI4GEmhY1PVqubX4zcr9bB # 你自己的accessKeyId
+    accessKeySecret: KridDZSnk4hqXtvNeduiRKzTWMJ21D # 你自己的AccessKeySecret
+    signName: 绿色商城 # 签名名称
+    verifyCodeTemplate: SMS_205615945 # 模板名称

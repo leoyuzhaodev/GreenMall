@@ -4,7 +4,7 @@ import com.yzf.greenmall.entity.User;
 import tk.mybatis.mapper.common.Mapper;
 
 /**
- * @description: [测试] UserMapper
+ * @description: UserMapper
  * @author:leo_yuzhao
  * @date:2020/11/2
  */
