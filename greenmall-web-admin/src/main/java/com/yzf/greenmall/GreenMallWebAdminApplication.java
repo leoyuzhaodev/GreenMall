@@ -13,6 +13,7 @@ import tk.mybatis.spring.annotation.MapperScan;
 @MapperScan("com.yzf.greenmall.mapper")
 public class GreenMallWebAdminApplication {
     public static void main(String[] args) {
+        System.setProperty("es.set.netty.runtime.available.processors", "false");
         SpringApplication.run(GreenMallWebAdminApplication.class);
     }
 }

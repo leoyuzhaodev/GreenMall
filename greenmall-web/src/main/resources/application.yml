@@ -45,10 +45,29 @@ fdfs:
     height: 60
   tracker-list: # tracker地址：你的虚拟机服务器地址+端口（默认是22122）
     - 192.168.230.128:22122
-# 阿里短信配置
 greenmall:
+  # 阿里短信配置
   sms:
     accessKeyId: LTAI4GEmhY1PVqubX4zcr9bB # 你自己的accessKeyId
     accessKeySecret: KridDZSnk4hqXtvNeduiRKzTWMJ21D # 你自己的AccessKeySecret
     signName: 绿色商城 # 签名名称
     verifyCodeTemplate: SMS_205615945 # 模板名称
+  # 加密配置
+  jwt:
+    secret: greenmall@Login(Auth}*^31)&GM% # 登录校验的密钥
+    pubKeyPath: D:/test/greenmall/rsa/rsa.pub # 公钥地址
+    priKeyPath: D:/test/greenmall/rsa/rsa.pri # 私钥地址
+    expire: 30 # 过期时间,单位分钟
+    cookieName: GM_TOKEN
+    cookieMaxAge: 30
+  # 拦截配置
+  filter:
+    allowPaths:
+      - /auth
+      - /search
+      - /user/register
+      - /user/check
+      - /user/code
+      - /login.html
+      - /index.html
+      - /static/**

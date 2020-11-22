@@ -10,16 +10,23 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="renderer" content="webkit">
     <meta http-equiv="Cache-Control" content="no-siteapp"/>
-    <link rel="stylesheet" href="AmazeUI-2.4.2/assets/css/amazeui.min.css"/>
-    <link href="css/dlstyle.css" rel="stylesheet" type="text/css">
-    <script src="AmazeUI-2.4.2/assets/js/jquery.min.js"></script>
-    <script src="AmazeUI-2.4.2/assets/js/amazeui.min.js"></script>
+    <link rel="stylesheet" href="http://www.greenmall.com/AmazeUI-2.4.2/assets/css/amazeui.min.css"/>
+    <link href="http://www.greenmall.com/css/dlstyle.css" rel="stylesheet" type="text/css">
+    <script src="http://www.greenmall.com/AmazeUI-2.4.2/assets/js/jquery.min.js"></script>
+    <script src="http://www.greenmall.com/AmazeUI-2.4.2/assets/js/amazeui.min.js"></script>
     <!-- 引入 vue，以及相关工具js -->
     <script src="http://www.greenmall.com/js/validate.js"></script>
     <script src="http://www.greenmall.com/js/vue/vue.js"></script>
     <script src="http://www.greenmall.com/js/vue/vuetify.js"></script>
     <script src="http://www.greenmall.com/js/axios.min.js"></script>
     <script src="http://www.greenmall.com/js/common.js"></script>
+
+    <style type="text/css">
+        .gmErrorInfo {
+            color: red;
+            font-size: 12px;
+        }
+    </style>
 </head>
 
 <body>
@@ -42,31 +49,40 @@
                             <form method="post">
                                 <div class="user-phone">
                                     <label for="phone"><i class="am-icon-mobile-phone am-icon-md"></i></label>
-                                    <input type="tel" name="" id="phone" placeholder="请输入手机号">
+                                    <input type="tel" id="phone" placeholder="请输入手机号"
+                                           v-model="user.phone" name="phone" data-vv-as="手机号"
+                                           v-validate="{required:true,regex:/^1[35678]\d{9}$/,useful:2}">
                                 </div>
+                                <span class="gmErrorInfo" style="color: red;">{{ errors.first('phone') }}</span>
                                 <div class="verification">
                                     <label for="code"><i class="am-icon-code-fork"></i></label>
-                                    <input type="tel" name="" id="code" placeholder="请输入验证码">
-                                    <a class="btn" href="javascript:void(0);" onClick="sendMobileCode();"
+                                    <input type="tel" id="code" placeholder="请输入验证码"
+                                           v-model="user.code" name="code" v-validate="'required'" data-vv-as="验证码">
+                                    <a class="btn" href="javascript:void(0);"
                                        id="sendMobileCode">
-                                        <span id="dyMobileButton">获取</span></a>
+                                        <span @click="createVerifyCode" id="dyMobileButton">获取</span></a>
                                 </div>
+                                <span class="gmErrorInfo">{{ errors.first('code') }}</span>
                                 <div class="user-pass">
                                     <label for="password"><i class="am-icon-lock"></i></label>
-                                    <input type="password" name="" id="password" placeholder="设置密码">
+                                    <input type="password" id="password" placeholder="设置密码"
+                                           v-model="user.password" name="password" data-vv-as="密码"
+                                           v-validate="'required|alpha_dash|min:4|max:30'">
                                 </div>
+                                <span class="gmErrorInfo">{{ errors.first('password') }}</span>
                                 <div class="user-pass">
                                     <label for="passwordRepeat"><i class="am-icon-lock"></i></label>
-                                    <input type="password" name="" id="passwordRepeat" placeholder="确认密码">
+                                    <input type="password" id="passwordRepeat" placeholder="确认密码"
+                                           v-model="user.confirmPassword" name="confirmPass" data-vv-as="确认密码"
+                                           v-validate="{required:true,confirm:user.password}">
                                 </div>
+                                <span class="gmErrorInfo">{{ errors.first('confirmPass') }}</span>
                             </form>
                             <div class="login-links">
-                                <label for="reader-me">
-                                    <input id="reader-me" type="checkbox"> 点击表示您同意商城《服务协议》
-                                </label>
+
                             </div>
                             <div class="am-cf">
-                                <input type="submit" name="" value="注册" class="am-btn am-btn-primary am-btn-sm am-fl">
+                                <input @click.stop="submit" type="button" name="" value="注册" class="am-btn am-btn-primary am-btn-sm am-fl">
                             </div>
                             <hr>
                         </div>
@@ -101,16 +117,92 @@
 </div>
 </body>
 <script>
+    /* 数据验证 */
+    Vue.use(VeeValidate, {
+        events: 'blur',
+        dictionary: {
+            zh: {
+                messages: {
+                    required: (field) => field + '不能为空！',
+                    min: (field, args) => field + '长度不能小于' + args[0],
+                    max: (field, args) => field + '长度不能大于' + args[0],
+                    alpha_dash: (field) => field + '只能包含数字、字母或下划线',
+                    regex: (field) => field + "格式不正确",
+                    is: () => "两次密码不一致"
+                }
+            }
+        },
+        locale: 'zh'
+    });
+
     var registerVm = new Vue({
         el: "#registerApp",
         data: {
-            gm// 必须引用到实例中，在html标签中才能使用
+            gm,// 必须引用到实例中，在html标签中才能使用
+            user: {
+                password: '',
+                confirmPassword: '',
+                phone: '',
+                code: ''
+            }
         }, created() {
+            /* 手机是否重复验证 */
+            this.$validator.extend('useful', {
+                getMessage(field, args, data) {
+                    return args[0] === '1' ? '用户名' + data : '手机' + data;
+                },
+                validate(value, args) {
+                    return new Promise(resolve => {
+                        gm.http.get("/user/check/" + value + "/" + args[0])
+                            .then(resp => {
+                                resolve({
+                                    valid: resp.data,
+                                    data: "已存在!"
+                                })
+                            })
+                    });
+                }
+            })
+            /* 密码相同验证 */
+            this.$validator.extend('confirm', {
+                getMessage() {
+                    return "两次密码不一致"
+                },
+                validate(val, args) {
+                    return val === args[0]
+                }
+            })
         },
         components: {},
         watch: {},
         computed: {},
-        methods: {}
+        methods: {
+            /* 生成短信验证码 */
+            createVerifyCode() {
+                this.$validator.validate("phone").then(r => {
+                    if (r) {
+                        gm.http.post("/user/code", "phone=" + this.user.phone);
+                    }
+                });
+            },
+            /* 注册 */
+            submit() {
+                this.$validator.validateAll().then(d => {
+                    if (d) {
+                        // 校验通过，提交表单
+                        gm.http.post("/user/register", gm.stringify(this.user))
+                            .then(resp => {
+                                if (resp.status === 201) {
+                                    // 注册成功
+                                    alert("注册成功,即将跳转到登录页！");
+                                    setTimeout(() => window.location = '/login.html', 2000);
+                                }
+                            })
+                            .catch(() => alert("注册失败！"))
+                    }
+                })
+            }
+        }
     });
 </script>
 </html>

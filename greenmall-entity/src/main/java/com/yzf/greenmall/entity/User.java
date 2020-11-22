@@ -1,5 +1,6 @@
 package com.yzf.greenmall.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.GeneratedValue;
@@ -14,12 +15,21 @@ import java.util.Date;
  * @author:leo_yuzhao
  * @date:2020/11/2
  */
-@Table(name = "tb_user")
 @Data
+@Table(name = "tb_user")
 public class User implements Serializable {
+
+    public static final Integer USER_VALID_YES = 1;
+    public static final Integer USER_VALID_NO = 0;
+    public static final Integer USER_STATE_NOT_INIT = 1;
+    public static final Integer USER_STATE_INIT = 2;
+    public static final Integer USER_STATE_PP = 4;
+    public static final Integer USER_NAME_DEFAULT_LEN = 10;
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     private String name;
     private String nickName;
     // 用户性别：1：男，0：女
@@ -28,9 +38,13 @@ public class User implements Serializable {
     private String phone;
     private String email;
     private Date createDate;
+    @JsonIgnore
     private String password;
+    @JsonIgnore
     private String salt;
+    @JsonIgnore
     private String payPassword;
+    @JsonIgnore
     private String paySalt;
     // 用户状态：1：非禁用 0：禁用
     private Integer valid;
