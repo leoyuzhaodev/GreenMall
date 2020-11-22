@@ -1,6 +1,6 @@
-package com.yzf.greenmall.config;
+package com.yzf.greenmall.admin.config;
 
-import com.yzf.greenmall.interceptor.LoginInterceptor;
+import com.yzf.greenmall.admin.interceptor.LoginInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

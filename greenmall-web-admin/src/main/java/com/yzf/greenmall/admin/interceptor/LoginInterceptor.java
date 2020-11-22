@@ -1,10 +1,9 @@
-package com.yzf.greenmall.interceptor;
+package com.yzf.greenmall.admin.interceptor;
 
 import com.yzf.greenmall.bo.UserInfo;
 import com.yzf.greenmall.common.CookieUtils;
 import com.yzf.greenmall.common.jwt.JwtUtils;
 import com.yzf.greenmall.config.JwtProperties;
-import com.yzf.greenmall.filter.LoginFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +11,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
 
 /**
  * @description:登录拦截器，加载用户信息

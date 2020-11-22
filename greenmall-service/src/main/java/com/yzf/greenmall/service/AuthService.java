@@ -4,6 +4,7 @@ import com.yzf.greenmall.bo.UserInfo;
 import com.yzf.greenmall.common.CodecUtils;
 import com.yzf.greenmall.common.jwt.JwtUtils;
 import com.yzf.greenmall.config.JwtProperties;
+import com.yzf.greenmall.entity.GMAdmin;
 import com.yzf.greenmall.entity.User;
 import com.yzf.greenmall.mapper.UserMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +23,9 @@ public class AuthService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private GMAdminService gmAdminService;
 
     @Autowired
     private JwtProperties jwtProperties;
@@ -49,6 +53,31 @@ public class AuthService {
         } catch (Exception e) {
             e.printStackTrace();
             LOGGER.info("为用户授权出现异常：{}", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * 为Admin颁发认证
+     *
+     * @param admin
+     * @return
+     */
+    public String authenticationAdmin(GMAdmin admin) {
+
+        try {
+
+            // 1，根据昵称查询用户
+            GMAdmin gmAdmin = gmAdminService.findGMAdmin(admin);
+            if (gmAdmin == null) {
+                return null;
+            }
+            // 2，根据用户信息生成token
+            String token = JwtUtils.generateToken(new UserInfo(gmAdmin.getId(), gmAdmin.getNickName()),
+                    jwtProperties.getPrivateKey(), jwtProperties.getExpire());
+            return token;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }

@@ -60,14 +60,11 @@ greenmall:
     expire: 30 # 过期时间,单位分钟
     cookieName: GM_TOKEN
     cookieMaxAge: 30
-  # 拦截配置
+  # 登录拦截配置
   filter:
-    allowPaths:
-      - /auth
-      - /search
-      - /user/register
-      - /user/check
-      - /user/code
-      - /login.html
-      - /index.html
-      - /static/**
+    filterPaths:
+      - /user/hello
+  # 登录拦截用户信息加载配置
+  interceptor:
+    interceptorPaths:
+      - /user/hello

@@ -1,6 +1,7 @@
 package com.yzf.greenmall.web;
 
 import com.yzf.greenmall.entity.User;
+import com.yzf.greenmall.interceptor.LoginInterceptor;
 import com.yzf.greenmall.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -57,18 +58,26 @@ public class UserController {
 
     /**
      * 注册用户
+     *
      * @param user 用户数据
      * @param code 验证码
      * @return
      */
     @PostMapping("/register")
-    public ResponseEntity<Void> register(User user,@RequestParam("code") String code) {
-        boolean flag = userService.register(user,code);
+    public ResponseEntity<Void> register(User user, @RequestParam("code") String code) {
+        boolean flag = userService.register(user, code);
         if (flag) {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GetMapping(path = "/hello")
+    public ResponseEntity<Void> hello() {
+        System.out.println("测试登录拦截...");
+        System.out.println(LoginInterceptor.getLoginUser().getUsername());
+        return ResponseEntity.ok().build();
     }
 
 

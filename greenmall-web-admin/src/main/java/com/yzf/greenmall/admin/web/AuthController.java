@@ -2,8 +2,10 @@ package com.yzf.greenmall.admin.web;
 
 import com.yzf.greenmall.bo.UserInfo;
 import com.yzf.greenmall.common.CookieUtils;
+import com.yzf.greenmall.common.Message;
 import com.yzf.greenmall.common.jwt.JwtUtils;
 import com.yzf.greenmall.config.JwtProperties;
+import com.yzf.greenmall.entity.GMAdmin;
 import com.yzf.greenmall.service.AuthService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,12 +40,11 @@ public class AuthController {
      * @return
      */
     @PostMapping(path = "/accredit")
-    public ResponseEntity<Void> authentication(@RequestParam("key") String key,
-                                               @RequestParam("password") String password,
-                                               HttpServletRequest request,
-                                               HttpServletResponse responses) {
+    public ResponseEntity<Message> authentication(@RequestBody(required = true) GMAdmin admin,
+                                                  HttpServletRequest request,
+                                                  HttpServletResponse responses) {
         // 1，登录校验，获取授权码：token
-        String token = authService.authentication(key, password);
+        String token = authService.authenticationAdmin(admin);
         if (StringUtils.isBlank(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -51,7 +52,7 @@ public class AuthController {
         CookieUtils.setCookie(request, responses, jwtProperties.getCookieName(),
                 token, jwtProperties.getCookieMaxAge(), null, true);
 
-        return ResponseEntity.ok().build();
+        return Message.generateResponseEntity(Message.MESSAGE_STATE_SUCCESS, "授权成功!");
     }
 
     /**
@@ -60,7 +61,7 @@ public class AuthController {
      * @return
      */
     @GetMapping(path = "/verify")
-    public ResponseEntity<UserInfo> verify(@CookieValue("GM_TOKEN") String token,
+    public ResponseEntity<UserInfo> verify(@CookieValue("GM_ADMIN_TOKEN") String token,
                                            HttpServletRequest request,
                                            HttpServletResponse responses) {
         try {

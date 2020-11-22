@@ -25,6 +25,17 @@ spring:
     elasticsearch:
       cluster-name: elasticsearch
       cluster-nodes: 192.168.230.128:9300
+  # redis
+  redis:
+    host: 192.168.230.128
+  # rabbitmq
+  rabbitmq:
+    host: 192.168.230.128
+    username: leorab
+    password: 123456
+    virtual-host: /greenmall
+    # 生产者确认机制，确保消息会正确发送，如果发送失败会有错误回执，从而触发重试
+    publisher-confirms: true
 # FastDFS 相关配置
 fdfs:
   so-timeout: 1501 # 超时时间
@@ -46,9 +57,21 @@ greenmall:
     signName: 绿色商城 # 签名名称
     verifyCodeTemplate: SMS_205615945 # 模板名称
   jwt:
-    secret: greenmall@Login(Auth}*^31)&GM% # 登录校验的密钥
-    pubKeyPath: D:/test/greenmall/rsa/rsa.pub # 公钥地址
-    priKeyPath: D:/test/greenmall/rsa/rsa.pri # 私钥地址
+    secret: greenmall@Login(Auth}*^31)&GMADMIN% # 登录校验的密钥
+    pubKeyPath: D:/test/greenmall/admin/rsa/rsa.pub # 公钥地址
+    priKeyPath: D:/test/greenmall/admin/rsa/rsa.pri # 私钥地址
     expire: 30 # 过期时间,单位分钟
-    cookieName: GM_TOKEN
+    cookieName: GM_ADMIN_TOKEN
     cookieMaxAge: 30
+  # 登录拦截配置
+  filter:
+    filterPaths:
+      - /category/
+      - /goods/
+      - /param/
+  # 登录拦截用户信息加载配置
+  interceptor:
+    interceptorPaths:
+      - /category/**
+      - /goods/**
+      - /param/**
