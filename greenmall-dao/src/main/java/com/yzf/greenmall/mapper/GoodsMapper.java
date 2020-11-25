@@ -1,10 +1,7 @@
 package com.yzf.greenmall.mapper;
 
 import com.yzf.greenmall.entity.Goods;
-import org.apache.ibatis.annotations.One;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Results;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.mapping.FetchType;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -18,7 +15,7 @@ import java.util.List;
 public interface GoodsMapper extends Mapper<Goods> {
 
     @Select("select * from tb_goods where saleable = 1 and valid = 1")
-    @Results({
+    @Results(id = "GoodsResultMap", value = {
             @Result(id = true, column = "id", property = "id"),
             @Result(column = "sub_title", property = "subTitle"),
             @Result(column = "cid1", property = "cid1"),
@@ -29,5 +26,9 @@ public interface GoodsMapper extends Mapper<Goods> {
             @Result(column = "id", property = "goodsDetail", one = @One(select = "com.yzf.greenmall.mapper.GoodsDetailMapper.findGoodsDetailById", fetchType = FetchType.EAGER))
     })
     List<Goods> findAllGoodsAndDetail();
+
+    @Select("select * from tb_goods where id = #{goodsId} and saleable = 1 and valid = 1")
+    @ResultMap(value = "GoodsResultMap")
+    Goods findGoodsAndDetail(@Param("goodsId") Long goodsId);
 
 }

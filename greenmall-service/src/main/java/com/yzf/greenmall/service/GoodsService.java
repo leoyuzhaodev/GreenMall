@@ -11,6 +11,7 @@ import com.yzf.greenmall.mapper.GoodsMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,10 @@ public class GoodsService {
     @Autowired
     private CategoryService categoryService;
 
+    @Autowired
+    private AmqpTemplate amqpTemplate;
+
+
     // 日志
     private static final Logger LOGGER = LoggerFactory.getLogger(GoodsService.class);
 
@@ -58,6 +63,8 @@ public class GoodsService {
      * @return
      */
     public void update(GoodsBo goodsBo) {
+        // 记录操作商品id，方便 rabbitMq 发送消息，elasticSearch 更新索引库
+        Long goodsId = null;
         if (goodsBo.getId() == null) {
             // 添加商品
             // 1，初始化商品相关参数
@@ -76,6 +83,7 @@ public class GoodsService {
             if (j <= 0) {
                 throw new RuntimeException("GoodsDetail数据保存失败");
             }
+            goodsId = goods.getId();
         } else {
             // 编辑商品
             Goods record = new Goods(goodsBo.getId());
@@ -88,8 +96,12 @@ public class GoodsService {
                 goodsMapper.updateByPrimaryKeySelective(goods);
                 // 2，更新商品详情
                 goodsDetailMapper.updateByPrimaryKeySelective(goodsBo);
+                goodsId = record.getId();
             }
         }
+
+        // 发送消息
+        this.amqpTemplate.convertAndSend("greenmall.goods.exchange", "goods.update.goods", goodsId);
 
     }
 

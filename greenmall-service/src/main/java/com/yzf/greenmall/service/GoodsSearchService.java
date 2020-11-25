@@ -64,14 +64,7 @@ public class GoodsSearchService {
             // 2，依次遍历，将商品和商品详情封装成为 GoodsSearch
             List<GoodsSearch> goodsSearches = new ArrayList<>();
             for (Goods goods : allGoodsAndDetail) {
-                List<String> categoriesName = categoryService.findCategoriesNameByIds(Arrays.asList(goods.getCid1(), goods.getCid2(), goods.getCid3()));
-                goods.setCategory(StringUtils.join(categoriesName, " "));
-                GoodsSearch goodsSearch = GoodsSearch.generateGoodsSearch(goods);
-                // 查询该商品的总销量
-                goodsSearch.setSalesVolume(salesVolumeService.getGoodsAllSalesVolume(goods.getId()));
-                // 设置该商品的评分 todo:建立评论表
-                goodsSearch.setEvaluationScores((int) (Math.random() * 10));
-                goodsSearches.add(goodsSearch);
+                goodsSearches.add(getGoodsSearch(goods));
             }
             // 3，将数据存入数据库中
             this.goodsRepository.saveAll(goodsSearches);
@@ -80,6 +73,23 @@ public class GoodsSearchService {
             e.printStackTrace();
         }
         System.out.println("初始化索引库成功");
+    }
+
+    /**
+     * 根据 goods（goodsDetail属性已赋值）GoodsSearch
+     *
+     * @param goods
+     * @return
+     */
+    private GoodsSearch getGoodsSearch(Goods goods) {
+        List<String> categoriesName = categoryService.findCategoriesNameByIds(Arrays.asList(goods.getCid1(), goods.getCid2(), goods.getCid3()));
+        goods.setCategory(StringUtils.join(categoriesName, " "));
+        GoodsSearch goodsSearch = GoodsSearch.generateGoodsSearch(goods);
+        // 查询该商品的总销量
+        goodsSearch.setSalesVolume(salesVolumeService.getGoodsAllSalesVolume(goods.getId()));
+        // 设置该商品的评分 todo:建立评论表
+        goodsSearch.setEvaluationScores((int) (Math.random() * 10));
+        return goodsSearch;
     }
 
     /**
@@ -122,5 +132,23 @@ public class GoodsSearchService {
 
         // 7，返回结果
         return new PageResult<GoodsSearch>(goodsSearchPage.getTotalElements(), goodsSearchPage.getTotalPages(), goodsSearchPage.getContent());
+    }
+
+    /**
+     * 更新索引库中的商品
+     *
+     * @param goodsId
+     */
+    public void updateSearchGoods(Long goodsId) {
+        // 1，根据id查询商品
+        Goods goods = goodsMapper.findGoodsAndDetail(goodsId);
+        if (goods == null) {
+            return;
+        }
+        // 2，将查找到的商品转化为SearchGoods
+        GoodsSearch goodsSearch = getGoodsSearch(goods);
+
+        // 3，更新索引库中原有的商品
+        this.goodsRepository.save(goodsSearch);
     }
 }
