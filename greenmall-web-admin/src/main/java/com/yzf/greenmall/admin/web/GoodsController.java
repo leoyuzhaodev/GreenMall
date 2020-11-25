@@ -18,10 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description:GoodsController
@@ -268,6 +270,15 @@ public class GoodsController {
             e.printStackTrace();
         }
         return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品批量下架失败");
+    }
+
+    @GetMapping(path = "/introduction/{id}.html")
+    public String toItemPage(Model model, @PathVariable("id") Long id) {
+       /* Map<String, Object> itemPageData = goodsService.loadItemPageData(id);
+        model.addAllAttributes(itemPageData);
+        goodsHtmlService.creatGoodsDetailHtml(id,itemPageData);
+        return "item";*/
+        return null;
     }
 
 }

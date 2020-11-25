@@ -71,6 +71,7 @@ public class GoodsBo extends GoodsDetail implements Serializable {
         goodsBo.setDescription(goodsDetail.getDescription());
         goodsBo.setPackingList(goodsDetail.getPackingList());
         goodsBo.setAfterService(goodsDetail.getAfterService());
+        goodsBo.setStock(goodsDetail.getStock());
         return goodsBo;
     }
 }

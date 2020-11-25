@@ -73,6 +73,17 @@
                        class="layui-input">
             </div>
         </div>
+
+        <!-- 库存 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">商品库存</label>
+            <div class="layui-input-block">
+                <input type="number" name="stock" lay-verify="stock" autocomplete="off"
+                       placeholder="请输入库存(不能有小数)"
+                       class="layui-input">
+            </div>
+        </div>
+
         <!-- 自动生成参数 -->
         <div id="dynamicParams">
 
@@ -253,7 +264,12 @@
             }, price: function (value, item) {
                 var test = /^(?!0+(?:\.0+)?$)(?:[1-9]\d*|0)(?:\.\d{1,2})?$/;
                 if (!(test.exec(value))) {
-                    return "请输入正确的价格！";
+                    return "请输入正确的价格！"; //
+                }
+            }, stock: function (value, item) {
+                var test = /^[+]{0,1}(\d+)$/;
+                if (!(test.exec(value))) {
+                    return "请输入正确的库存！";
                 }
             }, packingList: function (value, item) {
                 if (isEmpty(value)) {
@@ -651,6 +667,7 @@
                         , "cid2": data.cid2
                         , "cid3": data.cid3
                         , "price": data.price
+                        , "stock": data.stock
                         , "packingList": data.packingList
                         , "afterService": data.afterService
                     });

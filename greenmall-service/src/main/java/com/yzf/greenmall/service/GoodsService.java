@@ -145,6 +145,9 @@ public class GoodsService {
             String[] names = categoriesNames.toArray(new String[3]);
             // 设置三级分类
             goods.setCategory(StringUtils.join(names, ">"));
+            // 设置库存
+            Long stock = goodsDetailMapper.findStockByGoodsId(goods.getId());
+            goods.setStock(stock == null ? 0 : stock);
         });
 
         // 3，封装分页信息，并返回

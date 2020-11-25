@@ -35,6 +35,8 @@ public class Goods implements Serializable {
     private String category;
     @Transient
     private GoodsDetail goodsDetail;
+    @Transient
+    private Long stock; // 商品库存
 
     public Goods() {
     }

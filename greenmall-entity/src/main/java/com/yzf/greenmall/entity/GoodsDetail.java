@@ -23,6 +23,6 @@ public class GoodsDetail implements Serializable {
     private String description; // 商品描述
     private String packingList; // 商品打包
     private String afterService; // 售后服务
-
+    private Long stock; // 商品库存
 
 }
