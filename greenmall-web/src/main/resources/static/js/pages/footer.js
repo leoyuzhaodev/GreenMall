@@ -23,6 +23,7 @@ const gmFooter = {
     ,
     name: 'gm-footer',
     data() {
+        return {}
     },
     created() {
     },

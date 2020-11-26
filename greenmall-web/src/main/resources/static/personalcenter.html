@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=0">
+    <title>个人中心</title>
+    <link href="AmazeUI-2.4.2/assets/css/admin.css" rel="stylesheet" type="text/css">
+    <link href="AmazeUI-2.4.2/assets/css/amazeui.css" rel="stylesheet" type="text/css">
+    <link href="css/personal.css" rel="stylesheet" type="text/css">
+    <link href="http://www.greenmall.com/basic/css/demo.css" rel="stylesheet" type="text/css"/>
+    <script src="../AmazeUI-2.4.2/assets/js/jquery.min.js" type="text/javascript"></script>
+    <script src="../AmazeUI-2.4.2/assets/js/amazeui.js" type="text/javascript"></script>
+    <!-- 引入 vue，以及相关工具js -->
+    <script src="http://www.greenmall.com/js/vue/vue.js"></script>
+    <script src="http://www.greenmall.com/js/axios.min.js"></script>
+    <script src="http://www.greenmall.com/js/common.js"></script>
+
+</head>
+
+<body>
+<!--头 -->
+<div id="pcCenter">
+    <div>
+        <gm-top/>
+    </div>
+    <div class="center">
+        <div class="col-main">
+            <!-- 菜单 -->
+            <aside class="menu">
+                <ul>
+                    <li class="person">
+                        <a href="index.html">个人中心</a>
+                    </li>
+                    <li class="person">
+                        <a href="javascript:void(0)">个人资料</a>
+                        <ul>
+                            <li><a href="finformation.html" target="iframeMain">个人信息</a></li>
+                            <li><a href="fsafety.html" target="iframeMain">安全设置</a></li>
+                            <li><a href="faddress.html" target="iframeMain">收货地址</a></li>
+                        </ul>
+                    </li>
+                    <li class="person">
+                        <a href="javascript:void(0)">我的交易</a>
+                        <ul>
+                            <li><a href="forder.html" target="iframeMain">订单管理</a></li>
+                            <li><a href="fchange.html" target="iframeMain">退款售后</a></li>
+                        </ul>
+                    </li>
+                    <li class="person">
+                        <a href="javascript:void(0)">我的资产</a>
+                        <ul>
+                            <li><a href="fbill.html" target="iframeMain">账单明细</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="person">
+                        <a href="javascript:void(0)">我的小窝</a>
+                        <ul>
+                            <li><a id="fcollection" href="fcollection.html" target="iframeMain">收藏</a></li>
+                            <li><a href="fcomment.html" target="iframeMain">评价</a></li>
+                        </ul>
+                    </li>
+
+                </ul>
+
+            </aside>
+            <!-- 核心内容显示 -->
+            <div class="main-wrap">
+                <iframe name="iframeMain" id="iframeMain" src="finformation.html" width="100%"
+                        style="background-color:white;height: 1000px;">
+                </iframe>
+            </div>
+            <!-- 页脚 -->
+            <gm-footer></gm-footer>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    var vm = new Vue({
+        el: "#pcCenter",
+        data: {
+            gm, // 必须引用到实例中，在html标签中才能使用
+        }, created() {
+            this.openSpecificPage();
+        },
+        components: {
+            gmTop: () => import("http://www.greenmall.com/js/pages/top.js"),
+            gmFooter: () => import("http://www.greenmall.com/js/pages/footer.js"),
+        },
+        watch: {},
+        computed: {},
+        methods: {
+            /* 打开指定的页面 */
+            openSpecificPage() {
+                var pageName = gm.getUrlParam("open");
+                if (pageName != undefined && pageName != null && pageName.trim().length != 0) {
+                    $("#iframeMain").attr("src", pageName + ".html");
+                }
+            }
+        }
+    });
+</script>
+</html>

@@ -46,7 +46,9 @@ const gmTop = {
     <div class='nav white'>\
         <div class='logo'><img src='http://www.greenmall.com/images/gmlogo.png'/></div>\
         <div class='logoBig'>\
-            <li><img style='margin-top: 15px;' src='http://www.greenmall.com/images/gmlogo.png'/></li>\
+            <li>\
+            <a href='http://www.greenmall.com/'><img style='margin-top: 15px;' src='http://www.greenmall.com/images/gmlogo.png'/></a>\
+            </li>\
         </div>\
         <div class='search-bar pr'>\
             <a name='key' href='http://www.greenmall.com/search.html'></a>\
@@ -120,7 +122,7 @@ const gmTop = {
             } else if (pn === 2) {
                 window.location.href = "http://www.greenmall.com/shopcart.html"
             } else if (pn === 3) {
-                window.location.href = "http://www.greenmall.com/collection.html"
+                window.location.href = "http://www.greenmall.com/personalcenter.html?open=fcollection"
             }
         }
     }

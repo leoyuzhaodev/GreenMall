@@ -77,7 +77,9 @@
                             <li v-for="goods in goodsList" :key="goods.id">
                                 <div class="i-pic limit">
                                     <!-- 商品图片 -->
-                                    <img height="330px" :src="getImages(goods.images)"/>
+                                    <a :href="'http://www.greenmall.com/goods/introduction/'+goods.id+'.html'">
+                                        <img height="330px" :src="getImages(goods.images)"/>
+                                    </a>
                                     <!-- 商品副标题 -->
                                     <p class="title fl">
                                         【GreenMall】{{goods.subTitle.length > 20 ? goods.subTitle.substring(0,20) +
