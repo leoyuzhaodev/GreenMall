@@ -272,13 +272,6 @@ public class GoodsController {
         return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品批量下架失败");
     }
 
-    @GetMapping(path = "/introduction/{id}.html")
-    public String toItemPage(Model model, @PathVariable("id") Long id) {
-       /* Map<String, Object> itemPageData = goodsService.loadItemPageData(id);
-        model.addAllAttributes(itemPageData);
-        goodsHtmlService.creatGoodsDetailHtml(id,itemPageData);
-        return "item";*/
-        return null;
-    }
+
 
 }

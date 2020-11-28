@@ -1,6 +1,5 @@
 package com.yzf.greenmall.common;
 
-import com.yzf.greenmall.entity.User;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -26,6 +25,17 @@ public class QueryPage<T> {
     public QueryPage() {
         this.page = 1;
         this.limit = 10;
+    }
+
+    public QueryPage(int page, int limit) {
+        this.page = page;
+        this.limit = limit;
+    }
+
+    public QueryPage(int page, int limit, Map<String, String> queryMap) {
+        this.page = page;
+        this.limit = limit;
+        this.queryMap = queryMap;
     }
 
     /**

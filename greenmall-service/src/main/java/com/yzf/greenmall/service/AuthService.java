@@ -1,13 +1,10 @@
 package com.yzf.greenmall.service;
 
-import com.yzf.greenmall.bo.UserInfo;
-import com.yzf.greenmall.common.CodecUtils;
+import com.yzf.greenmall.common.jwt.UserInfo;
 import com.yzf.greenmall.common.jwt.JwtUtils;
 import com.yzf.greenmall.config.JwtProperties;
 import com.yzf.greenmall.entity.GMAdmin;
 import com.yzf.greenmall.entity.User;
-import com.yzf.greenmall.mapper.UserMapper;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

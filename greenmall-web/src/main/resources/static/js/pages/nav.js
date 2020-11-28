@@ -12,6 +12,9 @@ const gmNav = {
     ,
     name: 'gm-nav',
     data() {
+        return {
+            msg: "中部导航组件"
+        }
     },
     created() {
     },

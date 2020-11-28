@@ -36,6 +36,8 @@ spring:
     virtual-host: /greenmall
     # 生产者确认机制，确保消息会正确发送，如果发送失败会有错误回执，从而触发重试
     publisher-confirms: true
+  thymeleaf:
+    cache: false
 # FastDFS 相关配置
 fdfs:
   so-timeout: 1501 # 超时时间

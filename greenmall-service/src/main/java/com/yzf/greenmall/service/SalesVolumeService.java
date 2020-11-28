@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.Id;
+import java.util.Calendar;
 
 /**
  * @description:SalesVolumeService
@@ -52,13 +53,13 @@ public class SalesVolumeService {
      * @return
      */
     public Long getGoodsSVByMonthAndYear(Integer year, Integer month, Long goodsId) {
-        SalesVolume salesVolume = new SalesVolume(year, month, goodsId);
+        SalesVolume record = new SalesVolume(year, month, goodsId);
+        SalesVolume salesVolume = salesVolumeMapper.selectOne(record);
         if (salesVolume == null) {
             return 0l;
         } else {
             return salesVolume.getSalesVolume();
         }
     }
-
 
 }

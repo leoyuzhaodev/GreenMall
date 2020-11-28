@@ -1,4 +1,4 @@
-package com.yzf.greenmall.bo;
+package com.yzf.greenmall.common.jwt;
 
 /**
  * 载荷对象

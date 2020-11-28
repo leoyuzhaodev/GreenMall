@@ -1,6 +1,6 @@
 package com.yzf.greenmall.web;
 
-import com.yzf.greenmall.bo.UserInfo;
+import com.yzf.greenmall.common.jwt.UserInfo;
 import com.yzf.greenmall.common.CookieUtils;
 import com.yzf.greenmall.common.jwt.JwtUtils;
 import com.yzf.greenmall.config.JwtProperties;

@@ -1,13 +1,20 @@
 package com.yzf.greenmall.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
+import com.yzf.greenmall.bo.EvaluateBo;
 import com.yzf.greenmall.bo.GoodsBo;
+import com.yzf.greenmall.bo.GoodsIntroduction;
+import com.yzf.greenmall.bo.ParamBo;
 import com.yzf.greenmall.common.LayuiPage;
 import com.yzf.greenmall.common.QueryPage;
 import com.yzf.greenmall.entity.Goods;
 import com.yzf.greenmall.entity.GoodsDetail;
+import com.yzf.greenmall.entity.Param;
 import com.yzf.greenmall.mapper.GoodsDetailMapper;
 import com.yzf.greenmall.mapper.GoodsMapper;
+import com.yzf.greenmall.mapper.ParamMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +24,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.util.StringUtil;
 
 import javax.jnlp.FileSaveService;
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @description:GoodsService
@@ -43,6 +51,14 @@ public class GoodsService {
     @Autowired
     private AmqpTemplate amqpTemplate;
 
+    @Autowired
+    private ParamMapper paramMapper;
+
+    @Autowired
+    private EvaluateService evaluateService;
+
+    @Autowired
+    private SalesVolumeService salesVolumeService;
 
     // 日志
     private static final Logger LOGGER = LoggerFactory.getLogger(GoodsService.class);
@@ -140,11 +156,8 @@ public class GoodsService {
 
         // 封装商品分类信息
         goodsList.forEach(goods -> {
-            // 根据多个分类id查询分类
-            List<String> categoriesNames = categoryService.findCategoriesNameByIds(Arrays.asList(goods.getCid1(), goods.getCid2(), goods.getCid3()));
-            String[] names = categoriesNames.toArray(new String[3]);
             // 设置三级分类
-            goods.setCategory(StringUtils.join(names, ">"));
+            goods.setCategory(loadGoodsCategory(goods.getCid1(), goods.getCid2(), goods.getCid3()));
             // 设置库存
             Long stock = goodsDetailMapper.findStockByGoodsId(goods.getId());
             goods.setStock(stock == null ? 0 : stock);
@@ -153,6 +166,22 @@ public class GoodsService {
         // 3，封装分页信息，并返回
         return new LayuiPage<Goods>().initLayuiPage(goodsList);
     }
+
+    /**
+     * 查询商品的三级分类
+     *
+     * @param cid1
+     * @param cid2
+     * @param cid3
+     * @return
+     */
+    private String loadGoodsCategory(Long cid1, Long cid2, Long cid3) {
+        // 根据多个分类id查询分类
+        List<String> categoriesNames = categoryService.findCategoriesNameByIds(Arrays.asList(cid1, cid2, cid3));
+        String[] names = categoriesNames.toArray(new String[3]);
+        return StringUtils.join(names, ">");
+    }
+
 
     /**
      * 删除商品
@@ -253,4 +282,85 @@ public class GoodsService {
             goodsDown(id);
         });
     }
+
+    /**
+     * 根据商品id查询商品详情
+     *
+     * @param id 商品id
+     * @return
+     */
+    public GoodsIntroduction findIntroductionById(Long id) throws IOException {
+
+        // 1，根据id查询商品
+        Goods goods = goodsMapper.selectByPrimaryKey(id);
+        if (goods == null) {
+            return null;
+        }
+
+        // 2，根据商品id查询商品详情
+        GoodsDetail goodsDetail = goodsDetailMapper.selectByPrimaryKey(id);
+
+        // 3，加载规格参数
+        List<Map<String, String>> params = loadParams(goodsDetail.getParams());
+
+        // 4，加载评价信息
+        EvaluateBo evaluate = evaluateService.loadEvaluate(id);
+
+        // 5，加载商品月销量
+        Calendar calendar = Calendar.getInstance();
+        Long monthSalesVolume = salesVolumeService.getGoodsSVByMonthAndYear(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH) + 1,
+                goods.getId());
+
+        // 6，加载商品总销量
+        Long allSalesVolume = salesVolumeService.getGoodsAllSalesVolume(goods.getId());
+
+        // 7，构建 GoodsIntroduction
+        GoodsIntroduction goodsIntroduction = new GoodsIntroduction();
+        goodsIntroduction.setId(goods.getId());
+        goodsIntroduction.setImages(goodsDetail.getImages());
+        goodsIntroduction.setTitle(goods.getTitle());
+        goodsIntroduction.setCategory(loadGoodsCategory(goods.getCid1(), goods.getCid2(), goods.getCid3()));
+        goodsIntroduction.setPrice(goodsDetail.getPrice());
+        goodsIntroduction.setSubtitle(goods.getSubTitle());
+        goodsIntroduction.setStock(goodsDetail.getStock());
+        goodsIntroduction.setParams(params);
+        goodsIntroduction.setGoodsDetail(goodsDetail.getDescription());
+        goodsIntroduction.setAfterService(goodsDetail.getAfterService());
+        goodsIntroduction.setSaleMonth(monthSalesVolume);
+        goodsIntroduction.setSaleAll(allSalesVolume);
+        goodsIntroduction.setCommentAll(evaluate.getTotalEvaluate());
+        goodsIntroduction.setEvaluate(evaluate);
+
+        return goodsIntroduction;
+    }
+
+
+    /**
+     * 加载规格参数
+     * [{"id":"1","value":"2"}] => [{"name":"规格参数名称","value":"2"}]
+     *
+     * @param params
+     * @return
+     */
+    private List<Map<String, String>> loadParams(String params) throws IOException {
+        if (StringUtils.isEmpty(params)) {
+            return null;
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        List<ParamBo> paramBoList = mapper.readValue(params, new TypeReference<List<ParamBo>>() {
+        });
+        List<Map<String, String>> paramsVal = new ArrayList<>();
+        for (ParamBo paramBo : paramBoList) {
+            Param param = paramMapper.selectByPrimaryKey(paramBo.getId());
+            Map<String, String> map = new HashMap<>();
+            map.put("name", param.getName());
+            map.put("value", paramBo.getValue());
+            map.put("unit", param.getUnit());
+            paramsVal.add(map);
+        }
+        return paramsVal;
+    }
+
+
 }

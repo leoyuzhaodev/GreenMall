@@ -2,6 +2,7 @@ package com.yzf.greenmall.bo;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -10,7 +11,7 @@ import java.util.List;
  * @date:2020/11/13
  */
 @Data
-public class CategoryTreeBo {
+public class CategoryTreeBo implements Serializable {
     private String title;
     private Long id;
     private List<CategoryTreeBo> children;

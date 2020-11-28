@@ -526,6 +526,11 @@ axios.defaults.withCredentials = true
 
 // 配置对象
 const gm = greemmall = {
+    /* 格式化时间 */
+    renderTime(date) {
+        var dateee = new Date(date).toJSON();
+        return new Date(+new Date(dateee) + 8 * 3600 * 1000).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
+    },
     /**
      * 对encodeURI()编码过的 URI 进行解码。并且获取其中的指定参数
      * @param name

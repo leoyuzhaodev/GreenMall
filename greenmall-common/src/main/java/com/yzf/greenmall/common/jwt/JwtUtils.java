@@ -1,6 +1,5 @@
 package com.yzf.greenmall.common.jwt;
 
-import com.yzf.greenmall.bo.UserInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;

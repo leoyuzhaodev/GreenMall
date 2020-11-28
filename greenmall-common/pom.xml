@@ -23,12 +23,6 @@
             <version>1.0.4</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>com.yzf</groupId>
-            <artifactId>greenmall-entity</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
         <!-- 分页助手 -->
         <dependency>
             <groupId>com.github.pagehelper</groupId>
