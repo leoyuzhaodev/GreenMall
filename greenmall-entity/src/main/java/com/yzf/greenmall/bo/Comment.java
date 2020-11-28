@@ -13,6 +13,7 @@ import java.util.Date;
 @Data
 public class Comment implements Serializable {
     private String userNickName; // 用户名：b***1
+    private String userPortrait; // 用户头像
     private Date date;// 评论时间：111
     private String content; // 评论文字：xxxx
     private String images; // 评论图片：

@@ -341,7 +341,7 @@
                         <li v-for="(item,index) in commentPageResult.items" :key="index" class="am-comment">
                             <!-- 评论容器 -->
                             <a href="">
-                                <img class="am-comment-avatar" :src="item.portrait"/>
+                                <img class="am-comment-avatar" :src="item.userPortrait"/>
                                 <!-- 评论者头像 -->
                             </a>
 
@@ -525,7 +525,7 @@
                 /* 初始化分页信息 */
                 initPageInfo() {
                     // 1，初始总页数
-                    this.pageInfo.totalPage = Math.floor((this.commentPageResult.total + 9) / 10);
+                    this.pageInfo.totalPage = Math.floor((this.commentPageResult.total + 4) / 5);
                     // 2，初始化数据总条数
                     this.pageInfo.total = this.commentPageResult.total;
                 },
@@ -564,7 +564,7 @@
                     }
                     // 关闭加载锁
                     this.closeLock2();
-                    this.pageInfo.page = page;
+                    this.pageInfo.page = toPage;
                 },
                 /* 指定评论类型 */
                 changEType(eType) {

@@ -38,6 +38,7 @@ public class User implements Serializable {
     private String phone;
     private String email;
     private Date createDate;
+    private String portrait; // 用户头像
     @JsonIgnore
     private String password;
     @JsonIgnore

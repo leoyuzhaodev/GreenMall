@@ -19,10 +19,7 @@ import org.springframework.util.StringUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @description:EvaluateService
@@ -144,6 +141,8 @@ public class EvaluateService {
             comment.setContent(evaluate.getContent());
             // 4，评论图片
             comment.setImages(evaluate.getImages());
+            // 5，用户头像
+            comment.setUserPortrait(user.getPortrait());
             comments.add(comment);
         }
 
@@ -152,5 +151,26 @@ public class EvaluateService {
 
         // 封装分页数据对象
         return new PageResult<Comment>(pageInfo.getTotal(), comments);
+    }
+
+    /**
+     * 添加测试数据
+     */
+    public void addTestData() {
+        /*
+        5	28	4	5	完美	http://image.greenmall.com/group1/M00/00/00/wKjmgF-tM0yAOf5XAABiHYHHMos819.jpg	2020-11-26 17:09:55
+         */
+
+        for (int i = 0; i < 100; i++) {
+            Evaluate evaluate = new Evaluate();
+            evaluate.setOrderId(5l);
+            evaluate.setGoodsId(28l);
+            evaluate.setAccountId(4l);
+            evaluate.setScore(5);
+            evaluate.setContent("完美" + (i + 1));
+            evaluate.setImages("http://image.greenmall.com/group1/M00/00/00/wKjmgF-tM0yAOf5XAABiHYHHMos819.jpg");
+            evaluate.setCreateTime(new Date());
+            evaluateMapper.insert(evaluate);
+        }
     }
 }
