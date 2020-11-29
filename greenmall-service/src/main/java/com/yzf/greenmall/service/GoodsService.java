@@ -363,4 +363,22 @@ public class GoodsService {
     }
 
 
+    /**
+     * 判断商品是否可用
+     *
+     * @param goodsId
+     * @return
+     */
+    public boolean isGoodsAvailable(Long goodsId) {
+        Goods goods = goodsMapper.selectByPrimaryKey(goodsId);
+        // 商品不存在
+        if (goods == null) {
+            return false;
+        }
+        // 商品下架/删除
+        if (goods.getValid() == false || goods.getSaleable() == false) {
+            return false;
+        }
+        return true;
+    }
 }
