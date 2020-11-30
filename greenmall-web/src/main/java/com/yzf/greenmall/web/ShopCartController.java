@@ -73,7 +73,7 @@ public class ShopCartController {
     }
 
     /**
-     * 购物车展示
+     * 根据 goodsId 删除购物车数据
      *
      * @return
      */
@@ -84,6 +84,21 @@ public class ShopCartController {
             throw new RuntimeException("用户信息加载异常...");
         }
         Message message = shopCartService.delete(loginUser, goodsId);
+        return ResponseEntity.ok(message);
+    }
+
+    /**
+     * 根据 goodsId 批量删除购物车数据
+     *
+     * @return
+     */
+    @PostMapping(path = "/deleteBatch")
+    public ResponseEntity<Message> deleteBatch(@RequestBody List<Long> goodsIds) {
+        UserInfo loginUser = LoginInterceptor.getLoginUser();
+        if (loginUser == null) {
+            throw new RuntimeException("用户信息加载异常...");
+        }
+        Message message = shopCartService.deleteBatch(loginUser, goodsIds);
         return ResponseEntity.ok(message);
     }
 }

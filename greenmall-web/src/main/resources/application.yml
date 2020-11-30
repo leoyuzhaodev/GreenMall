@@ -67,8 +67,10 @@ greenmall:
     filterPaths:
       - /user/hello
       - /shopCart
+      - /collect
   # 登录拦截用户信息加载配置
   interceptor:
     interceptorPaths:
       - /user/hello
       - /shopCart/**
+      - /collect/**

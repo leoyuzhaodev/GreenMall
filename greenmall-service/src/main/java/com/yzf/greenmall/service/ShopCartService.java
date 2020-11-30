@@ -185,10 +185,28 @@ public class ShopCartService {
             if (flag) {
                 // 3，执行删除
                 hashOps.delete(goodsId.toString());
-                return new Message(1, "");
-            } else {
-                return new Message(2, "需要删除的购物车数据不存在！");
             }
+            return new Message(1, "");
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.info("删除购物车数据异常：{}", e.getMessage());
+            return new Message(2, "服务器异常！");
+        }
+    }
+
+    /**
+     * 批量删除购物车数据
+     *
+     * @param loginUser
+     * @param goodsIds
+     * @return
+     */
+    public Message deleteBatch(UserInfo loginUser, List<Long> goodsIds) {
+        try {
+            goodsIds.forEach(goodsId -> {
+                this.delete(loginUser, goodsId);
+            });
+            return new Message(1, "");
         } catch (Exception e) {
             e.printStackTrace();
             LOGGER.info("删除购物车数据异常：{}", e.getMessage());
