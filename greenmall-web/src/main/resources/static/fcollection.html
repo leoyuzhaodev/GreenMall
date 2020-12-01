@@ -13,13 +13,18 @@
     <link href="css/personal.css" rel="stylesheet" type="text/css">
     <link href="css/colstyle.css" rel="stylesheet" type="text/css">
 
+    <!-- 引入 vue，以及相关工具js -->
+    <script src="http://www.greenmall.com/js/vue/vue.js"></script>
+    <script src="http://www.greenmall.com/js/axios.min.js"></script>
+    <script src="http://www.greenmall.com/js/common.js"></script>
+
 </head>
 
 <body style="background-color: white">
 
 <!-- ----------------------------------------- 保留 ----------------------------------------- -->
 
-<div class="user-collection">
+<div id="collectApp" class="user-collection">
     <!--标题 -->
     <div class="am-cf am-padding">
         <div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">我的收藏</strong> /
@@ -30,208 +35,52 @@
     <div class="you-like">
         <div class="s-bar">
             我的收藏
-            <a class="am-badge am-badge-danger am-round">降价</a>
-            <a class="am-badge am-badge-danger am-round">下架</a>
         </div>
-        <div class="s-content">
-            <div class="s-item-wrap">
+        <!-- 渲染数据 -->
+        <div v-if="collectList.length>0" class="s-content">
+            <!-- 单条数据渲染 -->
+            <div v-for="(collect,index) in collectList" class="s-item-wrap">
                 <div class="s-item">
 
                     <div class="s-pic">
-                        <a href="#" class="s-pic-link">
-                            <img src="images/0-item_pic.jpg_220x220.jpg" alt="包邮s925纯银项链女吊坠短款锁骨链颈链日韩猫咪银饰简约夏配饰"
-                                 title="包邮s925纯银项链女吊坠短款锁骨链颈链日韩猫咪银饰简约夏配饰" class="s-pic-img s-guess-item-img">
+                        <a target="_blank"
+                           :href="'http://www.greenmall.com/goods/introduction/'+collect.goodsId+'.html'"
+                           class="s-pic-link">
+                            <img width="220" height="220" :src="collect.image"
+                                 :title="collect.subTitle" class="s-pic-img s-guess-item-img">
+                            <span v-if="collect.valid!=1" class="tip-title">已下架</span>
                         </a>
                     </div>
                     <div class="s-info">
-                        <div class="s-title"><a href="#" title="包邮s925纯银项链女吊坠短款锁骨链颈链日韩猫咪银饰简约夏配饰">包邮s925纯银项链女吊坠短款锁骨链颈链日韩猫咪银饰简约夏配饰</a>
+                        <div class="s-title">
+                            <a target="_blank"
+                               :href="'http://www.greenmall.com/goods/introduction/'+collect.goodsId+'.html'"
+                               :title="collect.subTitle">{{collect.title}}</a>
                         </div>
                         <div class="s-price-box">
-                            <span class="s-price"><em class="s-price-sign">¥</em><em class="s-value">42.50</em></span>
-                            <span class="s-history-price"><em class="s-price-sign">¥</em><em class="s-value">68.00</em></span>
+                            <!-- 价格 -->
+                            <span class="s-price"><em class="s-price-sign">¥</em><em
+                                    class="s-value">{{collect.price}}</em></span>
                         </div>
                         <div class="s-extra-box">
-                            <span class="s-comment">好评: 98.03%</span>
-                            <span class="s-sales">月销: 219</span>
+                            <span class="s-comment">好评: {{collect.goodEvaluateDegree*100}}%</span>
+                            <span class="s-sales">月销: {{collect.saleMonth}}</span>
                         </div>
                     </div>
                     <div class="s-tp">
-                        <span class="ui-btn-loading-before">找相似</span>
+                        <span @click="deleteCollection(collect.id)" class="ui-btn-loading-before" style="width: 100%;">取消收藏</span>
                         <i class="am-icon-shopping-cart"></i>
-                        <span class="ui-btn-loading-before buy">加入购物车</span>
-                        <p>
-                            <a href="javascript:;" class="c-nodo J_delFav_btn">取消收藏</a>
-                        </p>
                     </div>
                 </div>
             </div>
-
-            <div class="s-item-wrap">
-                <div class="s-item">
-
-                    <div class="s-pic">
-                        <a href="#" class="s-pic-link">
-                            <img src="images/1-item_pic.jpg_220x220.jpg" alt="s925纯银千纸鹤锁骨链短款简约时尚韩版素银项链小清新秋款女配饰"
-                                 title="s925纯银千纸鹤锁骨链短款简约时尚韩版素银项链小清新秋款女配饰" class="s-pic-img s-guess-item-img">
-                        </a>
-                    </div>
-                    <div class="s-info">
-                        <div class="s-title"><a href="#" title="s925纯银千纸鹤锁骨链短款简约时尚韩版素银项链小清新秋款女配饰">s925纯银千纸鹤锁骨链短款简约时尚韩版素银项链小清新秋款女配饰</a>
-                        </div>
-                        <div class="s-price-box">
-                            <span class="s-price"><em class="s-price-sign">¥</em><em class="s-value">49.90</em></span>
-                            <span class="s-history-price"><em class="s-price-sign">¥</em><em class="s-value">88.00</em></span>
-                        </div>
-                        <div class="s-extra-box">
-                            <span class="s-comment">好评: 99.74%</span>
-                            <span class="s-sales">月销: 69</span>
-                        </div>
-                    </div>
-                    <div class="s-tp">
-                        <span class="ui-btn-loading-before">找相似</span>
-                        <i class="am-icon-shopping-cart"></i>
-                        <span class="ui-btn-loading-before buy">加入购物车</span>
-                        <p>
-                            <a href="javascript:;" class="c-nodo J_delFav_btn">取消收藏</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="s-item-wrap">
-                <div class="s-item">
-
-                    <div class="s-pic">
-                        <a href="#" class="s-pic-link">
-                            <img src="images/-0-saturn_solar.jpg_220x220.jpg" alt="4折抢购!十二生肖925银女戒指,时尚开口女戒"
-                                 title="4折抢购!十二生肖925银女戒指,时尚开口女戒" class="s-pic-img s-guess-item-img">
-                            <span class="tip-title">已下架</span>
-                        </a>
-                    </div>
-                    <div class="s-info">
-                        <div class="s-title"><a href="#" title="4折抢购!十二生肖925银女戒指,时尚开口女戒">4折抢购!十二生肖925银女戒指,时尚开口女戒</a>
-                        </div>
-                        <div class="s-price-box">
-                            <span class="s-price"><em class="s-price-sign">¥</em><em class="s-value">378.00</em></span>
-                            <span class="s-history-price"><em class="s-price-sign">¥</em><em
-                                    class="s-value">1888.00</em></span>
-                        </div>
-                        <div class="s-extra-box">
-                            <span class="s-comment">好评: 99.93%</span>
-                            <span class="s-sales">月销: 278</span>
-                        </div>
-                    </div>
-                    <div class="s-tp">
-                        <span class="ui-btn-loading-before">找相似</span>
-                        <i class="am-icon-trash"></i>
-                        <span class="ui-btn-loading-before buy">进入店铺</span>
-                        <p>
-                            <a href="javascript:;" class="c-nodo J_delFav_btn">取消收藏</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="s-item-wrap">
-                <div class="s-item">
-
-                    <div class="s-pic">
-                        <a href="#" class="s-pic-link">
-                            <img src="images/0-item_pic.jpg_220x220.jpg" alt="包邮s925纯银项链女吊坠短款锁骨链颈链日韩猫咪银饰简约夏配饰"
-                                 title="包邮s925纯银项链女吊坠短款锁骨链颈链日韩猫咪银饰简约夏配饰" class="s-pic-img s-guess-item-img">
-                        </a>
-                    </div>
-                    <div class="s-info">
-                        <div class="s-title"><a href="#" title="包邮s925纯银项链女吊坠短款锁骨链颈链日韩猫咪银饰简约夏配饰">包邮s925纯银项链女吊坠短款锁骨链颈链日韩猫咪银饰简约夏配饰</a>
-                        </div>
-                        <div class="s-price-box">
-                            <span class="s-price"><em class="s-price-sign">¥</em><em class="s-value">42.50</em></span>
-                            <span class="s-history-price"><em class="s-price-sign">¥</em><em class="s-value">68.00</em></span>
-                        </div>
-                        <div class="s-extra-box">
-                            <span class="s-comment">好评: 98.03%</span>
-                            <span class="s-sales">月销: 219</span>
-                        </div>
-                    </div>
-                    <div class="s-tp">
-                        <span class="ui-btn-loading-before">找相似</span>
-                        <i class="am-icon-shopping-cart"></i>
-                        <span class="ui-btn-loading-before buy">加入购物车</span>
-                        <p>
-                            <a href="javascript:;" class="c-nodo J_delFav_btn">取消收藏</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="s-item-wrap">
-                <div class="s-item">
-
-                    <div class="s-pic">
-                        <a href="#" class="s-pic-link">
-                            <img src="images/1-item_pic.jpg_220x220.jpg" alt="s925纯银千纸鹤锁骨链短款简约时尚韩版素银项链小清新秋款女配饰"
-                                 title="s925纯银千纸鹤锁骨链短款简约时尚韩版素银项链小清新秋款女配饰" class="s-pic-img s-guess-item-img">
-                        </a>
-                    </div>
-                    <div class="s-info">
-                        <div class="s-title"><a href="#" title="s925纯银千纸鹤锁骨链短款简约时尚韩版素银项链小清新秋款女配饰">s925纯银千纸鹤锁骨链短款简约时尚韩版素银项链小清新秋款女配饰</a>
-                        </div>
-                        <div class="s-price-box">
-                            <span class="s-price"><em class="s-price-sign">¥</em><em class="s-value">49.90</em></span>
-                            <span class="s-history-price"><em class="s-price-sign">¥</em><em class="s-value">88.00</em></span>
-                        </div>
-                        <div class="s-extra-box">
-                            <span class="s-comment">好评: 99.74%</span>
-                            <span class="s-sales">月销: 69</span>
-                        </div>
-                    </div>
-                    <div class="s-tp">
-                        <span class="ui-btn-loading-before">找相似</span>
-                        <i class="am-icon-shopping-cart"></i>
-                        <span class="ui-btn-loading-before buy">加入购物车</span>
-                        <p>
-                            <a href="javascript:;" class="c-nodo J_delFav_btn">取消收藏</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="s-item-wrap">
-                <div class="s-item">
-
-                    <div class="s-pic">
-                        <a href="#" class="s-pic-link">
-                            <img src="images/-0-saturn_solar.jpg_220x220.jpg" alt="4折抢购!十二生肖925银女戒指,时尚开口女戒"
-                                 title="4折抢购!十二生肖925银女戒指,时尚开口女戒" class="s-pic-img s-guess-item-img">
-                        </a>
-                    </div>
-                    <div class="s-info">
-                        <div class="s-title"><a href="#" title="4折抢购!十二生肖925银女戒指,时尚开口女戒">4折抢购!十二生肖925银女戒指,时尚开口女戒</a>
-                        </div>
-                        <div class="s-price-box">
-                            <span class="s-price"><em class="s-price-sign">¥</em><em class="s-value">378.00</em></span>
-                            <span class="s-history-price"><em class="s-price-sign">¥</em><em
-                                    class="s-value">1888.00</em></span>
-                        </div>
-                        <div class="s-extra-box">
-                            <span class="s-comment">好评: 99.93%</span>
-                            <span class="s-sales">月销: 278</span>
-                        </div>
-                    </div>
-                    <div class="s-tp">
-                        <span class="ui-btn-loading-before">找相似</span>
-                        <i class="am-icon-shopping-cart"></i>
-                        <span class="ui-btn-loading-before buy">加入购物车</span>
-                        <p>
-                            <a href="javascript:;" class="c-nodo J_delFav_btn">取消收藏</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
+        </div>
+        <div v-else class="s-content">
+            <p style="text-align: center;line-height: 50px">收藏夹空空如也 ￣□￣｜｜。。。</p>
         </div>
 
-        <div class="s-more-btn i-load-more-item" data-screen="0"><i class="am-icon-refresh am-icon-fw"></i>更多</div>
+        <div @click="loadMoreCollectData" class="s-more-btn i-load-more-item" data-screen="0">
+            <i class="am-icon-refresh am-icon-fw"></i>更多
+        </div>
 
     </div>
 
@@ -239,5 +88,78 @@
 <!-- ----------------------------------------- 保留 ----------------------------------------- -->
 
 </body>
-
+<script>
+    var vm = new Vue({
+        el: "#collectApp",
+        data: {
+            gm, // 必须引用到实例中，在html标签中才能使用
+            loadNum: 6,
+            collectList: []
+        }, created() {
+            // 1，加载收藏数据
+            this.loadCollectData(this.loadNum);
+        },
+        watch: {},
+        computed: {},
+        methods: {
+            /* 加载收藏数据 */
+            loadCollectData(loadNum) {
+                var isLogin = 0;
+                // 1，登录验证
+                gm.verifyUser().then(() => {
+                    isLogin = 1;
+                    // 2，加载收藏夹数据
+                    gm.http.get("/collect/queryCollect/" + loadNum)
+                        .then(resp => {
+                            var data = resp.data;
+                            if (resp.status === 200) {
+                                this.collectList = data;
+                            } else if (resp.status === 404) {
+                                // alert("收藏夹空空如也!")
+                            } else {
+                                alert("加载收藏夹失败!")
+                            }
+                        })
+                        .catch(() => {
+                            alert("加载收藏夹失败!")
+                        })
+                }).catch(() => {
+                    if (isLogin === 0) {
+                        alert("您还没有登录，请登录之后做相关操作。")
+                        window.location.href = "http://www.greenmall.com/login.html";
+                    } else {
+                        alert("加载购物车异常...")
+                    }
+                })
+            },
+            /* 取消收藏 */
+            deleteCollection(collectId) {
+                gm.http.get("/collect/deleteCollection/" + collectId)
+                    .then(resp => {
+                        var data = resp.data;
+                        if (resp.status === 200) {
+                            alert("取消收藏成功！");
+                            this.collectList.splice(this.collectList.indexOf(this.collectList.find(collect => {
+                                return collect.id == collectId;
+                            })), 1);
+                        } else {
+                            alert("取消收藏失败!")
+                        }
+                    })
+                    .catch(() => {
+                        alert("取消收藏失败!")
+                    })
+            },
+            /* 加载更多数据 */
+            loadMoreCollectData() {
+                if (this.loadNum > this.collectList.length) {
+                    alert("没有更多数据了...");
+                } else {
+                    this.loadNum += 6;
+                    this.loadCollectData(this.loadNum);
+                }
+            }
+        }
+    });
+</script>
 </html>

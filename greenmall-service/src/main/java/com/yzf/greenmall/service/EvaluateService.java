@@ -158,7 +158,8 @@ public class EvaluateService {
      */
     public void addTestData() {
         /*
-        5	28	4	5	完美	http://image.greenmall.com/group1/M00/00/00/wKjmgF-tM0yAOf5XAABiHYHHMos819.jpg	2020-11-26 17:09:55
+            5	28	4	5	完美	http://image.greenmall.com/group1/M00/00/00/wKjmgF-tM0yAOf5XAABiHYHHMos819.jpg
+            2020-11-26 17:09:55
          */
 
         for (int i = 0; i < 100; i++) {
@@ -172,5 +173,23 @@ public class EvaluateService {
             evaluate.setCreateTime(new Date());
             evaluateMapper.insert(evaluate);
         }
+    }
+
+    /**
+     * 计算商品好评度
+     *
+     * @return
+     */
+    public Double findGoodsEvaluateDegree(Long goodsId) {
+
+        // 1,查询所有的评论数
+        Long totalEvaluate = evaluateMapper.getTotalEvaluate(goodsId);
+        if (totalEvaluate == 0) {
+            return 0d;
+        }
+        // 2，查询好评数量
+        Long goodEvaluateNum = evaluateMapper.getGoodEvaluateNum(goodsId);
+        BigDecimal b = new BigDecimal(goodEvaluateNum.doubleValue() / totalEvaluate.doubleValue());
+        return b.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 }
