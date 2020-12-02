@@ -164,4 +164,45 @@ public class UserService {
         return user;
     }
 
+    /**
+     * 根据用户id加载当前登录用户的用户信息
+     *
+     * @param id
+     * @return
+     */
+    public User findUser(Long id) {
+        User user = userMapper.selectByPrimaryKey(id);
+        if (user == null) {
+            throw new RuntimeException("用户信息加载异常!");
+        }
+        return user;
+    }
+
+    /**
+     * 更新用户信息
+     *
+     * @param user
+     * @return
+     */
+    public boolean update(User user) {
+
+        try {
+            // 1，查看用户是否存在
+            User record = new User();
+            record.setId(user.getId());
+            int i = userMapper.selectCount(record);
+            if (1 != i) {
+                throw new RuntimeException("更新用户信息：id对应的用户不存在");
+            }
+            // 更新信息：选择性更新
+            user.setEmail(null);
+            user.setPhone(null);
+            userMapper.updateByPrimaryKeySelective(user);
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

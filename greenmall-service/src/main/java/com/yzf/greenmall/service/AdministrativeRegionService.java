@@ -6,12 +6,14 @@ import com.yzf.greenmall.entity.AdministrativeRegion;
 import com.yzf.greenmall.mapper.AdministrativeRegionMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @description:AdministrativeRegionService
@@ -31,7 +33,7 @@ public class AdministrativeRegionService {
      *
      * @throws Exception
      */
-    public void initAR() throws Exception {
+    private void initAR() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonNode = mapper.readTree(new File("D:/test/address.json"));
         list(jsonNode, 1, null);
@@ -132,4 +134,32 @@ public class AdministrativeRegionService {
         }
         return nt.append("," + nt1.toString()).toString();
     }
+
+    /**
+     * 根据父id查找行政区划信息
+     *
+     * @param fId
+     * @return
+     */
+    public List<AdministrativeRegion> findByFId(Long fId) {
+        AdministrativeRegion ar = new AdministrativeRegion();
+        ar.setFatherId(fId);
+        List<AdministrativeRegion> arList = arMapper.select(ar);
+        return arList;
+    }
+
+    /**
+     * 根据多个id获取多个对应的名称
+     *
+     * @param ids
+     * @return
+     */
+    public List<String> findNamesByIds(List<Long> ids) {
+        List<AdministrativeRegion> arList = arMapper.selectByIdList(ids);
+        if (CollectionUtils.isEmpty(arList)) {
+            return null;
+        }
+        return arList.stream().map(AdministrativeRegion::getName).collect(Collectors.toList());
+    }
+
 }

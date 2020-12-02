@@ -639,7 +639,69 @@ const gm = greemmall = {
      * 将请求参数字符串格式化为js对象
      */
     parse,
+    /**
+     * 验证用户是否登录
+     * @returns {*}
+     */
     verifyUser() {
         return this.http.get("/auth/verify");
+    },
+    /**
+     * 判断集合是否为空
+     * @param list
+     * @returns {boolean}
+     */
+    isCollectionNotEmpty(list) {
+        if (list !== undefined && list != null && list.length > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+    /**
+     * 判断字符串是否为空
+     * @param str
+     * @returns {boolean}
+     */
+    isStringNotEmpty(str) {
+        if (str != undefined && str != null && str.trim().length > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+    /**
+     * 根据属性以及对应的值在数组中查找数据
+     * @param list
+     * @param attr
+     * @param val
+     * @returns {*}
+     */
+    findList(list, attr, val) {
+        var items = list.filter(function (item) {
+            return item[attr] == val;
+        })
+        return items;
+    },
+    /**
+     * 深度拷贝对象
+     * @param object
+     * @returns {any}
+     */
+    copyObject(object) {
+        return JSON.parse(JSON.stringify(object));
+    },
+    /**
+     * 根据对象的属性值查找其所在数组中的下标
+     * @param list
+     * @param attr
+     * @param val
+     * @returns {*|number|c}
+     */
+    findListIndex(list, attr, val) {
+        return list.indexOf(list.find(cartItem => {
+            return cartItem[attr] == val;
+        }));
     }
+
 }

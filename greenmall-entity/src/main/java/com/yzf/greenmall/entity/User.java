@@ -32,7 +32,7 @@ public class User implements Serializable {
     private Long id;
     private String name;
     private String nickName;
-    // 用户性别：1：男，0：女
+    // 用户性别：1：男，0：女 2:保密
     private Integer sex;
     private Date birthday;
     private String phone;

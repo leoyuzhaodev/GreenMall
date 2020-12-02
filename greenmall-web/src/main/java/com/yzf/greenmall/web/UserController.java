@@ -1,5 +1,6 @@
 package com.yzf.greenmall.web;
 
+import com.yzf.greenmall.common.jwt.UserInfo;
 import com.yzf.greenmall.entity.User;
 import com.yzf.greenmall.interceptor.LoginInterceptor;
 import com.yzf.greenmall.service.UserService;
@@ -78,6 +79,42 @@ public class UserController {
         System.out.println("测试登录拦截...");
         System.out.println(LoginInterceptor.getLoginUser().getUsername());
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 加载当前登录用户的信息
+     * @return
+     */
+    @GetMapping(path = "/queryUser")
+    public ResponseEntity<User> queryUser() {
+        UserInfo loginUser = LoginInterceptor.getLoginUser();
+        try {
+            if (loginUser == null) {
+                throw new RuntimeException("用户信息加载异常!");
+            }
+            User user = userService.findUser(loginUser.getId());
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * 注册用户
+     *
+     * @param user 用户数据
+     * @param code 验证码
+     * @return
+     */
+    @PostMapping("/update")
+    public ResponseEntity<Void> update(@RequestBody User user) {
+        boolean flag = userService.update(user);
+        if (flag) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 

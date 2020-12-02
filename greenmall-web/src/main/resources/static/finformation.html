@@ -11,12 +11,28 @@
     <link href="css/infstyle.css" rel="stylesheet" type="text/css">
     <script src="AmazeUI-2.4.2/assets/js/jquery.min.js" type="text/javascript"></script>
     <script src="AmazeUI-2.4.2/assets/js/amazeui.js" type="text/javascript"></script>
+    <!-- 引入 vue，以及相关工具js -->
+    <script src="http://www.greenmall.com/js/validate.js"></script>
+    <script src="http://www.greenmall.com/js/vue/vue.js"></script>
+    <script src="http://www.greenmall.com/js/vue/vuetify.js"></script>
+    <script src="http://www.greenmall.com/js/axios.min.js"></script>
+    <script src="http://www.greenmall.com/js/common.js"></script>
+    <!-- 引入layui -->
+    <script src="http://www.greenmall.com/layui/layui.js"></script>
+    <link href="http://www.greenmall.com/layui/css/layui.css" rel="stylesheet" type="text/css">
+    <style type="text/css">
+        .gmErrorInfo {
+            color: red;
+            font-size: 12px;
+            /*margin-left: 10px;*/
+        }
+    </style>
 </head>
 
 <body style="background-color: white">
 
 <!-- ---------------------------- 保留 ---------------------------- -->
-<div class="user-info">
+<div id="userInfoApp" class="user-info">
     <!--标题 -->
     <div class="am-cf am-padding">
         <div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">个人资料</strong> / <small>Personal&nbsp;information</small>
@@ -25,27 +41,25 @@
     <hr/>
 
     <!--头像 -->
-    <div class="user-infoPic">
+    <div class="user-infoPic" style="height: 180px;">
 
         <div class="filePic">
-            <input type="file" class="inputPic" allowexts="gif,jpeg,jpg,png,bmp" accept="image/*">
-            <img class="am-circle am-img-thumbnail" src="images/getAvatar.do.jpg" alt=""/>
-        </div>
-
-        <p class="am-form-help">头像</p>
-
-        <div class="info-m">
-            <div><b>用户名：<i>小叮当</i></b></div>
-            <div class="u-level">
-									<span class="rank r2">
-							             <s class="vip1"></s><a class="classes" href="#">铜牌会员</a>
-						            </span>
+            <!-- <input type="file" class="inputPic" allowexts="gif,jpeg,jpg,png,bmp" accept="image/*">
+             <img class="am-circle am-img-thumbnail" height="98px" width="98px" :src="curUser.portrait" alt=""/>-->
+            <div class="layui-upload">
+                <div class="layui-upload-list">
+                    <img :src="curUser.portrait" height="98px" width="98px" class="layui-upload-img" id="demo1">
+                    <p id="demoText"></p>
+                </div>
+                <button type="button" class="layui-btn layui-btn-warm layui-btn-xs" id="test1">更换头像</button>
+                <input @click="changeImage" id="userPortrait" type="hidden" v-model="curUser.portrait">
             </div>
-            <div class="u-safety">
-                <a href="safety.html">
-                    账户安全
-                    <span class="u-profile"><i class="bc_ee0000" style="width: 60px;" width="0">60分</i></span>
-                </a>
+        </div>
+        <div class="info-m">
+            <div class="u-level" style="padding-top: 30px">
+                <span class="rank r2">
+                    <b>用户名：<i>{{curUser.nickName}}</i></b>
+                </span>
             </div>
         </div>
     </div>
@@ -54,104 +68,78 @@
     <div class="info-main">
         <form class="am-form am-form-horizontal">
 
+            <!-- 昵称 -->
             <div class="am-form-group">
                 <label for="user-name2" class="am-form-label">昵称</label>
                 <div class="am-form-content">
-                    <input type="text" id="user-name2" placeholder="nickname">
-
+                    <input type="text" name="nickName" v-model="curUser.nickName" placeholder="昵称"
+                           data-vv-as="昵称"
+                           v-validate="'required|min:4|max:30'">
+                    <span class="gmErrorInfo">{{ errors.first('nickName') }}</span>
                 </div>
             </div>
 
+            <!-- 姓名 -->
             <div class="am-form-group">
                 <label for="user-name" class="am-form-label">姓名</label>
                 <div class="am-form-content">
-                    <input type="text" id="user-name2" placeholder="name">
-
+                    <input type="text" name="name" v-model="curUser.name" placeholder="姓名"
+                           data-vv-as="姓名"
+                           v-validate="'required|min:2|max:30'">
+                    <span class="gmErrorInfo">{{ errors.first('name') }}</span>
                 </div>
             </div>
 
+            <!-- 性别 -->
             <div class="am-form-group">
                 <label class="am-form-label">性别</label>
                 <div class="am-form-content sex">
                     <label class="am-radio-inline">
-                        <input type="radio" name="radio10" value="male" data-am-ucheck> 男
+                        <input v-model="curUser.sex" type="radio" name="radio10" value="1" data-am-ucheck> 男
                     </label>
                     <label class="am-radio-inline">
-                        <input type="radio" name="radio10" value="female" data-am-ucheck> 女
+                        <input v-model="curUser.sex" type="radio" name="radio10" value="0" data-am-ucheck> 女
                     </label>
                     <label class="am-radio-inline">
-                        <input type="radio" name="radio10" value="secret" data-am-ucheck> 保密
+                        <input v-model="curUser.sex" type="radio" name="radio10" value="2" data-am-ucheck> 保密
                     </label>
+                    <input type="hidden" name="sex" v-model="curUser.sex"
+                           data-vv-as="性别"
+                           v-validate="'required'">
+                    <br>
+                    <span class="gmErrorInfo">{{ errors.first('sex') }}</span>
                 </div>
             </div>
-
+            <!-- 生日 -->
             <div class="am-form-group">
                 <label for="user-birth" class="am-form-label">生日</label>
                 <div class="am-form-content birth">
-                    <div class="birth-select">
-                        <select data-am-selected>
-                            <option value="a">2015</option>
-                            <option value="b">1987</option>
-                        </select>
-                        <em>年</em>
-                    </div>
-                    <div class="birth-select2">
-                        <select data-am-selected>
-                            <option value="a">12</option>
-                            <option value="b">8</option>
-                        </select>
-                        <em>月</em></div>
-                    <div class="birth-select2">
-                        <select data-am-selected>
-                            <option value="a">21</option>
-                            <option value="b">23</option>
-                        </select>
-                        <em>日</em></div>
+                    <input type="date" v-model="curUser.birthday" name="birthday" id="myDate"
+                           data-vv-as="生日"
+                           v-validate="'required'">
+                    <span class="gmErrorInfo">{{ errors.first('birthday') }}</span>
+
                 </div>
 
             </div>
+            <!-- 电话 -->
             <div class="am-form-group">
                 <label for="user-phone" class="am-form-label">电话</label>
                 <div class="am-form-content">
-                    <input id="user-phone" placeholder="telephonenumber" type="tel">
-
+                    <input disabled="disabled" :value="curUser.phone" id="user-phone" placeholder="telephonenumber"
+                           type="tel">
                 </div>
             </div>
+            <!-- 电子邮件 -->
             <div class="am-form-group">
                 <label for="user-email" class="am-form-label">电子邮件</label>
                 <div class="am-form-content">
-                    <input id="user-email" placeholder="Email" type="email">
-
+                    <input disabled="disabled" :value="curUser.email" id="user-email" placeholder="Email" type="email">
                 </div>
             </div>
-            <div class="am-form-group address">
-                <label for="user-address" class="am-form-label">收货地址</label>
-                <div class="am-form-content address">
-                    <a href="address.html">
-                        <p class="new-mu_l2cw">
-                            <span class="province">湖北</span>省
-                            <span class="city">武汉</span>市
-                            <span class="dist">洪山</span>区
-                            <span class="street">雄楚大道666号(中南财经政法大学)</span>
-                            <span class="am-icon-angle-right"></span>
-                        </p>
-                    </a>
 
-                </div>
-            </div>
-            <div class="am-form-group safety">
-                <label for="user-safety" class="am-form-label">账号安全</label>
-                <div class="am-form-content safety">
-                    <a href="safety.html">
-
-                        <span class="am-icon-angle-right"></span>
-
-                    </a>
-
-                </div>
-            </div>
             <div class="info-btn">
-                <div class="am-btn am-btn-danger">保存修改</div>
+                <div @click="saveUserInfo" class="am-btn am-btn-danger">保存修改</div>
             </div>
 
         </form>
@@ -160,7 +148,142 @@
 </div>
 <!-- ---------------------------- 保留 ---------------------------- -->
 
-
 </body>
+<script>
+    /* layui 图片上传组件 */
+    layui.use('upload', function () {
+        var $ = layui.jquery
+            , upload = layui.upload;
 
+        //普通图片上传
+        var uploadInst = upload.render({
+            elem: '#test1'
+            , url: 'http://www.greenmall.com/upload/image' //改成您自己的上传接口
+            , before: function (obj) {
+                //预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('#demo1').attr('src', result); //图片链接（base64）
+                });
+            }
+            , done: function (res) {
+                //如果上传失败
+                if (res.code > 0) {
+                    return layer.msg('上传失败');
+                }
+                if (res.state == 1) {
+                    //上传成功
+                    $("#userPortrait").val(res.info);
+                    $("#userPortrait").click();
+                    layer.msg("更换头像成功")
+                } else {
+                    layer.msg("文件上传失败!")
+                }
+            }
+            , error: function () {
+                layer.msg("文件上传失败!")
+            }
+        });
+    });
+</script>
+<script>
+    /* 数据验证 */
+    Vue.use(VeeValidate, {
+        events: 'blur',
+        dictionary: {
+            zh: {
+                messages: {
+                    required: (field) => field + '不能为空！',
+                    min: (field, args) => field + '长度不能小于' + args[0],
+                    max: (field, args) => field + '长度不能大于' + args[0],
+                    alpha_dash: (field) => field + '只能包含数字、字母或下划线',
+                    regex: (field) => field + "格式不正确",
+                    is: () => "两次密码不一致"
+                }
+            }
+        },
+        locale: 'zh'
+    });
+
+    var vm = new Vue({
+        el: "#userInfoApp",
+        data: {
+            gm, // 必须引用到实例中，在html标签中才能使用
+            curUser: {
+                id: -1,
+                nickName: "",
+                name: "",
+                sex: -1,
+                birthday: "",
+                phone: "",
+                email: "",
+                portrait: "" // 头像
+            }
+        }, created() {
+            // 1，加载用户信息
+            this.loadUserData();
+        },
+        watch: {},
+        computed: {},
+        methods: {
+            /* 加载用户信息 */
+            loadUserData() {
+                var isLogin = 0;
+                // 1，登录验证
+                gm.verifyUser().then(() => {
+                    isLogin = 1;
+                    // 2，加载用户信息数据
+                    gm.http.get("/user/queryUser/")
+                        .then(resp => {
+                            var data = resp.data;
+                            if (resp.status === 200) {
+                                // 初始化 curUser
+                                this.curUser.id = data.id;
+                                this.curUser.nickName = data.nickName;
+                                this.curUser.name = data.name;
+                                this.curUser.sex = data.sex;
+                                this.curUser.birthday = gm.renderTime(data.birthday).substr(0, 10);
+                                this.curUser.phone = data.phone;
+                                this.curUser.email = data.email;
+                                this.curUser.portrait = data.portrait;
+                            } else if (resp.status === 404) {
+                                // alert("收藏夹空空如也!")
+                            } else {
+                                alert("加载用户信息失败!")
+                            }
+                        })
+                        .catch(() => {
+                            alert("加载用户信息失败!")
+                        })
+                }).catch(() => {
+                    if (isLogin === 0) {
+                        alert("您还没有登录，请登录之后做相关操作。")
+                        window.location.href = "http://www.greenmall.com/login.html";
+                    } else {
+                        alert("加载用户信息异常...")
+                    }
+                })
+            },
+            /* 更换头像 */
+            changeImage() {
+                this.curUser.portrait = $("#userPortrait").val();
+            },
+            /* 保存修改 */
+            saveUserInfo() {
+                this.$validator.validateAll().then(d => {
+                    if (d) {
+                        this.gm.http.post("/user/update", this.curUser).then(resp => {
+                            if (resp.status === 200) {
+                                alert("用户信息更新成功!")
+                            } else {
+                                alert("用户信息更新失败!")
+                            }
+                        }).catch(() => {
+                            alert("用户信息更新异常。")
+                        });
+                    }
+                });
+            }
+        }
+    });
+</script>
 </html>
