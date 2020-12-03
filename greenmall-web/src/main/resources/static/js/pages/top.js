@@ -40,6 +40,13 @@ const gmTop = {
                     </a>\
                 </div>\
             </div>\
+            <div v-if='isLogin == 1' class='topMessage favorite'>\
+                <div class='menu-hd'>\
+                    <a style='cursor: pointer' @click='logout'>\
+                        <span style='color: red'>退出登录</span>\
+                    </a>\
+                </div>\
+            </div>\
         </ul>\
     </div>\
     <!--悬浮搜索框-->\
@@ -123,6 +130,20 @@ const gmTop = {
                 window.location.href = "http://www.greenmall.com/shopcart.html"
             } else if (pn === 3) {
                 window.location.href = "http://www.greenmall.com/personalcenter.html?open=fcollection"
+            }
+        },
+        /* 退出登录 */
+        logout() {
+            if (this.isLogin == 0) {
+                alert("您还没有登录呢...")
+            } else {
+                gm.http.get("/user/auth/logout")
+                    .then(resp => {
+                        window.top.location.href = "http://www.greenmall.com/login.html";
+                    })
+                    .catch(() => {
+                        return null;
+                    })
             }
         }
     }

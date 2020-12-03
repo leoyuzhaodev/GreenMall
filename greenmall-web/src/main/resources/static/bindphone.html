@@ -44,8 +44,9 @@
     </div>
     <hr/>
     <!--进度条-->
-    <div class="m-progress">
-
+    <!--进度条-->
+    <div class="m-progress" style="text-align: center">
+        <p style="color: red;font-size: 26px;"> 换绑手机 </p>
     </div>
     <form class="am-form am-form-horizontal">
         <div class="am-form-group bind">
@@ -205,7 +206,7 @@
                 }).catch(() => {
                     if (isLogin === 0) {
                         alert("您还没有登录，请登录之后做相关操作。")
-                        window.location.href = "http://www.greenmall.com/login.html";
+                        window.top.location.href = "http://www.greenmall.com/login.html";
                     } else {
                         alert("加载用户信息异常...")
                     }

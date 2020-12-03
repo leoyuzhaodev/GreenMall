@@ -40,10 +40,14 @@ public class UserService {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
-
+    // 注册验证码前缀
     static final String KEY_PREFIX = "user:code:phone:";
+    // 设置支付密码验证码前缀
     static final String KEY_PREFIX_SET_PAY = "user:pay:code:phone:";
+    // 绑定手机验证码前缀
     static final String KEY_PREFIX_BIND_PHONE = "user:bp:code:phone:";
+    // 邮箱绑定验证码前缀
+    static final String KEY_PREFIX_MAIL = "user:code:mail:";
 
     static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
@@ -109,6 +113,10 @@ public class UserService {
             // 验证手机
             record = new User();
             record.setPhone(data);
+        } else if (type == 3) {
+            // 验证邮箱
+            record = new User();
+            record.setEmail(data);
         } else {
             return null;
         }
@@ -336,6 +344,61 @@ public class UserService {
         // 3，更换手机号
         user.setPhone(newPhone);
         userMapper.updateByPrimaryKeySelective(user);
+        return new Message(1, "");
+    }
+
+    /**
+     * 指定邮箱发送验证码
+     *
+     * @param email
+     * @param keyType
+     * @return
+     */
+    public boolean sendMailCode(String email, int keyType) {
+        String code = null;
+        try {
+            // 1，生成验证码
+            code = NumberUtils.generateCode(6);
+            Map<String, String> map = new HashMap<>();
+            map.put("code", code);
+            map.put("email", email);
+            // 2，发送消息到消息队列通知信息服务发送短信验证码
+            this.amqpTemplate.convertAndSend("greenmall.mail.exchange", "mail.verify.code", map);
+            // 3，将验证码存放在redis中，有效时间为5分钟
+            if (keyType == 1) {
+                // 登录验证码
+                this.redisTemplate.opsForValue().set(KEY_PREFIX_MAIL + email, code, 5, TimeUnit.MINUTES);
+            }
+            return true;
+        } catch (AmqpException e) {
+            e.printStackTrace();
+            logger.info("UserService：指定邮箱发送验证码：email:{} code:{} 异常：{}", email, code, e.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * 绑定邮箱
+     *
+     * @param loginUser
+     * @param user      {email:""}
+     * @param code      验证码
+     * @return
+     */
+    public Message bindEmail(UserInfo loginUser, User user, String code) {
+        // 1，查询登录用户
+        User curUser = userMapper.selectByPrimaryKey(loginUser.getId());
+
+        // 2，获取验证码并进行比对
+        String key = KEY_PREFIX_MAIL + user.getEmail();
+        String redisCode = this.redisTemplate.opsForValue().get(key);
+        if (StringUtils.isEmpty(redisCode) || !redisCode.equals(code)) {
+            return new Message(2, "");
+        }
+
+        // 3，绑定邮箱
+        curUser.setEmail(user.getEmail());
+        userMapper.updateByPrimaryKeySelective(curUser);
         return new Message(1, "");
     }
 }

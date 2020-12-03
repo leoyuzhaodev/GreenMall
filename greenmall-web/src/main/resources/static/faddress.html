@@ -167,7 +167,7 @@
                         <div class="am-form-group">
                             <div class="am-u-sm-9 am-u-sm-push-3">
                                 <a @click="updateUserAddress" class="am-btn am-btn-danger">保存</a>
-                                <a href="javascript: void(0)" class="am-close am-btn am-btn-danger"
+                                <a @click="resetAddress" class="am-close am-btn am-btn-danger"
                                    data-am-modal-close>取消</a>
                             </div>
                         </div>
@@ -441,6 +441,10 @@
                         .catch(() => {
                             alert("删除地址失败!")
                         })
+                },
+                /* 重置地址信息 */
+                resetAddress(){
+                    this.userAddress = gm.copyObject(this.userAddressEmpty);
                 }
             }
         })

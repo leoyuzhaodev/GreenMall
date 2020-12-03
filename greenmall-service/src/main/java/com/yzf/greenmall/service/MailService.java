@@ -8,18 +8,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.util.Map;
 import java.util.Properties;
 
 /**
  * 发邮件工具类
  */
 @Service
+@Transactional
 @EnableConfigurationProperties(MailProperties.class)
-public final class MailService {
+public class MailService {
 
     @Autowired
     private MailProperties mailProperties;
@@ -31,7 +36,7 @@ public final class MailService {
      * @param text  邮件正文
      * @param title 标题
      */
-    public boolean sendMail(String to, String text, String title) {
+    private boolean sendMail(String to, String text, String title) {
         try {
             final Properties props = new Properties();
             props.put("mail.smtp.auth", "true");
@@ -72,13 +77,32 @@ public final class MailService {
             message.setContent(text, "text/html;charset=UTF-8");
             // 发送邮件
             Transport.send(message);
-            logger.info("发给 {} 的邮件发送成功！", to);
+            logger.info("发给 {} 的邮件：{}，发送成功!", to, text);
             return true;
         } catch (Exception e) {
             logger.info("SmsService：指定邮箱发送信息：email:{} message:{} 异常：{}", to, text, e.getMessage());
             e.printStackTrace();
         }
         return false;
+    }
+
+    /**
+     * 发送邮件
+     *
+     * @param msg {code:"",email:""}
+     */
+    public void sendMessage(Map<String, String> msg) {
+        // 1，验证
+        if (CollectionUtils.isEmpty(msg)) {
+            throw new RuntimeException("邮件发送信息为空，无法发送邮件!");
+        }
+        String code = msg.get("code");
+        String email = msg.get("email");
+        if (StringUtils.isEmpty(code) || StringUtils.isEmpty(email)) {
+            throw new RuntimeException("邮件发送信息为空，无法发送邮件!");
+        }
+        // 2，发送邮件
+        sendMail(email, "您的验证码是：【" + code + "】，验证码在5分钟之内有效。", "绿色商城邮箱验证码");
     }
 
 }

@@ -1,7 +1,9 @@
 package com.yzf.greenmall.web;
 
+import com.yzf.greenmall.common.CookieUtils;
 import com.yzf.greenmall.common.Message;
 import com.yzf.greenmall.common.jwt.UserInfo;
+import com.yzf.greenmall.config.JwtProperties;
 import com.yzf.greenmall.entity.User;
 import com.yzf.greenmall.interceptor.LoginInterceptor;
 import com.yzf.greenmall.service.UserService;
@@ -11,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 /**
@@ -25,6 +29,8 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JwtProperties jwtProperties;
 
     /**
      * 指定电话号码发送验证码
@@ -78,7 +84,7 @@ public class UserController {
      * 检查用户数据的正确性
      *
      * @param data 需要检测的数据
-     * @param type 数据类型 1：用户名 2：手机
+     * @param type 数据类型 1：用户名 2：手机 3：邮箱
      * @return false:不可用 true:可用
      */
     @GetMapping("/check/{data}/{type}")
@@ -179,13 +185,18 @@ public class UserController {
      * @return
      */
     @PostMapping(path = "/auth/updatePassword")
-    public ResponseEntity<Message> updatePassword(@RequestBody Map<String, String> map) {
+    public ResponseEntity<Message> updatePassword(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @RequestBody Map<String, String> map) {
         UserInfo loginUser = LoginInterceptor.getLoginUser();
         try {
             if (loginUser == null) {
                 throw new RuntimeException("用户信息加载异常!");
             }
             Message message = userService.updatePassword(loginUser, map);
+            // 退出登录
+            logOut(request, response);
             return ResponseEntity.ok(message);
         } catch (Exception e) {
             e.printStackTrace();
@@ -193,7 +204,39 @@ public class UserController {
         }
     }
 
-    /* setPayPassword */
+    /**
+     * 退出登录
+     *
+     * @return
+     */
+    @GetMapping(path = "/auth/logout")
+    public ResponseEntity<Void> userLogout(HttpServletRequest request,
+                                           HttpServletResponse response) {
+        UserInfo loginUser = LoginInterceptor.getLoginUser();
+        try {
+            if (loginUser == null) {
+                throw new RuntimeException("用户信息加载异常!");
+            }
+            // 退出登录
+            logOut(request, response);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
+    /**
+     * 退出登录用户浏览器的cookie置空
+     *
+     * @param request
+     * @param response
+     */
+    public void logOut(HttpServletRequest request, HttpServletResponse response) {
+        CookieUtils.setCookie(request, response, jwtProperties.getCookieName(),
+                "", jwtProperties.getCookieMaxAge(), null, true);
+    }
 
     /**
      * 设置支付密码
@@ -234,6 +277,44 @@ public class UserController {
                 throw new RuntimeException("用户信息加载异常!");
             }
             Message message = userService.bindPhone(loginUser, code1, code2, newPhone);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * 指定电话号码发送验证码
+     *
+     * @param email
+     * @return
+     */
+    @PostMapping("/mailCode")
+    public ResponseEntity<Void> sendMailCode(@RequestParam("email") String email) {
+        boolean flag = userService.sendMailCode(email, 1);
+        if (flag) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * 绑定邮箱
+     *
+     * @param user 用户数据
+     * @param code 验证码
+     * @return
+     */
+    @PostMapping("/auth/bindEmail")
+    public ResponseEntity<Message> bindEmail(User user, @RequestParam("code") String code) {
+        UserInfo loginUser = LoginInterceptor.getLoginUser();
+        try {
+            if (loginUser == null) {
+                throw new RuntimeException("用户信息加载异常!");
+            }
+            Message message = userService.bindEmail(loginUser, user, code);
             return ResponseEntity.ok(message);
         } catch (Exception e) {
             e.printStackTrace();
