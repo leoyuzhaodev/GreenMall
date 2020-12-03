@@ -322,4 +322,40 @@ public class UserController {
         }
     }
 
+
+    /**
+     * 找回密码发送验证码
+     *
+     * @param loginFlag
+     * @return
+     */
+    @PostMapping(path = "/findPwdCode")
+    public ResponseEntity<Message> findPwdCode(@RequestParam("loginFlag") String loginFlag) {
+        try {
+            Message message = userService.findPwdCode(loginFlag);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    /**
+     * 找回密码
+     *
+     * @param user
+     * @param code
+     * @return
+     */
+    @PostMapping("/findBackPwd")
+    public ResponseEntity<Message> findBackPwd(User user, @RequestParam("code") String code) {
+        try {
+            Message message = userService.findBackPwd(user, code);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

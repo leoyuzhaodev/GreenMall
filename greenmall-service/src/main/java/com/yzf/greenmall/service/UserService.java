@@ -48,6 +48,8 @@ public class UserService {
     static final String KEY_PREFIX_BIND_PHONE = "user:bp:code:phone:";
     // 邮箱绑定验证码前缀
     static final String KEY_PREFIX_MAIL = "user:code:mail:";
+    // 找回密码验证码前缀
+    static final String KEY_PREFIX_FIND_PASSWORD = "user:code:findpwd:";
 
     static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
@@ -65,7 +67,7 @@ public class UserService {
      * 指定电话发送验证码
      *
      * @param phone
-     * @param keyType 1: 登录验证码 2：设置支付密码验证码
+     * @param keyType 1: 登录验证码 2：设置支付密码验证码 3：重新绑定手机的验证码 4：找回密码的验证码
      */
     public boolean sendVerifyCode(String phone, int keyType) {
         String code = null;
@@ -87,6 +89,9 @@ public class UserService {
             } else if (keyType == 3) {
                 // 重新绑定手机的验证码
                 this.redisTemplate.opsForValue().set(KEY_PREFIX_BIND_PHONE + phone, code, 5, TimeUnit.MINUTES);
+            } else if (keyType == 4) {
+                // 找回密码的验证码
+                this.redisTemplate.opsForValue().set(KEY_PREFIX_FIND_PASSWORD + phone, code, 5, TimeUnit.MINUTES);
             }
             return true;
         } catch (AmqpException e) {
@@ -170,7 +175,6 @@ public class UserService {
         if (StringUtils.isBlank(key) || StringUtils.isBlank(password)) {
             return null;
         }
-        User record = new User();
         // 1，根据 用户名/电话号码/邮箱 进行查找
         Example example = new Example(User.class);
         Example.Criteria criteria = example.createCriteria();
@@ -351,7 +355,7 @@ public class UserService {
      * 指定邮箱发送验证码
      *
      * @param email
-     * @param keyType
+     * @param keyType 1:登录验证码，2:找回密码的验证码
      * @return
      */
     public boolean sendMailCode(String email, int keyType) {
@@ -368,6 +372,9 @@ public class UserService {
             if (keyType == 1) {
                 // 登录验证码
                 this.redisTemplate.opsForValue().set(KEY_PREFIX_MAIL + email, code, 5, TimeUnit.MINUTES);
+            } else if (keyType == 2) {
+                // 找回密码的验证码
+                this.redisTemplate.opsForValue().set(KEY_PREFIX_FIND_PASSWORD + email, code, 5, TimeUnit.MINUTES);
             }
             return true;
         } catch (AmqpException e) {
@@ -399,6 +406,81 @@ public class UserService {
         // 3，绑定邮箱
         curUser.setEmail(user.getEmail());
         userMapper.updateByPrimaryKeySelective(curUser);
+        return new Message(1, "");
+    }
+
+    /**
+     * 找回密码发送验证码
+     *
+     * @param loginFlag
+     * @return
+     */
+    public Message findPwdCode(String loginFlag) {
+
+        if (StringUtils.isBlank(loginFlag)) {
+            return new Message(2, "用户身份标识为空!");
+        }
+        // 1，根据 用户名/电话号码/邮箱 进行查找
+        Example example = new Example(User.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.orEqualTo("phone", loginFlag);
+        criteria.orEqualTo("nickName", loginFlag);
+        criteria.orEqualTo("email", loginFlag);
+        User user = userMapper.selectOneByExample(example);
+        if (user == null) {
+            return new Message(2, "系统不存在此身份标识的用户!");
+        }
+
+        // 2,发送验证码
+        if (StringUtils.isNoneBlank(user.getEmail())) {
+            // 给邮箱发送验证码
+            sendMailCode(user.getEmail(), 2);
+        } else {
+            // 给手机发送验证码
+            sendVerifyCode(user.getPhone(), 4);
+        }
+
+        return new Message(1, user.getId() + "");
+    }
+
+    /**
+     * 找回密码
+     *
+     * @param user
+     * @param code
+     * @return
+     */
+    public Message findBackPwd(User user, String code) {
+
+        if (user.getId() == null || StringUtils.isBlank(user.getPassword()) || StringUtils.isBlank(code)) {
+            return new Message(2, "该标识下的用户不存在或者验证码，密码为空！");
+        }
+
+        // 1，查找用户数据根据用户id
+        User sysUser = userMapper.selectByPrimaryKey(user.getId());
+        if (sysUser == null) {
+            return new Message(2, "该标识下的用户不存在！");
+        }
+
+        // 2，比对验证码
+        String key = null;
+        if (StringUtils.isNotBlank(sysUser.getEmail())) {
+            key = KEY_PREFIX_FIND_PASSWORD + sysUser.getEmail();
+        } else {
+            key = KEY_PREFIX_FIND_PASSWORD + sysUser.getPhone();
+        }
+        String redisCode = this.redisTemplate.opsForValue().get(key);
+        if (StringUtils.isEmpty(redisCode) || !redisCode.equals(code)) {
+            return new Message(2, "验证码错误!");
+        }
+
+        // 3，重置密码
+        String salt = CodecUtils.generateSalt();
+        String newPassword = CodecUtils.md5Hex(user.getPassword(), salt);
+        sysUser.setPassword(newPassword);
+        sysUser.setSalt(salt);
+        userMapper.updateByPrimaryKeySelective(sysUser);
+
         return new Message(1, "");
     }
 }
