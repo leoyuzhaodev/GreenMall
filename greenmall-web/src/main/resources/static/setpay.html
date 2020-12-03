@@ -1,222 +1,228 @@
 <!DOCTYPE html>
 <html>
 
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=0">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=0">
 
-		<title>支付密码</title>
+    <title>支付密码</title>
 
-		<link href="AmazeUI-2.4.2/assets/css/admin.css" rel="stylesheet" type="text/css">
-		<link href="AmazeUI-2.4.2/assets/css/amazeui.css" rel="stylesheet" type="text/css">
+    <link href="AmazeUI-2.4.2/assets/css/admin.css" rel="stylesheet" type="text/css">
+    <link href="AmazeUI-2.4.2/assets/css/amazeui.css" rel="stylesheet" type="text/css">
 
-		<link href="css/personal.css" rel="stylesheet" type="text/css">
-		<link href="css/stepstyle.css" rel="stylesheet" type="text/css">
+    <link href="css/personal.css" rel="stylesheet" type="text/css">
+    <link href="css/stepstyle.css" rel="stylesheet" type="text/css">
 
-		<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
-		<script src="AmazeUI-2.4.2/assets/js/amazeui.js"></script>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+    <script src="AmazeUI-2.4.2/assets/js/amazeui.js"></script>
+    <!-- 引入 vue，以及相关工具js -->
+    <script src="http://www.greenmall.com/js/validate.js"></script>
+    <script src="http://www.greenmall.com/js/vue/vue.js"></script>
+    <script src="http://www.greenmall.com/js/vue/vuetify.js"></script>
+    <script src="http://www.greenmall.com/js/axios.min.js"></script>
+    <script src="http://www.greenmall.com/js/common.js"></script>
+    <!-- 引入layui -->
+    <script src="http://www.greenmall.com/layui/layui.js"></script>
+    <link href="http://www.greenmall.com/layui/css/layui.css" rel="stylesheet" type="text/css">
+    <style type="text/css">
+        .gmErrorInfo {
+            color: red;
+            font-size: 12px;
+            /*margin-left: 10px;*/
+        }
+    </style>
+</head>
 
-	</head>
+<body style="background-color: white">
+<div id="setPayApp">
 
-	<body>
-		<!--头 -->
-		<header>
-			<article>
-				<div class="mt-logo">
-					<!--顶部导航条 -->
-					<div class="am-container header">
-						<ul class="message-l">
-							<div class="topMessage">
-								<div class="menu-hd">
-									<a href="#" target="_top" class="h">亲，请登录</a>
-									<a href="#" target="_top">免费注册</a>
-								</div>
-							</div>
-						</ul>
-						<ul class="message-r">
-							<div class="topMessage home">
-								<div class="menu-hd"><a href="#" target="_top" class="h">商城首页</a></div>
-							</div>
-							<div class="topMessage my-shangcheng">
-								<div class="menu-hd MyShangcheng"><a href="#" target="_top"><i class="am-icon-user am-icon-fw"></i>个人中心</a></div>
-							</div>
-							<div class="topMessage mini-cart">
-								<div class="menu-hd"><a id="mc-menu-hd" href="#" target="_top"><i class="am-icon-shopping-cart  am-icon-fw"></i><span>购物车</span><strong id="J_MiniCartNum" class="h">0</strong></a></div>
-							</div>
-							<div class="topMessage favorite">
-								<div class="menu-hd"><a href="#" target="_top"><i class="am-icon-heart am-icon-fw"></i><span>收藏夹</span></a></div>
-						</ul>
-						</div>
+    <div class="am-cf am-padding">
+        <div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">支付密码</strong> / <small>Set&nbsp;Pay&nbsp;Password</small>
+        </div>
+    </div>
+    <hr/>
+    <!--进度条-->
+    <div class="m-progress">
 
-						<!--悬浮搜索框-->
+    </div>
+    <form class="am-form am-form-horizontal">
+        <div class="am-form-group bind">
+            <label for="user-phone" class="am-form-label">验证手机</label>
+            <div class="am-form-content">
+                <span id="user-phone">{{curUser.phone}}</span>
+            </div>
+        </div>
+        <div class="am-form-group code">
+            <label for="user-code" class="am-form-label">验证码</label>
+            <div class="am-form-content">
+                <!-- 验证码输入框 -->
+                <input type="text" id="user-code" placeholder="短信验证码"
+                       name="code"
+                       v-model="curUser.code"
+                       v-validate="'required'"
+                       data-vv-as="验证码">
+                <!-- 错误提示 -->
+                <span class="gmErrorInfo">{{ errors.first('code') }}</span>
+            </div>
+            <!-- 验证码发送按钮 -->
+            <a class="btn" @click="createVerifyCode" id="sendMobileCode">
+                <div class="am-btn am-btn-danger">验证码</div>
+            </a>
+            <br>
 
-						<div class="nav white">
-							<div class="logoBig">
-								<li><img src="images/logobig.png" /></li>
-							</div>
+        </div>
+        <div class="am-form-group">
+            <label for="user-password" class="am-form-label">支付密码</label>
+            <div class="am-form-content">
+                <!-- 支付密码 -->
+                <input type="password" id="user-password" placeholder="6位数字"
+                       name="payPassword"
+                       v-model="curUser.payPassword"
+                       v-validate="'required|min:6|max:6'"
+                       data-vv-as="支付密码">
+                <!-- 错误提示 -->
+                <span class="gmErrorInfo">{{ errors.first('payPassword') }}</span>
 
-							<div class="search-bar pr">
-								<a name="index_none_header_sysc" href="#"></a>
-								<form>
-									<input id="searchInput" name="index_none_header_sysc" type="text" placeholder="搜索" autocomplete="off">
-									<input id="ai-topsearch" class="submit am-btn" value="搜索" index="1" type="submit">
-								</form>
-							</div>
-						</div>
+            </div>
+        </div>
+        <div class="am-form-group">
+            <label for="user-confirm-password" class="am-form-label">确认密码</label>
+            <div class="am-form-content">
+                <!-- 确认支付密码 -->
+                <input type="password" id="user-password" placeholder="6位数字"
+                       name="payPasswordConfirm"
+                       v-model="curUser.payPasswordConfirm"
+                       v-validate="{required:true,confirm:curUser.payPassword}"
+                       data-vv-as="确认支付密码">
+                <!-- 错误提示 -->
+                <span class="gmErrorInfo">{{ errors.first('payPasswordConfirm') }}</span>
+            </div>
+        </div>
+        <div class="info-btn">
+            <div @click="setPayPassword" class="am-btn am-btn-danger">保存修改</div>
+        </div>
 
-						<div class="clear"></div>
-					</div>
-				</div>
-			</article>
-		</header>
-            <div class="nav-table">
-					   <div class="long-title"><span class="all-goods">全部分类</span></div>
-					   <div class="nav-cont">
-							<ul>
-								<li class="index"><a href="#">首页</a></li>
-                                <li class="qc"><a href="#">闪购</a></li>
-                                <li class="qc"><a href="#">限时抢</a></li>
-                                <li class="qc"><a href="#">团购</a></li>
-                                <li class="qc last"><a href="#">大包装</a></li>
-							</ul>
-						    <div class="nav-extra">
-						    	<i class="am-icon-user-secret am-icon-md nav-user"></i><b></b>我的福利
-						    	<i class="am-icon-angle-right" style="padding-left: 10px;"></i>
-						    </div>
-						</div>
-			</div>
-			<b class="line"></b>
-		<div class="center">
-			<div class="col-main">
-				<div class="main-wrap">
+    </form>
 
-					<div class="am-cf am-padding">
-						<div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">支付密码</strong> / <small>Set&nbsp;Pay&nbsp;Password</small></div>
-					</div>
-					<hr/>
-					<!--进度条-->
-					<div class="m-progress">
-						<div class="m-progress-list">
-							<span class="step-1 step">
-                                <em class="u-progress-stage-bg"></em>
-                                <i class="u-stage-icon-inner">1<em class="bg"></em></i>
-                                <p class="stage-name">设置支付密码</p>
-                            </span>
-							<span class="step-2 step">
-                                <em class="u-progress-stage-bg"></em>
-                                <i class="u-stage-icon-inner">2<em class="bg"></em></i>
-                                <p class="stage-name">完成</p>
-                            </span>
-							<span class="u-progress-placeholder"></span>
-						</div>
-						<div class="u-progress-bar total-steps-2">
-							<div class="u-progress-bar-inner"></div>
-						</div>
-					</div>
-					<form class="am-form am-form-horizontal">
-						<div class="am-form-group bind">
-							<label for="user-phone" class="am-form-label">验证手机</label>
-							<div class="am-form-content">
-								<span id="user-phone">186XXXX0531</span>
-							</div>
-						</div>
-						<div class="am-form-group code">
-							<label for="user-code" class="am-form-label">验证码</label>
-							<div class="am-form-content">
-								<input type="tel" id="user-code" placeholder="短信验证码">
-							</div>
-							<a class="btn" href="javascript:void(0);" onClick="sendMobileCode();" id="sendMobileCode">
-								<div class="am-btn am-btn-danger">验证码</div>
-							</a>
-						</div>
-						<div class="am-form-group">
-							<label for="user-password" class="am-form-label">支付密码</label>
-							<div class="am-form-content">
-								<input type="tel" id="user-password" placeholder="6位数字">
-							</div>
-						</div>
-						<div class="am-form-group">
-							<label for="user-confirm-password" class="am-form-label">确认密码</label>
-							<div class="am-form-content">
-								<input type="tel" id="user-confirm-password" placeholder="请再次输入上面的密码">
-							</div>
-						</div>
-						<div class="info-btn">
-							<div class="am-btn am-btn-danger">保存修改</div>
-						</div>
+</div>
 
-					</form>
+</body>
 
-				</div>
-				<!--底部-->
-				<div class="footer">
-					<div class="footer-hd">
-						<p>
-							<a href="#">恒望科技</a>
-							<b>|</b>
-							<a href="#">商城首页</a>
-							<b>|</b>
-							<a href="#">支付宝</a>
-							<b>|</b>
-							<a href="#">物流</a>
-						</p>
-					</div>
-					<div class="footer-bd">
-						<p>
-							<a href="#">关于恒望</a>
-							<a href="#">合作伙伴</a>
-							<a href="#">联系我们</a>
-							<a href="#">网站地图</a>
-							<em>© 2015-2025 Hengwang.com 版权所有</em>
-						</p>
-					</div>
-				</div>
-			</div>
+<script>
 
-			<aside class="menu">
-				<ul>
-					<li class="person">
-						<a href="index.html">个人中心</a>
-					</li>
-					<li class="person">
-						<a href="#">个人资料</a>
-						<ul>
-							<li> <a href="information.html">个人信息</a></li>
-							<li> <a href="safety.html">安全设置</a></li>
-							<li> <a href="address.html">收货地址</a></li>
-						</ul>
-					</li>
-					<li class="person">
-						<a href="#">我的交易</a>
-						<ul>
-							<li><a href="order.html">订单管理</a></li>
-							<li> <a href="change.html">退款售后</a></li>
-						</ul>
-					</li>
-					<li class="person">
-						<a href="#">我的资产</a>
-						<ul>
-							<li> <a href="coupon.html">优惠券 </a></li>
-							<li> <a href="bonus.html">红包</a></li>
-							<li> <a href="bill.html">账单明细</a></li>
-						</ul>
-					</li>
+    /* 数据验证 */
+    Vue.use(VeeValidate, {
+        events: 'blur',
+        dictionary: {
+            zh: {
+                messages: {
+                    required: (field) => field + '不能为空！',
+                    min: (field, args) => field + '长度不能小于' + args[0],
+                    max: (field, args) => field + '长度不能大于' + args[0],
+                    alpha_dash: (field) => field + '只能包含数字、字母或下划线',
+                    regex: (field) => field + "格式不正确",
+                    is: () => "两次密码不一致"
+                }
+            }
+        },
+        locale: 'zh'
+    });
 
-					<li class="person">
-						<a href="#">我的小窝</a>
-						<ul>
-							<li> <a href="collection.html">收藏</a></li>
-							<li> <a href="foot.html">足迹</a></li>
-							<li> <a href="comment.html">评价</a></li>
-							<li> <a href="news.html">消息</a></li>
-						</ul>
-					</li>
+    var vm = new Vue({
+        el: "#setPayApp",
+        data: {
+            gm, // 必须引用到实例中，在html标签中才能使用
+            curUser: {
+                id: -1,
+                phone: "",
+                payPassword: "",
+                payPasswordConfirm: "",
+                code: ""
+            }
+        },
+        created() {
+            // 1，登录验证
+            this.loadUserData();
+            /* 密码相同验证 */
+            this.$validator.extend('confirm', {
+                getMessage() {
+                    return "两次密码不一致"
+                },
+                validate(val, args) {
+                    return val === args[0]
+                }
+            })
+        }
+        ,
+        watch: {}
+        ,
+        computed: {}
+        ,
+        methods: {
+            /* 加载用户信息 */
+            loadUserData() {
+                var isLogin = 0;
+                // 1，登录验证
+                gm.verifyUser().then(() => {
+                    isLogin = 1;
+                    // 2，加载用户信息数据
+                    gm.http.get("/user/auth/queryUser/")
+                        .then(resp => {
+                            var data = resp.data;
+                            if (resp.status === 200) {
+                                // 初始化 curUser
+                                this.curUser.id = data.id;
+                                this.curUser.phone = data.phone;
+                            } else if (resp.status === 404) {
+                                // alert("收藏夹空空如也!")
+                            } else {
+                                alert("加载用户信息失败!")
+                            }
+                        })
+                        .catch(() => {
+                            alert("加载用户信息失败!")
+                        })
+                }).catch(() => {
+                    if (isLogin === 0) {
+                        alert("您还没有登录，请登录之后做相关操作。")
+                        window.location.href = "http://www.greenmall.com/login.html";
+                    } else {
+                        alert("加载用户信息异常...")
+                    }
+                })
+            },
+            /* 生成短信验证码 */
+            createVerifyCode() {
+                if (gm.isStringNotEmpty(this.curUser.phone)) {
+                    gm.http.post("/user/auth/payCode", "phone=" + this.curUser.phone);
+                }
+            },
+            /* 设置支付密码 */
+            setPayPassword() {
+                this.$validator.validateAll().then(d => {
+                    if (d) {
+                        // 校验通过，提交表单
+                        gm.http.post("/user/auth/setPayPassword", gm.stringify(this.curUser))
+                            .then(resp => {
+                                var data = resp.data;
+                                if (resp.status === 200) {
+                                    if (data.state == 1) {
+                                        alert("设置支付密码成功...");
+                                        window.location.href = "http://www.greenmall.com/personalcenter.html?open=fsafety";
+                                    } else if (data.state == 2) {
+                                        alert("验证码不正确!");
+                                    } else {
+                                        alert("设置支付密码失败!");
+                                    }
+                                }
+                            })
+                            .catch(() => alert("设置支付密码失败！"))
+                    }
+                })
+            }
 
-				</ul>
-
-			</aside>
-		</div>
-
-	</body>
+        }
+    })
+</script>
 
 </html>

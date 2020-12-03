@@ -9,11 +9,21 @@
     <link href="AmazeUI-2.4.2/assets/css/amazeui.css" rel="stylesheet" type="text/css">
     <link href="css/personal.css" rel="stylesheet" type="text/css">
     <link href="css/infstyle.css" rel="stylesheet" type="text/css">
+
+    <!-- 引入 vue，以及相关工具js -->
+    <script src="http://www.greenmall.com/js/validate.js"></script>
+    <script src="http://www.greenmall.com/js/vue/vue.js"></script>
+    <script src="http://www.greenmall.com/js/vue/vuetify.js"></script>
+    <script src="http://www.greenmall.com/js/axios.min.js"></script>
+    <script src="http://www.greenmall.com/js/common.js"></script>
+    <!-- 引入layui -->
+    <script src="http://www.greenmall.com/layui/layui.js"></script>
+    <link href="http://www.greenmall.com/layui/css/layui.css" rel="stylesheet" type="text/css">
 </head>
 
 <body style="background-color: white">
 <!-- ---------------------------------------- 保留 ---------------------------------------- -->
-<div class="user-safety">
+<div id="safetyApp" class="user-safety">
     <div class="am-cf am-padding">
         <div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">账户安全</strong> / <small>Set&nbsp;up&nbsp;Safety</small>
         </div>
@@ -24,23 +34,14 @@
     <div class="user-infoPic">
 
         <div class="filePic">
-            <img class="am-circle am-img-thumbnail" src="images/getAvatar.do.jpg" alt=""/>
+            <img class="am-circle" width="98px" height="98px" :src="curUser.portrait" alt=""/>
         </div>
 
         <p class="am-form-help">头像</p>
 
         <div class="info-m">
-            <div><b>用户名：<i>小叮当</i></b></div>
             <div class="u-level">
-									<span class="rank r2">
-							             <s class="vip1"></s><a class="classes" href="#">铜牌会员</a>
-						            </span>
-            </div>
-            <div class="u-safety">
-                <a href="safety.html">
-                    账户安全
-                    <span class="u-profile"><i class="bc_ee0000" style="width: 60px;" width="0">60分</i></span>
-                </a>
+                <b style="line-height: 60px">用户名：<i>{{curUser.nickName}}</i></b>
             </div>
         </div>
     </div>
@@ -67,7 +68,8 @@
                 </div>
                 <div class="fore3">
                     <a href="setpay.html">
-                        <div class="am-btn am-btn-secondary">立即启用</div>
+                        <div v-if="curUser.hasPayPassWord == 0" class="am-btn am-btn-secondary">立即启用</div>
+                        <div v-else class="am-btn am-btn-secondary">立即修改</div>
                     </a>
                 </div>
             </li>
@@ -75,7 +77,7 @@
                 <i class="i-safety-iphone"></i>
                 <div class="m-left">
                     <div class="fore1">手机验证</div>
-                    <div class="fore2"><small>您验证的手机：186XXXXXXXX 若已丢失或停用，请立即更换</small></div>
+                    <div class="fore2"><small>您验证的手机：{{curUser.phone}} 若已丢失或停用，请立即更换</small></div>
                 </div>
                 <div class="fore3">
                     <a href="bindphone.html">
@@ -87,43 +89,115 @@
                 <i class="i-safety-mail"></i>
                 <div class="m-left">
                     <div class="fore1">邮箱验证</div>
-                    <div class="fore2"><small>您验证的邮箱：5831XXX@qq.com 可用于快速找回登录密码</small></div>
+                    <div v-if="gm.isStringNotEmpty(curUser.email)" class="fore2">
+                        <small>您验证的邮箱：{{curUser.email}}，可用于快速找回登录密码</small></div>
+                    <div v-else class="fore2">
+                        <small>绑定邮箱，可用于快速找回登录密码</small>
+                    </div>
                 </div>
                 <div class="fore3">
                     <a href="email.html">
-                        <div class="am-btn am-btn-secondary">换绑</div>
+                        <div v-if="gm.isStringNotEmpty(curUser.email)" class="am-btn am-btn-secondary">换绑</div>
+                        <div v-else class="am-btn am-btn-secondary">绑定</div>
                     </a>
                 </div>
             </li>
-            <li>
-                <i class="i-safety-idcard"></i>
-                <div class="m-left">
-                    <div class="fore1">实名认证</div>
-                    <div class="fore2"><small>用于提升账号的安全性和信任级别，认证后不能修改认证信息。</small></div>
-                </div>
-                <div class="fore3">
-                    <a href="idcard.html">
-                        <div class="am-btn am-btn-secondary">认证</div>
-                    </a>
-                </div>
-            </li>
-            <li>
-                <i class="i-safety-security"></i>
-                <div class="m-left">
-                    <div class="fore1">安全问题</div>
-                    <div class="fore2"><small>保护账户安全，验证您身份的工具之一。</small></div>
-                </div>
-                <div class="fore3">
-                    <a href="question.html">
-                        <div class="am-btn am-btn-secondary">认证</div>
-                    </a>
-                </div>
-            </li>
+
         </ul>
     </div>
 
 </div>
 <!-- ---------------------------------------- 保留 ---------------------------------------- -->
 </body>
+<script>
 
+    var vm = new Vue({
+        el: "#safetyApp",
+        data: {
+            gm, // 必须引用到实例中，在html标签中才能使用
+            curUser: {
+                id: -1,
+                nickName: "",
+                name: "",
+                sex: -1,
+                birthday: "",
+                phone: "",
+                email: "",
+                portrait: "", // 头像
+                hasPayPassWord: 0
+            }
+        },
+        created() {
+            // 1，加载用户信息
+            this.loadUserData();
+            // 2，判断是否存在支付密码
+            this.isHasPayPassword();
+        }
+        ,
+        watch: {}
+        ,
+        computed: {}
+        ,
+        methods: {
+            /* 加载用户信息 */
+            loadUserData() {
+                var isLogin = 0;
+                // 1，登录验证
+                gm.verifyUser().then(() => {
+                    isLogin = 1;
+                    // 2，加载用户信息数据
+                    gm.http.get("/user/auth/queryUser/")
+                        .then(resp => {
+                            var data = resp.data;
+                            if (resp.status === 200) {
+                                // 初始化 curUser
+                                this.curUser.id = data.id;
+                                this.curUser.nickName = data.nickName;
+                                this.curUser.name = data.name;
+                                this.curUser.sex = data.sex;
+                                this.curUser.birthday = gm.renderTime(data.birthday).substr(0, 10);
+                                this.curUser.phone = data.phone;
+                                this.curUser.email = data.email;
+                                this.curUser.portrait = data.portrait;
+                            } else if (resp.status === 404) {
+                                // alert("收藏夹空空如也!")
+                            } else {
+                                alert("加载用户信息失败!")
+                            }
+                        })
+                        .catch(() => {
+                            alert("加载用户信息失败!")
+                        })
+                }).catch(() => {
+                    if (isLogin === 0) {
+                        alert("您还没有登录，请登录之后做相关操作。")
+                        window.location.href = "http://www.greenmall.com/login.html";
+                    } else {
+                        alert("加载用户信息异常...")
+                    }
+                })
+            },
+            /* 判断是否存在支付密码 */
+            isHasPayPassword() {
+                gm.http.get("/user/auth/isHasPayPassword/")
+                    .then(resp => {
+                        var data = resp.data;
+                        if (resp.status === 200) {
+                            if (data.state == 1) {
+                                this.curUser.hasPayPassWord = 1;
+                            } else {
+                                this.curUser.hasPayPassWord = 0;
+                            }
+                        } else {
+                            alert("判断是否存在支付密码失败!")
+                        }
+                    })
+                    .catch(() => {
+                        alert("判断是否存在支付密码异常!")
+                    })
+            }
+        }
+    })
+
+</script>
 </html>

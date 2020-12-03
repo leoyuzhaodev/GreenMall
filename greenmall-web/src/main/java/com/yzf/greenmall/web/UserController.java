@@ -1,5 +1,6 @@
 package com.yzf.greenmall.web;
 
+import com.yzf.greenmall.common.Message;
 import com.yzf.greenmall.common.jwt.UserInfo;
 import com.yzf.greenmall.entity.User;
 import com.yzf.greenmall.interceptor.LoginInterceptor;
@@ -9,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * @description:UserController
@@ -31,7 +34,39 @@ public class UserController {
      */
     @PostMapping("/code")
     public ResponseEntity<Void> sendVerifyCode(@RequestParam("phone") String phone) {
-        boolean flag = userService.sendVerifyCode(phone);
+        boolean flag = userService.sendVerifyCode(phone, 1);
+        if (flag) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * 指定电话号码发送 更改支付密码 验证码
+     *
+     * @param phone
+     * @return
+     */
+    @PostMapping("/auth/payCode")
+    public ResponseEntity<Void> sendVerifyPayCode(@RequestParam("phone") String phone) {
+        boolean flag = userService.sendVerifyCode(phone, 2);
+        if (flag) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * 指定电话号码发送 绑定手机 验证码
+     *
+     * @param phone
+     * @return
+     */
+    @PostMapping("/auth/bindPhoneCode")
+    public ResponseEntity<Void> sendBindPhoneCode(@RequestParam("phone") String phone) {
+        boolean flag = userService.sendVerifyCode(phone, 3);
         if (flag) {
             return ResponseEntity.ok().build();
         } else {
@@ -83,9 +118,10 @@ public class UserController {
 
     /**
      * 加载当前登录用户的信息
+     *
      * @return
      */
-    @GetMapping(path = "/queryUser")
+    @GetMapping(path = "/auth/queryUser")
     public ResponseEntity<User> queryUser() {
         UserInfo loginUser = LoginInterceptor.getLoginUser();
         try {
@@ -104,7 +140,6 @@ public class UserController {
      * 注册用户
      *
      * @param user 用户数据
-     * @param code 验证码
      * @return
      */
     @PostMapping("/update")
@@ -117,5 +152,93 @@ public class UserController {
         }
     }
 
+
+    /**
+     * 判断当前登录用户是否拥有支付密码
+     *
+     * @return
+     */
+    @GetMapping(path = "/auth/isHasPayPassword")
+    public ResponseEntity<Message> isHasPayPassword() {
+        UserInfo loginUser = LoginInterceptor.getLoginUser();
+        try {
+            if (loginUser == null) {
+                throw new RuntimeException("用户信息加载异常!");
+            }
+            Message message = userService.hasPayPassword(loginUser);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * 更新密码
+     *
+     * @return
+     */
+    @PostMapping(path = "/auth/updatePassword")
+    public ResponseEntity<Message> updatePassword(@RequestBody Map<String, String> map) {
+        UserInfo loginUser = LoginInterceptor.getLoginUser();
+        try {
+            if (loginUser == null) {
+                throw new RuntimeException("用户信息加载异常!");
+            }
+            Message message = userService.updatePassword(loginUser, map);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /* setPayPassword */
+
+    /**
+     * 设置支付密码
+     *
+     * @param user
+     * @return
+     */
+    @PostMapping(path = "/auth/setPayPassword")
+    public ResponseEntity<Message> setPayPassword(User user, @RequestParam("code") String code) {
+        UserInfo loginUser = LoginInterceptor.getLoginUser();
+        try {
+            if (loginUser == null) {
+                throw new RuntimeException("用户信息加载异常!");
+            }
+            Message message = userService.setPayPassword(loginUser, user, code);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * 重新绑定手机号码
+     *
+     * @param code1
+     * @param code2
+     * @param newPhone
+     * @return
+     */
+    @PostMapping(path = "/auth/bindPhone")
+    public ResponseEntity<Message> bindPhone(@RequestParam("code1") String code1,
+                                             @RequestParam("code2") String code2,
+                                             @RequestParam("newPhone") String newPhone) {
+        UserInfo loginUser = LoginInterceptor.getLoginUser();
+        try {
+            if (loginUser == null) {
+                throw new RuntimeException("用户信息加载异常!");
+            }
+            Message message = userService.bindPhone(loginUser, code1, code2, newPhone);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
 }

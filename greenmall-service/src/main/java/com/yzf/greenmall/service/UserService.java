@@ -1,7 +1,9 @@
 package com.yzf.greenmall.service;
 
 import com.yzf.greenmall.common.CodecUtils;
+import com.yzf.greenmall.common.Message;
 import com.yzf.greenmall.common.NumberUtils;
+import com.yzf.greenmall.common.jwt.UserInfo;
 import com.yzf.greenmall.mapper.UserMapper;
 import com.yzf.greenmall.entity.User;
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +42,8 @@ public class UserService {
     private StringRedisTemplate redisTemplate;
 
     static final String KEY_PREFIX = "user:code:phone:";
+    static final String KEY_PREFIX_SET_PAY = "user:pay:code:phone:";
+    static final String KEY_PREFIX_BIND_PHONE = "user:bp:code:phone:";
 
     static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
@@ -57,8 +61,9 @@ public class UserService {
      * 指定电话发送验证码
      *
      * @param phone
+     * @param keyType 1: 登录验证码 2：设置支付密码验证码
      */
-    public boolean sendVerifyCode(String phone) {
+    public boolean sendVerifyCode(String phone, int keyType) {
         String code = null;
         try {
             // 1，生成验证码
@@ -69,7 +74,16 @@ public class UserService {
             // 2，发送消息到消息队列通知信息服务发送短信验证码
             this.amqpTemplate.convertAndSend("greenmall.sms.exchange", "sms.verify.code", map);
             // 3，将验证码存放在redis中，有效时间为5分钟
-            this.redisTemplate.opsForValue().set(KEY_PREFIX + phone, code, 5, TimeUnit.MINUTES);
+            if (keyType == 1) {
+                // 登录验证码
+                this.redisTemplate.opsForValue().set(KEY_PREFIX + phone, code, 5, TimeUnit.MINUTES);
+            } else if (keyType == 2) {
+                // 设置支付密码验证码
+                this.redisTemplate.opsForValue().set(KEY_PREFIX_SET_PAY + phone, code, 5, TimeUnit.MINUTES);
+            } else if (keyType == 3) {
+                // 重新绑定手机的验证码
+                this.redisTemplate.opsForValue().set(KEY_PREFIX_BIND_PHONE + phone, code, 5, TimeUnit.MINUTES);
+            }
             return true;
         } catch (AmqpException e) {
             e.printStackTrace();
@@ -111,10 +125,12 @@ public class UserService {
      */
     public boolean register(User user, String code) {
         // 1，获取验证码并进行比对
-        String redisCode = this.redisTemplate.opsForValue().get(KEY_PREFIX + user.getPhone());
+        String key = KEY_PREFIX + user.getPhone();
+        String redisCode = this.redisTemplate.opsForValue().get(key);
         if (StringUtils.isEmpty(redisCode) || !redisCode.equals(code)) {
             return false;
         }
+        this.redisTemplate.delete(key);
         // 2，初始化用户昵称
         user.setNickName(NumberUtils.generateCode(User.USER_NAME_DEFAULT_LEN));
         // 3，初始化账号创建时间
@@ -204,5 +220,122 @@ public class UserService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * 判断当前登录用户是否拥有支付密码
+     *
+     * @param loginUser
+     * @return
+     */
+    public Message hasPayPassword(UserInfo loginUser) {
+
+        // 1，查询当前登录用户的完整信息
+        User user = userMapper.selectByPrimaryKey(loginUser.getId());
+        if (user == null) {
+            throw new RuntimeException("当前登录用户不存在!");
+        }
+        // 2，判断并返回标识
+        if (StringUtils.isBlank(user.getPayPassword())) {
+            return new Message(2, "");
+        } else {
+            return new Message(1, "");
+        }
+    }
+
+    /**
+     * 更新用户密码
+     *
+     * @param loginUser
+     * @param map
+     * @return
+     */
+    public Message updatePassword(UserInfo loginUser, Map<String, String> map) {
+        // 1，判断密码是否为空，新旧密码是否一样
+        String pwd = map.get("pwd");
+        String newPwd = map.get("newPwd");
+        if (StringUtils.isBlank(pwd) || StringUtils.isBlank(newPwd)) {
+            return new Message(2, "");
+        }
+        if (pwd.equals(newPwd)) {
+            return new Message(3, "");
+        }
+
+        // 2，根据id查询出用户数据，并进行原密码比对
+        User user = userMapper.selectByPrimaryKey(loginUser.getId());
+        String temp = CodecUtils.md5Hex(pwd, user.getSalt());
+        if (!temp.equals(user.getPassword())) {
+            return new Message(2, "");
+        }
+
+        // 3，修改密码
+        String salt = CodecUtils.generateSalt();
+        String newPassword = CodecUtils.md5Hex(newPwd, salt);
+        User user1 = new User();
+        user1.setId(loginUser.getId());
+        user1.setPassword(newPassword);
+        user1.setSalt(salt);
+        userMapper.updateByPrimaryKeySelective(user1);
+        return new Message(1, "");
+
+    }
+
+    /**
+     * 设置支付密码
+     *
+     * @param loginUser
+     * @param user
+     * @param code
+     * @return
+     */
+    public Message setPayPassword(UserInfo loginUser, User user, String code) {
+        // 1，获取验证码并进行比对
+        String key = KEY_PREFIX_SET_PAY + user.getPhone();
+        String redisCode = this.redisTemplate.opsForValue().get(key);
+        if (StringUtils.isEmpty(redisCode) || !redisCode.equals(code)) {
+            return new Message(2, "");
+        }
+        this.redisTemplate.delete(key);
+        // 2，设置支付密码
+        User record = new User();
+        record.setId(loginUser.getId());
+        String salt = CodecUtils.generateSalt();
+        String payPassword = CodecUtils.md5Hex(user.getPayPassword(), salt);
+        record.setPayPassword(payPassword);
+        record.setPaySalt(salt);
+        userMapper.updateByPrimaryKeySelective(record);
+        return new Message(1, "");
+    }
+
+    /**
+     * 绑定手机号码
+     *
+     * @param loginUser
+     * @param code1     原手机号验证码
+     * @param code2     新手机号验证码
+     * @param newPhone  新手机号
+     * @return
+     */
+    public Message bindPhone(UserInfo loginUser, String code1, String code2, String newPhone) {
+
+        // 1，查询登录用户
+        User user = userMapper.selectByPrimaryKey(loginUser.getId());
+
+        // 2，获取验证码并进行比对
+        String key = KEY_PREFIX_BIND_PHONE + user.getPhone();
+        String redisCode = this.redisTemplate.opsForValue().get(key);
+        if (StringUtils.isEmpty(redisCode) || !redisCode.equals(code1)) {
+            return new Message(2, "");
+        }
+        key = KEY_PREFIX_BIND_PHONE + newPhone;
+        redisCode = this.redisTemplate.opsForValue().get(key);
+        if (StringUtils.isEmpty(redisCode) || !redisCode.equals(code2)) {
+            return new Message(2, "");
+        }
+
+        // 3，更换手机号
+        user.setPhone(newPhone);
+        userMapper.updateByPrimaryKeySelective(user);
+        return new Message(1, "");
     }
 }

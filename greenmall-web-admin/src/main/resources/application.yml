@@ -75,3 +75,8 @@ greenmall:
       - /category/**
       - /goods/**
       - /param/**
+  # 邮件
+  mail:
+    user: leo_yuzhao@163.com
+    password: JZQDIGQFAVMDVMXM
+    host: smtp.163.com

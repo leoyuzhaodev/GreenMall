@@ -232,7 +232,7 @@
                 gm.verifyUser().then(() => {
                     isLogin = 1;
                     // 2，加载用户信息数据
-                    gm.http.get("/user/queryUser/")
+                    gm.http.get("/user/auth/queryUser/")
                         .then(resp => {
                             var data = resp.data;
                             if (resp.status === 200) {

@@ -65,15 +65,19 @@ greenmall:
   # 登录拦截配置
   filter:
     filterPaths:
-      - /user/hello
-      - /user/queryUser
+      - /user/auth
       - /shopCart
       - /collect
       - /address
   # 登录拦截用户信息加载配置
   interceptor:
     interceptorPaths:
-      - /user/queryUser/
+      - /user/auth/**
       - /shopCart/**
       - /collect/**
       - /address/**
+  # 邮件
+  mail:
+    user: leo_yuzhao@163.com
+    password: JZQDIGQFAVMDVMXM
+    host: smtp.163.com
