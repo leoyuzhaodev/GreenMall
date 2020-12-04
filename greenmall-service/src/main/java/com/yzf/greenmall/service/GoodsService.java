@@ -381,4 +381,23 @@ public class GoodsService {
         }
         return true;
     }
+
+    /**
+     * 判断商品是否可用
+     *
+     * @param goodsId
+     * @return
+     */
+    public boolean isGoodsAvailable(Long goodsId, Integer num) {
+        if (!this.isGoodsAvailable(goodsId)) {
+            return false;
+        }
+        // 获取商品详情
+        GoodsDetail goodsDetail = goodsDetailMapper.selectByPrimaryKey(goodsId);
+        if (goodsDetail.getStock() - num < 0) {
+            return false;
+        }
+        return true;
+    }
+
 }

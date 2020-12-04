@@ -47,6 +47,8 @@ public class User implements Serializable {
     private String payPassword;
     @JsonIgnore
     private String paySalt;
+    @JsonIgnore
+    private Double possession;
     // 用户状态：1：非禁用 0：禁用
     private Integer valid;
     // 状态 1：未初始化，刚刚注册 2:初始化完成 4:支付密码设置完成

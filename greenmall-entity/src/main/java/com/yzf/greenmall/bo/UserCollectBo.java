@@ -1,5 +1,7 @@
 package com.yzf.greenmall.bo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.yzf.greenmall.common.DoubleSerialize;
 import lombok.Data;
 
 /**
@@ -14,6 +16,7 @@ public class UserCollectBo {
     private String image;
     private String title;
     private String subTitle;
+    @JsonSerialize(using = DoubleSerialize.class)
     private Double price;
     private Double goodEvaluateDegree;
     private Long saleMonth;

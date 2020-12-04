@@ -702,6 +702,13 @@ const gm = greemmall = {
         return list.indexOf(list.find(cartItem => {
             return cartItem[attr] == val;
         }));
+    },
+    /**
+     * 格式化价格
+     */
+    gmFormatPrice(number) {
+        var temp = Math.floor(parseFloat(number * 100)) / 100;
+        return temp.toFixed(2);
     }
 
 }

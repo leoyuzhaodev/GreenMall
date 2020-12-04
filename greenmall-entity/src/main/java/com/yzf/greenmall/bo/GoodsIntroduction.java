@@ -1,5 +1,7 @@
 package com.yzf.greenmall.bo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.yzf.greenmall.common.DoubleSerialize;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -17,6 +19,7 @@ public class GoodsIntroduction implements Serializable {
     private String images; // 商品图片
     private String title;// 商品名称
     private String category; // "分类1 分类2 分类3"
+    @JsonSerialize(using = DoubleSerialize.class)
     private Double price; // 12.00 价格
     private String subtitle; // 售卖标题
     private Long stock; // 库存

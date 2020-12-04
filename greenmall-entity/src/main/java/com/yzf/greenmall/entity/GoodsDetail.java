@@ -1,5 +1,7 @@
 package com.yzf.greenmall.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.yzf.greenmall.common.DoubleSerialize;
 import lombok.Data;
 
 import javax.persistence.Column;
@@ -18,6 +20,7 @@ public class GoodsDetail implements Serializable {
     @Id
     private Long goodsId; // 商品id
     private String images; // 商品图片以英文逗号分割
+    @JsonSerialize(using = DoubleSerialize.class)
     private Double price; // 商品价格，注意通用 Mapper 不支持基本数据类型
     private String params; // 商品规格参数，存放格式为：{pId1:pVal1,pId2:pVal2}
     private String description; // 商品描述

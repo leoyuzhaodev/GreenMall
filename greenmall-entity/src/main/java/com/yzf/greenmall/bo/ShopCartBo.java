@@ -1,5 +1,7 @@
 package com.yzf.greenmall.bo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.yzf.greenmall.common.DoubleSerialize;
 import lombok.Data;
 
 /**
@@ -16,6 +18,7 @@ public class ShopCartBo {
     private String goodsImage; // 商品图片
     private String goodsTitle;// 商品名称
     private String goodsSubTitle; // 商品售卖标题
+    @JsonSerialize(using = DoubleSerialize.class)
     private Double price; // 单价
     private Boolean available; // 商品下架，删除 available = false，否则 available = true
     private Long num; // 数量

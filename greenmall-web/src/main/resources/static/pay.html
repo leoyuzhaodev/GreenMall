@@ -1,544 +1,397 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0 ,minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0 ,minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>结算页面</title>
+    <title>结算页面</title>
 
-		<link href="AmazeUI-2.4.2/assets/css/amazeui.css" rel="stylesheet" type="text/css" />
+    <link href="AmazeUI-2.4.2/assets/css/amazeui.css" rel="stylesheet" type="text/css"/>
 
-		<link href="basic/css/demo.css" rel="stylesheet" type="text/css" />
-		<link href="css/cartstyle.css" rel="stylesheet" type="text/css" />
+    <link href="basic/css/demo.css" rel="stylesheet" type="text/css"/>
+    <link href="css/cartstyle.css" rel="stylesheet" type="text/css"/>
 
-		<link href="css/jsstyle.css" rel="stylesheet" type="text/css" />
+    <link href="css/jsstyle.css" rel="stylesheet" type="text/css"/>
 
-		<script type="text/javascript" src="js/address.js"></script>
+    <script type="text/javascript" src="js/address.js"></script>
 
-	</head>
+    <!-- 引入 vue，以及相关工具js -->
+    <script src="http://www.greenmall.com/js/vue/vue.js"></script>
+    <script src="http://www.greenmall.com/js/axios.min.js"></script>
+    <script src="http://www.greenmall.com/js/common.js"></script>
+    <script src="http://www.greenmall.com/js/math.js"></script>
 
-	<body>
+    <style>
+        #gmHr {
+            width: 1200px;
+            margin: 0px auto;
+        }
+    </style>
+</head>
 
-		<!--顶部导航条 -->
-		<div class="am-container header">
-			<ul class="message-l">
-				<div class="topMessage">
-					<div class="menu-hd">
-						<a href="#" target="_top" class="h">亲，请登录</a>
-						<a href="#" target="_top">免费注册</a>
-					</div>
-				</div>
-			</ul>
-			<ul class="message-r">
-				<div class="topMessage home">
-					<div class="menu-hd"><a href="#" target="_top" class="h">商城首页</a></div>
-				</div>
-				<div class="topMessage my-shangcheng">
-					<div class="menu-hd MyShangcheng"><a href="#" target="_top"><i class="am-icon-user am-icon-fw"></i>个人中心</a></div>
-				</div>
-				<div class="topMessage mini-cart">
-					<div class="menu-hd"><a id="mc-menu-hd" href="#" target="_top"><i class="am-icon-shopping-cart  am-icon-fw"></i><span>购物车</span><strong id="J_MiniCartNum" class="h">0</strong></a></div>
-				</div>
-				<div class="topMessage favorite">
-					<div class="menu-hd"><a href="#" target="_top"><i class="am-icon-heart am-icon-fw"></i><span>收藏夹</span></a></div>
-			</ul>
-			</div>
+<body>
 
-			<!--悬浮搜索框-->
+<!-- 头部位置 -->
+<div id="payApp">
 
-			<div class="nav white">
-				<div class="logo"><img src="images/logo.png" /></div>
-				<div class="logoBig">
-					<li><img src="images/logobig.png" /></li>
-				</div>
+    <!-- 头部栏位 -->
+    <div id="nav-gm">
+        <gm-top/>
+    </div>
 
-				<div class="search-bar pr">
-					<a name="index_none_header_sysc" href="#"></a>
-					<form>
-						<input id="searchInput" name="index_none_header_sysc" type="text" placeholder="搜索" autocomplete="off">
-						<input id="ai-topsearch" class="submit am-btn" value="搜索" index="1" type="submit">
-					</form>
-				</div>
-			</div>
+    <div id="gmHr" class="logistics">
+        <h3 style="font-size: 20px">订单信息</h3>
+    </div>
 
-			<div class="clear"></div>
-			<div class="concent">
-				<!--地址 -->
-				<div class="paycont">
-					<div class="address">
-						<h3>确认收货地址 </h3>
-						<div class="control">
-							<div class="tc-btn createAddr theme-login am-btn am-btn-danger">使用新地址</div>
-						</div>
-						<div class="clear"></div>
-						<ul>
-							<div class="per-border"></div>
-							<li class="user-addresslist defaultAddr">
+    <div class="clear"></div>
+    <div class="concent">
+        <!--地址 -->
+        <div class="paycont">
+            <div class="address">
+                <h3>确认收货地址</h3>
+                <div class="clear"></div>
+                <ul>
+                    <div class="per-border"></div>
+                    <!-- 单条收货地址 -->
+                    <li style="cursor: pointer" v-for="(address,index) in userAddressList"
+                        :class="{'user-addresslist': 1==1,'defaultAddr': address.isChecked == 1 }"
+                        @click="selectAddress(address.id)">
 
-								<div class="address-left">
-									<div class="user DefaultAddr">
+                        <div class="address-left">
+                            <div class="user DefaultAddr">
+                                <span class="buy-address-detail">
+                                    <span class="buy-user">{{address.consignee}} </span>
+                                    <span class="buy-phone">{{address.phone}}</span>
+                                </span>
+                            </div>
+                            <div class="default-address DefaultAddr">
+                                <span class="buy-line-title buy-line-title-type">收货地址：</span>
+                                <span class="buy--address-detail">
+								   <span class="province">{{address.fullAddress}}</span>
+                                </span>
+                            </div>
+                            <ins v-if="address.isDefault == 1" class="deftip">默认地址</ins>
+                        </div>
+                        <div class="address-right">
+                            <a href="person/address.html">
+                                <span class="am-icon-angle-right am-icon-lg"></span></a>
+                        </div>
+                        <div class="clear"></div>
 
-										<span class="buy-address-detail">   
-                   <span class="buy-user">艾迪 </span>
-										<span class="buy-phone">15871145629</span>
-										</span>
-									</div>
-									<div class="default-address DefaultAddr">
-										<span class="buy-line-title buy-line-title-type">收货地址：</span>
-										<span class="buy--address-detail">
-								   <span class="province">湖北</span>省
-										<span class="city">武汉</span>市
-										<span class="dist">洪山</span>区
-										<span class="street">雄楚大道666号(中南财经政法大学)</span>
-										</span>
 
-										</span>
-									</div>
-									<ins class="deftip">默认地址</ins>
-								</div>
-								<div class="address-right">
-									<a href="person/address.html">
-										<span class="am-icon-angle-right am-icon-lg"></span></a>
-								</div>
-								<div class="clear"></div>
+                    </li>
+                </ul>
 
-								<div class="new-addr-btn">
-									<a href="#" class="hidden">设为默认</a>
-									<span class="new-addr-bar hidden">|</span>
-									<a href="#">编辑</a>
-									<span class="new-addr-bar">|</span>
-									<a href="javascript:void(0);" onclick="delClick(this);">删除</a>
-								</div>
+                <div class="clear"></div>
+            </div>
+            <!--物流 -->
+            <div class="logistics">
+                <h3>物流方式：</h3>
+                <span style="color: red;font-size: 13px;font-weight: bold;">申通快递/圆通速递/百世快递/天天快递（注：随机发一种）</span>
+            </div>
+            <div class="clear"></div>
 
-							</li>
-							<div class="per-border"></div>
-							<li class="user-addresslist">
-								<div class="address-left">
-									<div class="user DefaultAddr">
+            <!--支付方式-->
+            <div class="logistics">
+                <h3>支付方式：</h3>
+                <span style="color: red;font-size: 13px;font-weight: bold;">绿色商城账户</span>
+            </div>
+            <div class="clear"></div>
 
-										<span class="buy-address-detail">   
-                   <span class="buy-user">艾迪 </span>
-										<span class="buy-phone">15871145629</span>
-										</span>
-									</div>
-									<div class="default-address DefaultAddr">
-										<span class="buy-line-title buy-line-title-type">收货地址：</span>
-										<span class="buy--address-detail">
-								   <span class="province">湖北</span>省
-										<span class="city">武汉</span>市
-										<span class="dist">武昌</span>区
-										<span class="street">东湖路75号众环大厦2栋9层902</span>
-										</span>
+            <!--订单 -->
+            <div class="concent">
+                <div id="payTable">
+                    <h3>确认订单信息</h3>
+                    <div class="cart-table-th">
+                        <div class="wp">
 
-										</span>
-									</div>
-									<ins class="deftip hidden">默认地址</ins>
-								</div>
-								<div class="address-right">
-									<span class="am-icon-angle-right am-icon-lg"></span>
-								</div>
-								<div class="clear"></div>
+                            <div class="th th-item">
+                                <div class="td-inner">商品信息</div>
+                            </div>
+                            <div class="th th-price">
+                                <div class="td-inner">单价</div>
+                            </div>
+                            <div class="th th-amount">
+                                <div class="td-inner">数量</div>
+                            </div>
+                            <div class="th th-sum">
+                                <div class="td-inner">金额</div>
+                            </div>
+                            <div class="th th-oplist">
+                                <div class="td-inner">配送方式</div>
+                            </div>
 
-								<div class="new-addr-btn">
-									<a href="#">设为默认</a>
-									<span class="new-addr-bar">|</span>
-									<a href="#">编辑</a>
-									<span class="new-addr-bar">|</span>
-									<a href="javascript:void(0);"  onclick="delClick(this);">删除</a>
-								</div>
+                        </div>
+                    </div>
+                    <div class="clear"></div>
+                    <!-- 订单数据 -->
+                    <div v-for="(item,index) in goodsList" :key="index" class="bundle  bundle-last"
+                         style="margin-top:5px;border: 1px solid rgb(245,245,245)">
+                        <div class="bundle-main">
+                            <ul class="item-content clearfix">
+                                <div class="pay-phone">
+                                    <li class="td td-item">
+                                        <div class="item-pic">
+                                            <a href="#" class="J_MakePoint">
+                                                <!-- 图片 -->
+                                                <img width="80px" height="80px" :src="item.goodsImage"
+                                                     class="itempic J_ItemImg"></a>
+                                        </div>
+                                        <div class="item-info">
+                                            <div class="item-basic-info">
+                                                <a :href="'http://www.greenmall.com/goods/introduction/'+item.goodsId+'.html'"
+                                                   class="item-title J_MakePoint" data-point="tbcart.8.11">{{item.goodsTitle}}</a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <!-- 价格 -->
+                                    <li class="td td-price">
+                                        <div class="item-price price-promo-promo">
+                                            <div class="price-content">
+                                                <em class="J_Price price-now">{{gm.gmFormatPrice(item.price)}}</em>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </div>
+                                <li class="td td-amount">
+                                    <div class="amount-wrapper ">
+                                        <div class="item-amount ">
+                                            <!-- 数量 -->
+                                            <span class="phone-title">购买数量</span>
+                                            <div class="sl">
+                                                <input disabled="disabled" class="text_box" name="" type="text"
+                                                       :value="item.num"
+                                                       style="width:30px;"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="td td-sum">
+                                    <div class="td-inner">
+                                        <!-- 总金额 -->
+                                        <em tabindex="0" class="J_ItemSum number">{{calPrice(item.price,item.num)}}</em>
+                                    </div>
+                                </li>
+                                <li class="td td-oplist">
+                                    <div class="td-inner">
+                                        <span class="phone-title">配送方式</span>
+                                        <div class="pay-logis">
+                                            包邮
+                                        </div>
+                                    </div>
+                                </li>
 
-							</li>
+                            </ul>
+                            <div class="clear"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clear"></div>
 
-						</ul>
+            <!--含运费小计 -->
+            <div class="buy-point-discharge ">
+                <p class="price g_price ">
+                    合计（包邮） <span>¥</span><em class="pay-sum">{{calTotalPrice}}</em>
+                </p>
+            </div>
 
-						<div class="clear"></div>
-					</div>
-					<!--物流 -->
-					<div class="logistics">
-						<h3>选择物流方式</h3>
-						<ul class="op_express_delivery_hot">
-							<li data-value="yuantong" class="OP_LOG_BTN  "><i class="c-gap-right" style="background-position:0px -468px"></i>圆通<span></span></li>
-							<li data-value="shentong" class="OP_LOG_BTN  "><i class="c-gap-right" style="background-position:0px -1008px"></i>申通<span></span></li>
-							<li data-value="yunda" class="OP_LOG_BTN  "><i class="c-gap-right" style="background-position:0px -576px"></i>韵达<span></span></li>
-							<li data-value="zhongtong" class="OP_LOG_BTN op_express_delivery_hot_last "><i class="c-gap-right" style="background-position:0px -324px"></i>中通<span></span></li>
-							<li data-value="shunfeng" class="OP_LOG_BTN  op_express_delivery_hot_bottom"><i class="c-gap-right" style="background-position:0px -180px"></i>顺丰<span></span></li>
-						</ul>
-					</div>
-					<div class="clear"></div>
-
-					<!--支付方式-->
-					<div class="logistics">
-						<h3>选择支付方式</h3>
-						<ul class="pay-list">
-							<li class="pay card"><img src="images/wangyin.jpg" />银联<span></span></li>
-							<li class="pay qq"><img src="images/weizhifu.jpg" />微信<span></span></li>
-							<li class="pay taobao"><img src="images/zhifubao.jpg" />支付宝<span></span></li>
-						</ul>
-					</div>
-					<div class="clear"></div>
-
-					<!--订单 -->
-					<div class="concent">
-						<div id="payTable">
-							<h3>确认订单信息</h3>
-							<div class="cart-table-th">
-								<div class="wp">
-
-									<div class="th th-item">
-										<div class="td-inner">商品信息</div>
-									</div>
-									<div class="th th-price">
-										<div class="td-inner">单价</div>
-									</div>
-									<div class="th th-amount">
-										<div class="td-inner">数量</div>
-									</div>
-									<div class="th th-sum">
-										<div class="td-inner">金额</div>
-									</div>
-									<div class="th th-oplist">
-										<div class="td-inner">配送方式</div>
-									</div>
-
-								</div>
-							</div>
-							<div class="clear"></div>
-
-							<tr class="item-list">
-								<div class="bundle  bundle-last">
-
-									<div class="bundle-main">
-										<ul class="item-content clearfix">
-											<div class="pay-phone">
-												<li class="td td-item">
-													<div class="item-pic">
-														<a href="#" class="J_MakePoint">
-															<img src="images/kouhong.jpg_80x80.jpg" class="itempic J_ItemImg"></a>
-													</div>
-													<div class="item-info">
-														<div class="item-basic-info">
-															<a href="#" class="item-title J_MakePoint" data-point="tbcart.8.11">美康粉黛醉美唇膏 持久保湿滋润防水不掉色</a>
-														</div>
-													</div>
-												</li>
-												<li class="td td-info">
-													<div class="item-props">
-														<span class="sku-line">颜色：12#川南玛瑙</span>
-														<span class="sku-line">包装：裸装</span>
-													</div>
-												</li>
-												<li class="td td-price">
-													<div class="item-price price-promo-promo">
-														<div class="price-content">
-															<em class="J_Price price-now">39.00</em>
-														</div>
-													</div>
-												</li>
-											</div>
-											<li class="td td-amount">
-												<div class="amount-wrapper ">
-													<div class="item-amount ">
-														<span class="phone-title">购买数量</span>
-														<div class="sl">
-															<input class="min am-btn" name="" type="button" value="-" />
-															<input class="text_box" name="" type="text" value="3" style="width:30px;" />
-															<input class="add am-btn" name="" type="button" value="+" />
-														</div>
-													</div>
-												</div>
-											</li>
-											<li class="td td-sum">
-												<div class="td-inner">
-													<em tabindex="0" class="J_ItemSum number">117.00</em>
-												</div>
-											</li>
-											<li class="td td-oplist">
-												<div class="td-inner">
-													<span class="phone-title">配送方式</span>
-													<div class="pay-logis">
-														快递<b class="sys_item_freprice">10</b>元
-													</div>
-												</div>
-											</li>
-
-										</ul>
-										<div class="clear"></div>
-
-									</div>
-							</tr>
-							<div class="clear"></div>
-							</div>
-
-							<tr id="J_BundleList_s_1911116345_1" class="item-list">
-								<div id="J_Bundle_s_1911116345_1_0" class="bundle  bundle-last">
-									<div class="bundle-main">
-										<ul class="item-content clearfix">
-											<div class="pay-phone">
-												<li class="td td-item">
-													<div class="item-pic">
-														<a href="#" class="J_MakePoint">
-															<img src="images/kouhong.jpg_80x80.jpg" class="itempic J_ItemImg"></a>
-													</div>
-													<div class="item-info">
-														<div class="item-basic-info">
-															<a href="#" target="_blank" title="美康粉黛醉美唇膏 持久保湿滋润防水不掉色" class="item-title J_MakePoint" data-point="tbcart.8.11">美康粉黛醉美唇膏 持久保湿滋润防水不掉色</a>
-														</div>
-													</div>
-												</li>
-												<li class="td td-info">
-													<div class="item-props">
-														<span class="sku-line">颜色：10#蜜橘色+17#樱花粉</span>
-														<span class="sku-line">包装：两支手袋装（送彩带）</span>
-													</div>
-												</li>
-												<li class="td td-price">
-													<div class="item-price price-promo-promo">
-														<div class="price-content">
-															<em class="J_Price price-now">39.00</em>
-														</div>
-													</div>
-												</li>
-											</div>
-
-											<li class="td td-amount">
-												<div class="amount-wrapper ">
-													<div class="item-amount ">
-														<span class="phone-title">购买数量</span>
-														<div class="sl">
-															<input class="min am-btn" name="" type="button" value="-" />
-															<input class="text_box" name="" type="text" value="3" style="width:30px;" />
-															<input class="add am-btn" name="" type="button" value="+" />
-														</div>
-													</div>
-												</div>
-											</li>
-											<li class="td td-sum">
-												<div class="td-inner">
-													<em tabindex="0" class="J_ItemSum number">117.00</em>
-												</div>
-											</li>
-											<li class="td td-oplist">
-												<div class="td-inner">
-													<span class="phone-title">配送方式</span>
-													<div class="pay-logis">
-														包邮
-													</div>
-												</div>
-											</li>
-
-										</ul>
-										<div class="clear"></div>
-
-									</div>
-							</tr>
-							</div>
-							<div class="clear"></div>
-							<div class="pay-total">
-						<!--留言-->
-							<div class="order-extra">
-								<div class="order-user-info">
-									<div id="holyshit257" class="memo">
-										<label>买家留言：</label>
-										<input type="text" title="选填,对本次交易的说明（建议填写已经和卖家达成一致的说明）" placeholder="选填,建议填写和卖家达成一致的说明" class="memo-input J_MakePoint c2c-text-default memo-close">
-										<div class="msg hidden J-msg">
-											<p class="error">最多输入500个字符</p>
-										</div>
-									</div>
-								</div>
-
-							</div>
-							<!--优惠券 -->
-							<div class="buy-agio">
-								<li class="td td-coupon">
-
-									<span class="coupon-title">优惠券</span>
-									<select data-am-selected>
-										<option value="a">
-											<div class="c-price">
-												<strong>￥8</strong>
-											</div>
-											<div class="c-limit">
-												【消费满95元可用】
-											</div>
-										</option>
-										<option value="b" selected>
-											<div class="c-price">
-												<strong>￥3</strong>
-											</div>
-											<div class="c-limit">
-												【无使用门槛】
-											</div>
-										</option>
-									</select>
-								</li>
-
-								<li class="td td-bonus">
-
-									<span class="bonus-title">红包</span>
-									<select data-am-selected>
-										<option value="a">
-											<div class="item-info">
-												¥50.00<span>元</span>
-											</div>
-											<div class="item-remainderprice">
-												<span>还剩</span>10.40<span>元</span>
-											</div>
-										</option>
-										<option value="b" selected>
-											<div class="item-info">
-												¥50.00<span>元</span>
-											</div>
-											<div class="item-remainderprice">
-												<span>还剩</span>50.00<span>元</span>
-											</div>
-										</option>
-									</select>
-
-								</li>
-
-							</div>
-							<div class="clear"></div>
-							</div>
-							<!--含运费小计 -->
-							<div class="buy-point-discharge ">
-								<p class="price g_price ">
-									合计（含运费） <span>¥</span><em class="pay-sum">244.00</em>
-								</p>
-							</div>
-
-							<!--信息 -->
-							<div class="order-go clearfix">
-								<div class="pay-confirm clearfix">
-									<div class="box">
-										<div tabindex="0" id="holyshit267" class="realPay"><em class="t">实付款：</em>
-											<span class="price g_price ">
-                                    <span>¥</span> <em class="style-large-bold-red " id="J_ActualFee">244.00</em>
+            <!--信息 -->
+            <div class="order-go clearfix">
+                <div class="pay-confirm clearfix">
+                    <div class="box">
+                        <div tabindex="0" id="holyshit267" class="realPay"><em class="t">实付款：</em>
+                            <span class="price g_price ">
+                                    <span>¥</span> <em class="style-large-bold-red "
+                                                       id="J_ActualFee">{{calTotalPrice}}</em>
 											</span>
-										</div>
+                        </div>
 
-										<div id="holyshit268" class="pay-address">
+                        <div id="holyshit268" class="pay-address">
 
-											<p class="buy-footer-address">
-												<span class="buy-line-title buy-line-title-type">寄送至：</span>
-												<span class="buy--address-detail">
-								   <span class="province">湖北</span>省
-												<span class="city">武汉</span>市
-												<span class="dist">洪山</span>区
-												<span class="street">雄楚大道666号(中南财经政法大学)</span>
-												</span>
-												</span>
-											</p>
-											<p class="buy-footer-address">
-												<span class="buy-line-title">收货人：</span>
-												<span class="buy-address-detail">   
-                                         <span class="buy-user">艾迪 </span>
-												<span class="buy-phone">15871145629</span>
-												</span>
-											</p>
-										</div>
-									</div>
+                            <p class="buy-footer-address">
+                                <span class="buy-line-title buy-line-title-type">寄送至：</span>
+                                <span class="buy--address-detail">
+								   {{checkedAddress.fullAddress}}
+                                </span>
+                            </p>
+                            <p class="buy-footer-address">
+                                <span class="buy-line-title">收货人：</span>
+                                <span class="buy-address-detail">
+                                    <span class="buy-user">{{checkedAddress.consignee}} </span>
+                                    <span class="buy-phone">{{checkedAddress.phone}}</span>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
 
-									<div id="holyshit269" class="submitOrder">
-										<div class="go-btn-wrap">
-											<a id="J_Go" href="success.html" class="btn-go" tabindex="0" title="点击此按钮，提交订单">提交订单</a>
-										</div>
-									</div>
-									<div class="clear"></div>
-								</div>
-							</div>
-						</div>
+                    <div id="holyshit269" class="submitOrder">
+                        <div class="go-btn-wrap">
+                            <a id="J_Go" @click="submitOrder" class="btn-go" tabindex="0" title="点击此按钮，提交订单">提交订单</a>
+                        </div>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+        </div>
 
-						<div class="clear"></div>
-					</div>
-				</div>
-				<div class="footer">
-					<div class="footer-hd">
-						<p>
-							<a href="#">恒望科技</a>
-							<b>|</b>
-							<a href="#">商城首页</a>
-							<b>|</b>
-							<a href="#">支付宝</a>
-							<b>|</b>
-							<a href="#">物流</a>
-						</p>
-					</div>
-					<div class="footer-bd">
-						<p>
-							<a href="#">关于恒望</a>
-							<a href="#">合作伙伴</a>
-							<a href="#">联系我们</a>
-							<a href="#">网站地图</a>
-							<em>© 2015-2025 Hengwang.com 版权所有</em>
-						</p>
-					</div>
-				</div>
-			</div>
-			<div class="theme-popover-mask"></div>
-			<div class="theme-popover">
+        <div class="clear"></div>
+    </div>
 
-				<!--标题 -->
-				<div class="am-cf am-padding">
-					<div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">新增地址</strong> / <small>Add address</small></div>
-				</div>
-				<hr/>
+    <gm-footer></gm-footer>
+</div>
+</body>
 
-				<div class="am-u-md-12">
-					<form class="am-form am-form-horizontal">
 
-						<div class="am-form-group">
-							<label for="user-name" class="am-form-label">收货人</label>
-							<div class="am-form-content">
-								<input type="text" id="user-name" placeholder="收货人">
-							</div>
-						</div>
+<script>
+    var vm = new Vue({
+        el: "#payApp",
+        data: {
+            gm, // 必须引用到实例中，在html标签中才能使用
+            goodsList: [],
+            totalPrice: 0.00,
+            userAddressList: [],
+            checkedAddress: {}
+        }, created() {
+            // 1，验证用户是否登录 并 加载本地数据并渲染
+            this.loadPayData();
+            // 2，加载收货地址
+            this.loadUserAddress();
+        },
+        components: {
+            gmTop: () => import("http://www.greenmall.com/js/pages/top.js"),
+            gmFooter: () => import("http://www.greenmall.com/js/pages/footer.js"),
+        },
+        watch: {},
+        computed: {
+            /* 计算总金额 */
+            calTotalPrice() {
+                if (gm.isCollectionNotEmpty(this.goodsList)) {
+                    this.goodsList.forEach(item => {
+                        this.totalPrice += Math.floor(parseFloat(item.price * 100 * item.num)) / 100;
+                    })
+                }
 
-						<div class="am-form-group">
-							<label for="user-phone" class="am-form-label">手机号码</label>
-							<div class="am-form-content">
-								<input id="user-phone" placeholder="手机号必填" type="email">
-							</div>
-						</div>
+                return this.totalPrice.toFixed(2);
+            }
+        },
+        methods: {
+            /* 加载订单数据 */
+            loadPayData() {
+                gm.verifyUser().then(() => {
+                    isLogin = 1;
+                    // 从 localStorage 中读取数据并渲染
+                    var temp = gm.store.get("payData");
+                    if (gm.isCollectionNotEmpty(temp.goodsData)) {
+                        // 判断数据是否邮箱
+                        var dateDiff = (new Date().getTime()) - temp.payDate;
+                        /*if (dateDiff > 2 * 60 * 1000) {
+                            alert("订单数据失效,请重新提交订单!")
+                            gm.store.set("payData", {});
+                            return;
+                        }*/
+                        this.goodsList = temp.goodsData;
+                        // gm.store.set("payData", {});
+                    } else {
+                        alert("订单数据加载失败!");
+                    }
+                }).catch(() => {
+                    if (isLogin === 0) {
+                        alert("您还没有登录，请登录之后做相关操作。")
+                        window.top.location.href = "http://www.greenmall.com/login.html";
+                    } else {
+                        alert("订单数据加载异常...")
+                    }
+                })
+            },
+            /* 计算商品金额 */
+            calPrice(unitPrice, num) {
+                var temp = Math.floor(parseFloat(unitPrice * 100 * num)) / 100;
+                return temp.toFixed(2);
+            },
+            /* 加载用户地址 */
+            loadUserAddress() {
+                gm.http.get("/address/queryUserAddress/")
+                    .then(resp => {
+                        var data = resp.data;
+                        if (resp.status === 200) {
+                            if (gm.isCollectionNotEmpty(data)) {
+                                this.userAddressList = data;
 
-						<div class="am-form-group">
-							<label for="user-phone" class="am-form-label">所在地</label>
-							<div class="am-form-content address">
-								<select data-am-selected>
-									<option value="a">浙江省</option>
-									<option value="b">湖北省</option>
-								</select>
-								<select data-am-selected>
-									<option value="a">温州市</option>
-									<option value="b">武汉市</option>
-								</select>
-								<select data-am-selected>
-									<option value="a">瑞安区</option>
-									<option value="b">洪山区</option>
-								</select>
-							</div>
-						</div>
+                                // 新增属性并初始化默认选中
+                                this.userAddressList.forEach(address => {
+                                    address.isChecked = 0;
+                                    if (address.isDefault == 1) {
+                                        address.isChecked = 1;
+                                        // 初始化默认选中
+                                        this.checkedAddress = address;
+                                    }
+                                });
 
-						<div class="am-form-group">
-							<label for="user-intro" class="am-form-label">详细地址</label>
-							<div class="am-form-content">
-								<textarea class="" rows="3" id="user-intro" placeholder="输入详细地址"></textarea>
-								<small>100字以内写出你的详细地址...</small>
-							</div>
-						</div>
+                            } else {
+                                alert("您还没有设置收货地址，请在 个人中心->个人资料->收货地址 设置!");
+                            }
+                        } else if (resp.status === 404) {
+                            // alert("一级行政区域数据空空如也!")
+                        } else {
+                            alert("加载用户地址数据失败!")
+                        }
+                    })
+                    .catch(() => {
+                        alert("加载用户地址数据失败，您可能还没有登录!")
+                    })
+            },
+            /* 选择地址 */
+            selectAddress(addressId) {
+                // 1，移除旧的选中地址
+                // 2，根据id设置新的选中地址
+                this.userAddressList.forEach(address => {
+                    address.isChecked = 0;
+                    if (address.id == addressId) {
+                        address.isChecked = 1;
+                        this.checkedAddress = address;
+                    }
+                });
+            },
+            /* 提交订单 */
+            submitOrder() {
+                // 1，封装数据
+                var submitOrderList = [];
+                this.goodsList.forEach(goodsItem => {
+                    var order = {
+                        addressId: this.checkedAddress.id,
+                        goodsId: goodsItem.goodsId,
+                        unitPrice: goodsItem.price,
+                        num: goodsItem.num
+                    }
+                    submitOrderList.push(order);
+                });
 
-						<div class="am-form-group theme-poptit">
-							<div class="am-u-sm-9 am-u-sm-push-3">
-								<div class="am-btn am-btn-danger">保存</div>
-								<div class="am-btn am-btn-danger close">取消</div>
-							</div>
-						</div>
-					</form>
-				</div>
+                // 2，发起请求
+                this.gm.http.post("/order/auth/submitOrder", submitOrderList).then(resp => {
+                    if (resp.status === 200) {
+                        var data = resp.data;
+                        if (data.state = 1) {
+                            gm.store.set("totalPrice", this.totalPrice);
+                            gm.store.set("address", this.checkedAddress);
+                            window.top.location.href = "http://www.greenmall.com/success.html";
+                        } else if (data.state = 2) {
+                            alert(data.info);
+                        } else {
+                            alert("订单提交失败!")
+                        }
+                    } else {
+                        alert("订单提交失败!")
+                    }
+                }).catch(() => {
+                    alert("订单提交异常。")
+                });
 
-			</div>
-
-			<div class="clear"></div>
-	</body>
-
+            }
+        }
+    });
+</script>
 </html>

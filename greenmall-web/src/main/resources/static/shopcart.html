@@ -266,7 +266,7 @@
                     <strong class="price">¥<em id="J_Total">{{totalPrice}}</em></strong>
                 </div>
                 <div class="btn-area">
-                    <a href="pay.html" id="J_Go" class="submit-btn submit-btn-disabled" aria-label="请注意如果没有选择宝贝，将无法结算">
+                    <a @click="payForGoods" id="J_Go" class="submit-btn submit-btn-disabled">
                         <span>结&nbsp;算</span></a>
                 </div>
             </div>
@@ -322,19 +322,20 @@
                     this.checkVal.forEach(goodsId => {
                         var cartItem = this.getCartItem(goodsId);
                         if (undefined != cartItem && cartItem != null) {
-                            var temp = math.multiply(math.bignumber(cartItem.price), math.bignumber(cartItem.num));
-                            totalPrice = math.add(temp, totalPrice);
+                            totalPrice += Math.floor(parseFloat(cartItem.price * 100 * cartItem.num)) / 100;
                         }
                     })
                 }
 
-                return math.format(totalPrice, 14);
+                return totalPrice.toFixed(2);
             }
         },
         methods: {
             /*解决计算精度问题*/
             calPrice(unitPrice, num) {
-                return math.format(unitPrice * num, 14);
+                var temp = Math.floor(parseFloat(unitPrice * 100 * num)) / 100;
+                return temp.toFixed(2);
+                // return math.format(unitPrice * num, 14);
             },
             /* 加载购物车数据 */
             loadShopCartData() {
@@ -355,7 +356,7 @@
                 }).catch(() => {
                     if (isLogin === 0) {
                         alert("您还没有登录，请登录之后做相关操作。")
-                        window.location.href = "http://www.greenmall.com/login.html";
+                        window.top.location.href = "http://www.greenmall.com/login.html";
                     } else {
                         alert("加载购物车异常...")
                     }
@@ -555,6 +556,24 @@
                     }).catch(() => {
                         alert("将多条数据移入收藏夹异常。")
                     });
+                }
+            },
+            /* 结算 */
+            payForGoods() {
+                if (gm.isCollectionNotEmpty(this.checkVal) == false) {
+                    alert("您没有选中任何商品无法进行结算!");
+                } else {
+                    // 0，清空原有数据
+                    gm.store.set("payData", {});
+                    // 1，将数据存储到本地浏览器
+                    var payData = {payDate: new Date().getTime(), goodsData: []};
+                    this.checkVal.forEach(goodsId => {
+                        payData.goodsData.push(this.getCartItem(goodsId));
+                    })
+                    // localStorage
+                    gm.store.set("payData", payData);
+                    // 2，跳转到结算页面
+                    window.location.href = "http://www.greenmall.com/pay.html";
                 }
             }
         }

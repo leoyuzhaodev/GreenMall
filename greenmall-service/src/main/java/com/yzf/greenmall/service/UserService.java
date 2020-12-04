@@ -2,6 +2,7 @@ package com.yzf.greenmall.service;
 
 import com.yzf.greenmall.common.CodecUtils;
 import com.yzf.greenmall.common.Message;
+import com.yzf.greenmall.common.NumberCalUtil;
 import com.yzf.greenmall.common.NumberUtils;
 import com.yzf.greenmall.common.jwt.UserInfo;
 import com.yzf.greenmall.mapper.UserMapper;
@@ -156,6 +157,8 @@ public class UserService {
         user.setValid(User.USER_VALID_YES);
         // 6，初始化账号状态
         user.setState(User.USER_STATE_NOT_INIT);
+        // 7，设置默认金额 10000
+        user.setPossession(10000D);
         int i = userMapper.insertSelective(user);
         if (i > 0) {
             return true;
@@ -482,5 +485,40 @@ public class UserService {
         userMapper.updateByPrimaryKeySelective(sysUser);
 
         return new Message(1, "");
+    }
+
+    /**
+     * 查询用户账户余额
+     *
+     * @param id
+     * @return
+     */
+    public Double findUserPossession(Long id) {
+        User user = userMapper.selectByPrimaryKey(id);
+        if (user == null) {
+            throw new RuntimeException("账户id对应的用户不存在!");
+        }
+        return user.getPossession();
+    }
+
+    /**
+     * 从指定账户扣钱
+     *
+     * @param id
+     * @param totalPrice
+     * @return
+     */
+    public boolean cost(Long id, Double totalPrice) {
+        User user = userMapper.selectByPrimaryKey(id);
+        if (user == null) {
+            throw new RuntimeException("账户id对应的用户不存在!");
+        }
+        if (user.getPossession() - totalPrice < 0) {
+            return false;
+        }
+        // 扣钱并更新账户
+        user.setPossession(NumberCalUtil.subtract(user.getPossession(), totalPrice));
+        userMapper.updateByPrimaryKeySelective(user);
+        return true;
     }
 }
