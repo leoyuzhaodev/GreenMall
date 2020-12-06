@@ -2,10 +2,7 @@ package com.yzf.greenmall.entity;
 
 import lombok.Data;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * @description:订单详情
@@ -28,6 +25,9 @@ public class OrderDetail {
     private Double unitPrice;
     private Integer num;
     private Integer state; // 10:正常 20:退款中 30:完成退款
+
+    @Transient
+    private String goodsTitle; // 商品名称
 
 
 }

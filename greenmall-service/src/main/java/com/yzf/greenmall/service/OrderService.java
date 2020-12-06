@@ -1,24 +1,28 @@
 package com.yzf.greenmall.service;
 
 
+import com.github.pagehelper.PageHelper;
+import com.yzf.greenmall.common.LayuiPage;
 import com.yzf.greenmall.common.Message;
 import com.yzf.greenmall.common.NumberCalUtil;
+import com.yzf.greenmall.common.QueryPage;
 import com.yzf.greenmall.common.jwt.UserInfo;
-import com.yzf.greenmall.entity.Goods;
-import com.yzf.greenmall.entity.Order;
-import com.yzf.greenmall.entity.OrderDetail;
-import com.yzf.greenmall.entity.SubmitOrderBo;
+import com.yzf.greenmall.entity.*;
 import com.yzf.greenmall.mapper.GoodsMapper;
 import com.yzf.greenmall.mapper.OrderDetailMapper;
 import com.yzf.greenmall.mapper.OrderMapper;
+import org.mockito.internal.matchers.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import tk.mybatis.mapper.entity.Example;
 
 import java.time.temporal.Temporal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description:OrderService
@@ -104,6 +108,82 @@ public class OrderService {
         }
 
         // 订单提交成功
+        return new Message(1, "");
+    }
+
+    /**
+     * 分页查询订单数据
+     *
+     * @param queryPage
+     * @return
+     */
+    public LayuiPage<Order> findOrderByPage(QueryPage<Order> queryPage) {
+
+        if (CollectionUtils.isEmpty(queryPage.getQueryMap())) {
+            queryPage.setQueryMap(Order.originalQueryMap());
+        }
+        Example example = queryPage.generateExample(Order.class, false);
+        // 2，分页查询
+        PageHelper.startPage(queryPage.getPage(), queryPage.getLimit());
+        List<Order> orderList = orderMapper.selectByExample(example);
+
+        if (CollectionUtils.isEmpty(orderList)) {
+            return new LayuiPage<Order>();
+        }
+
+        // 3，封装分页信息，并返回
+        return new LayuiPage<Order>().initLayuiPage(orderList);
+
+    }
+
+    /**
+     * 查询订单详情
+     *
+     * @param orderId
+     * @return
+     */
+    public List<OrderDetail> findOrderDetail(Long orderId) {
+        OrderDetail record = new OrderDetail();
+        record.setOrderId(orderId);
+        List<OrderDetail> list = orderDetailMapper.select(record);
+        if (!CollectionUtils.isEmpty(list)) {
+            // 加载商品名称
+            list.forEach(orderDetail -> {
+                Goods goods = goodsMapper.selectByPrimaryKey(orderDetail.getGoodsId());
+                orderDetail.setGoodsTitle(goods.getTitle());
+            });
+        }
+        return list;
+    }
+
+    /**
+     * 为订单设置物流单号
+     * {"orderId":"7","logisticsId":"1","logisticsFlag":"STO"}
+     *
+     * @param logisticsInfo
+     * @return
+     */
+    public Message setLogisticsInfo(Map<String, String> logisticsInfo) {
+        // 1，获取订单和物流信息
+        String orderId = logisticsInfo.get("orderId");
+        String logisticsId = logisticsInfo.get("logisticsId");
+        String logisticsFlag = logisticsInfo.get("logisticsFlag");
+        if (StringUtils.isEmpty(orderId) ||
+                StringUtils.isEmpty(logisticsId) ||
+                StringUtils.isEmpty(logisticsFlag)) {
+            throw new RuntimeException("为订单设置物流单号，缺少必要的信息");
+        }
+
+        // 2，设置物流单号，更新订单信息，改变订单状态
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (order == null) {
+            throw new RuntimeException("订单号不存在本系统");
+        }
+        order.setLogisticsId(logisticsId);
+        order.setLogisticsFlag(logisticsFlag);
+        order.setState(Order.STATE_SENT_SIGN);
+        orderMapper.updateByPrimaryKeySelective(order);
+
         return new Message(1, "");
     }
 }

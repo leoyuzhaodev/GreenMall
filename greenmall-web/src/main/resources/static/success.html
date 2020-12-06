@@ -49,8 +49,8 @@
                 </ul>
                 <div class="option">
                     <span class="info">您可以</span>
-                    <a href="person/order.html" class="J_MakePoint">查看<span>已买到的宝贝</span></a>
-                    <a href="person/orderinfo.html" class="J_MakePoint">查看<span>交易详情</span></a>
+                    <a href="http://www.greenmall.com/personalcenter.html" class="J_MakePoint">查看<span>个人中心</span></a>
+                    <a href="http://www.greenmall.com/personalcenter.html?open=forder" class="J_MakePoint">查看<span>订单管理</span></a>
                 </div>
             </div>
         </div>
@@ -77,9 +77,7 @@
             gmFooter: () => import("http://www.greenmall.com/js/pages/footer.js"),
         },
         watch: {},
-        computed: {
-
-        },
+        computed: {},
         methods: {
             /* 加载订单数据 */
             loadPayData() {
@@ -90,8 +88,8 @@
                     this.totalPrice = gm.store.get("totalPrice");
 
                     // 从 localStorage 清除数据
-                    gm.store.set("address",{});
-                    gm.store.set("totalPrice",{});
+                    gm.store.set("address", {});
+                    gm.store.set("totalPrice", {});
                 }).catch(() => {
                     if (isLogin === 0) {
                         alert("您还没有登录，请登录之后做相关操作。")

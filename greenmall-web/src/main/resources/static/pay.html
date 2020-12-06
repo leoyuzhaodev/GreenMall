@@ -254,7 +254,8 @@
             goodsList: [],
             totalPrice: 0.00,
             userAddressList: [],
-            checkedAddress: {}
+            checkedAddress: {},
+            isShopCartDeleted: 0
         }, created() {
             // 1，验证用户是否登录 并 加载本地数据并渲染
             this.loadPayData();
@@ -288,13 +289,12 @@
                     if (gm.isCollectionNotEmpty(temp.goodsData)) {
                         // 判断数据是否邮箱
                         var dateDiff = (new Date().getTime()) - temp.payDate;
-                        /*if (dateDiff > 2 * 60 * 1000) {
+                        if (dateDiff > 2 * 60 * 1000) {
                             alert("订单数据失效,请重新提交订单!")
                             gm.store.set("payData", {});
                             return;
-                        }*/
+                        }
                         this.goodsList = temp.goodsData;
-                        // gm.store.set("payData", {});
                     } else {
                         alert("订单数据加载失败!");
                     }
@@ -375,9 +375,28 @@
                     if (resp.status === 200) {
                         var data = resp.data;
                         if (data.state = 1) {
-                            gm.store.set("totalPrice", this.totalPrice);
-                            gm.store.set("address", this.checkedAddress);
-                            window.top.location.href = "http://www.greenmall.com/success.html";
+
+                            // 删除浏览器临时存储的数据
+                            gm.store.set("payData", {});
+
+                            // 删除购物车数据
+                            this.deleteShopCartData();
+
+                            var temp = this;
+                            var test2 = window.setInterval(function () {
+                                if (temp.isShopCartDeleted == 1) {
+                                    // 删除成功
+                                    temp.isShopCartDeleted = 0;
+                                    // 保存相关订单数据，方便成功页面使用
+                                    gm.store.set("totalPrice", temp.totalPrice);
+                                    gm.store.set("address", temp.checkedAddress);
+                                    // 跳转页面
+                                    window.top.location.href = "http://www.greenmall.com/success.html";
+                                    // 清除定时器
+                                    window.clearInterval(test2);
+                                }
+                            }, 20);
+
                         } else if (data.state = 2) {
                             alert(data.info);
                         } else {
@@ -389,7 +408,27 @@
                 }).catch(() => {
                     alert("订单提交异常。")
                 });
-
+            },
+            /* 删除购物车数据 */
+            deleteShopCartData() {
+                // 1,封装数据
+                var goodsIds = gm.getListAttrs(this.goodsList, 'goodsId');
+                console.log("goodsIds：" + JSON.stringify(goodsIds));
+                if (false == gm.isCollectionNotEmpty(goodsIds)) {
+                    return;
+                }
+                // 2,执行删除
+                this.gm.http.post("/shopCart/deleteBatch", goodsIds).then(resp => {
+                    if (resp.status === 200) {
+                        var message = resp.data;
+                        if (message.state == 1) {
+                            this.isShopCartDeleted = 1;
+                            // alert("购物车数据删除成功!");
+                        }
+                    }
+                }).catch(() => {
+                    alert("删除多条购物车数据异常。")
+                });
             }
         }
     });

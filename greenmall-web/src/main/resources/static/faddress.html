@@ -418,9 +418,9 @@
                     var test2 = window.setInterval(function () {
                         if (temp.isARReady == 2) {
                             temp.isARReady = 0;
-                            window.clearInterval(test2);
                             // 深度拷贝
                             temp.userAddress = editAddress;
+                            window.clearInterval(test2);
                         }
                     }, 20);
                 }
@@ -443,7 +443,7 @@
                         })
                 },
                 /* 重置地址信息 */
-                resetAddress(){
+                resetAddress() {
                     this.userAddress = gm.copyObject(this.userAddressEmpty);
                 }
             }

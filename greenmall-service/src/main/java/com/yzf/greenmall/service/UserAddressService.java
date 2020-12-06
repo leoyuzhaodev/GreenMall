@@ -130,4 +130,23 @@ public class UserAddressService {
         userAddress.setIsDefault((byte) 1);
         userAddressMapper.updateByPrimaryKeySelective(userAddress);
     }
+
+    /**
+     * 根据地址id查找地址信息
+     *
+     * @param id
+     * @return
+     */
+    public UserAddress findUserAddress(Long id) {
+        if (id == null) {
+            return null;
+        }
+        UserAddress userAddress = userAddressMapper.selectByPrimaryKey(id);
+        if (userAddress == null) {
+            return null;
+        } else {
+            loadFullAddress(userAddress);
+        }
+        return userAddress;
+    }
 }

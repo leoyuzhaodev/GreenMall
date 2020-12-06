@@ -709,6 +709,18 @@ const gm = greemmall = {
     gmFormatPrice(number) {
         var temp = Math.floor(parseFloat(number * 100)) / 100;
         return temp.toFixed(2);
+    },
+    /**
+     * 获取对象数组中某个属性的集合
+     * @param array
+     * @param attr
+     * @returns {*}
+     */
+    getListAttrs(array, attr) {
+        var arr = array.map((item) => {
+            return item[attr];
+        })
+        return arr;
     }
 
 }

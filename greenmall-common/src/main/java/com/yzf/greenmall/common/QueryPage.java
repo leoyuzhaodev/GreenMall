@@ -93,5 +93,64 @@ public class QueryPage<T> {
         return weekend;
     }
 
+    /**
+     * 组装查询对象
+     *
+     * @param classz
+     * @param isLike 是否模糊查询
+     * @return
+     */
+    public Example generateExample(Class classz, boolean isLike) {
+        // 查询对象
+        Example example = new Example(classz);
+        // 查询条件对象
+        Example.Criteria criteria = example.createCriteria();
+        Weekend<T> weekend = new Weekend<T>(classz);
+        WeekendCriteria<T, Object> keywordCriteria = weekend.weekendCriteria();
+        // 表示是否进行了条件查询
+        boolean isCriteria = false;
+
+        // 根据 queryMap 构建查询对象
+         /*
+            "id,accountId,addressId":"afdad","categoryId":"10"
+            where （id = ? or accountId = ? or addressId = ?） and categoryId = 10
+         */
+        if (!CollectionUtils.isEmpty(queryMap)) {
+            Set<String> fields = queryMap.keySet();
+            for (String field : fields) {
+                if (!StringUtils.isEmpty(field)) {
+                    String[] fds = field.split(",");
+                    if (fds.length > 1) {
+                        // 组合关键字查询
+                        for (String fd : fds) {
+                            if (!StringUtils.isEmpty(fd)) {
+                                if (isLike) {
+                                    keywordCriteria.orLike(fd, "%" + queryMap.get(field) + "%");
+                                } else {
+                                    // 注意非空判断
+                                    if (!StringUtils.isEmpty(queryMap.get(field))) {
+                                        keywordCriteria.orEqualTo(fd, queryMap.get(field));
+                                    }
+                                }
+                            }
+                        }
+                    } else if (fds.length == 1) {
+                        // 组合条件查询
+                        if (!StringUtils.isEmpty(fds[0])) {
+                            if (!StringUtils.isEmpty(queryMap.get(field))) {
+                                isCriteria = true;
+                                criteria.andEqualTo(fds[0], queryMap.get(field));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (isCriteria) {
+            weekend.and(criteria);
+        }
+        return weekend;
+    }
+
 
 }
