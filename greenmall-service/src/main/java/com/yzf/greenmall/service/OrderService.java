@@ -8,9 +8,7 @@ import com.yzf.greenmall.common.NumberCalUtil;
 import com.yzf.greenmall.common.QueryPage;
 import com.yzf.greenmall.common.jwt.UserInfo;
 import com.yzf.greenmall.entity.*;
-import com.yzf.greenmall.mapper.GoodsMapper;
-import com.yzf.greenmall.mapper.OrderDetailMapper;
-import com.yzf.greenmall.mapper.OrderMapper;
+import com.yzf.greenmall.mapper.*;
 import org.mockito.internal.matchers.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,6 +45,12 @@ public class OrderService {
 
     @Autowired
     private OrderDetailMapper orderDetailMapper;
+
+    @Autowired
+    private GoodsDetailMapper goodsDetailMapper;
+
+    @Autowired
+    private EvaluateService evaluateService;
 
     /**
      * 提交订单
@@ -186,4 +190,66 @@ public class OrderService {
 
         return new Message(1, "");
     }
+
+    /**
+     * 查询登录用户的所有订单
+     *
+     * @param loginUser
+     * @return
+     */
+    public List<Order> findOrder(UserInfo loginUser) {
+
+        // 1，查找所有的订单
+        Order record = new Order();
+        record.setAccountId(loginUser.getId());
+        record.setValid(Order.VALID_YES); // 用户未删除
+        List<Order> orderList = orderMapper.select(record);
+        if (CollectionUtils.isEmpty(orderList)) {
+            return null;
+        }
+
+        // 2，封装订单数据
+        orderList.forEach(order -> {
+            // 1，检测订单是否评价
+            order.setIsNeedEvaluate(Order.EVALUATE_NO);
+            if (order.getState() == Order.STATE_FINISHED) {
+                // 订单完成后，但是没有评价，此时需要评价标识为：1
+                if (!evaluateService.isOrderEvaluated(order.getId())) {
+                    order.setIsNeedEvaluate(Order.EVALUATE_YES);
+                }
+            }
+            // 2，查询订单详情 & 设置订单详情
+            order.setOrderDetailList(findOrderDetails(order.getId()));
+        });
+
+        return orderList;
+    }
+
+    /**
+     * 根据订单id查询订单详情
+     *
+     * @param orderId
+     * @return
+     */
+    public List<OrderDetail> findOrderDetails(Long orderId) {
+        // 1,查询订单详情
+        OrderDetail record = new OrderDetail();
+        record.setOrderId(orderId);
+        List<OrderDetail> list = orderDetailMapper.select(record);
+        if (CollectionUtils.isEmpty(list)) {
+            throw new RuntimeException("根据订单id" + orderId + "没有查询到订单详情");
+        }
+
+        // 2,封装数据
+        list.forEach(item -> {
+            // 1，设置商品名称和图片
+            Goods goods = goodsMapper.selectByPrimaryKey(item.getGoodsId());
+            GoodsDetail goodsDetail = goodsDetailMapper.selectByPrimaryKey(item.getGoodsId());
+            item.setGoodsTitle(goods.getTitle());
+            item.setGoodsImage(goodsDetail.getImages().split(",")[0]);
+        });
+
+        return list;
+    }
+
 }

@@ -2,6 +2,8 @@ package com.yzf.greenmall.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yzf.greenmall.bo.LogisticsInfoBO;
+import com.yzf.greenmall.entity.Order;
+import com.yzf.greenmall.mapper.OrderMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +52,8 @@ public class KdniaoTrackQueryService {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    @Autowired
+    private OrderMapper orderMapper;
 
     /**
      * 查询物流信息
@@ -272,5 +276,17 @@ public class KdniaoTrackQueryService {
             sb.append(base64EncodeChars[b3 & 0x3f]);
         }
         return sb.toString();
+    }
+
+    /**
+     * 根据订单ID查找物流信息
+     *
+     * @param orderId
+     * @return
+     */
+    public LogisticsInfoBO findLogisticsInfoByOrderId(Long orderId) {
+        // 1，根据订单信息查询物流信息
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        return this.queryLogisticsInfo(order.getLogisticsId(), order.getLogisticsFlag());
     }
 }

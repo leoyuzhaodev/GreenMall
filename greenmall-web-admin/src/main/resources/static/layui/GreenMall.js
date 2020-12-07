@@ -161,4 +161,23 @@ function getOrderDetailStateStr(flag) {
     }
 }
 
+/**
+ * 获取物流的状态
+ * @param flag
+ * @returns {string}
+ */
+function getLogisticsStateStr(flag) {
+    if (flag == "0") {
+        return "暂无轨迹信息";
+    } else if (flag == "1") {
+        return "已揽收";
+    } else if (flag == "2") {
+        return "在途中";
+    } else if (flag == "3") {
+        return "签收";
+    } else {
+        return "问题件";
+    }
+}
+
 

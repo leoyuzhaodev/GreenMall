@@ -28,6 +28,8 @@ public class OrderDetail {
 
     @Transient
     private String goodsTitle; // 商品名称
+    @Transient
+    private String goodsImage; // 商品图片
 
 
 }

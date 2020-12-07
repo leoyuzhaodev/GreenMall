@@ -1,7 +1,7 @@
 package com.yzf.greenmall.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yzf.greenmall.bo.LogisticInfoBO;
+import com.yzf.greenmall.bo.LogisticsInfoBO;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,7 +36,7 @@ public class KdniaoTrackQueryAPI {
         try {
             String result = api.getOrderTracesByJson("STO", "773061037885505");
             ObjectMapper mapper = new ObjectMapper();
-            LogisticInfoBO logisticInfoBO = mapper.readValue(result, LogisticInfoBO.class);
+            LogisticsInfoBO logisticInfoBO = mapper.readValue(result, LogisticsInfoBO.class);
             System.out.print(result);
         } catch (Exception e) {
             e.printStackTrace();

@@ -192,4 +192,20 @@ public class EvaluateService {
         BigDecimal b = new BigDecimal(goodEvaluateNum.doubleValue() / totalEvaluate.doubleValue());
         return b.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
+
+    /**
+     * 根据订单id判读订单是否已经评价
+     *
+     * @param orderId
+     * @return
+     */
+    public boolean isOrderEvaluated(Long orderId) {
+        Evaluate record = new Evaluate();
+        record.setOrderId(orderId);
+        int i = evaluateMapper.selectCount(record);
+        if (i > 0) {
+            return true;
+        }
+        return false;
+    }
 }

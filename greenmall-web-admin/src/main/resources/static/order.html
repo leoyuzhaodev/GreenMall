@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>规格参数管理</title>
+    <title>订单管理</title>
     <style>
     </style>
     <link rel="stylesheet" href="http://manager.greenmall.com/layui/css/layui.css">
@@ -20,8 +20,9 @@
 
         .LInfo {
             line-height: 30px;
-            font-size: 16px;
             color: blue;
+            font-size: 15px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -107,7 +108,8 @@
             <legend>物流信息</legend>
         </fieldset>
         <span style="margin-left: 10px;">物流公司：</span><span class="LInfo" id="logisticsInfoId"></span><br>
-        <span style="margin-left: 10px;">物流单号：</span><span class="LInfo" class id="logisticsInfoCompany"></span>
+        <span style="margin-left: 10px;">物流单号：</span><span class="LInfo" class id="logisticsInfoCompany"></span><br>
+        <span style="margin-left: 10px;">物流状态：</span><span class="LInfo" class id="logisticsInfoState"></span>
         <fieldset class="layui-elem-field layui-field-title">
             <legend>物流踪迹</legend>
         </fieldset>
@@ -455,7 +457,10 @@
             // 2，设置物流单号
             $("#logisticsInfoCompany").text(data['LogisticCode']);
 
-            // 3，物流时间线
+            // 3，设置物流状态
+            $("#logisticsInfoState").text(getLogisticsStateStr(data['State']));
+
+            // 4，物流时间线
             // 清空之前的數據
             $("#logisticsInfoDiv ul").empty();
             if (!isObjectEmpty(data['Traces'])) {

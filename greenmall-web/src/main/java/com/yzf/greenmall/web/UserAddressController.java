@@ -60,6 +60,23 @@ public class UserAddressController {
     }
 
     /**
+     * 根据地址id查找地址
+     *
+     * @return
+     */
+    @GetMapping(path = "/queryUserAddressById")
+    public ResponseEntity<UserAddress> queryUserAddressById(@RequestParam(name = "id") Long addressId) {
+        try {
+            UserInfo loginUser = LoginInterceptor.getLoginUser();
+            UserAddress userAddress = userAddressService.findUserAddress(addressId);
+            return ResponseEntity.ok(userAddress);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    /**
      * 根据用户id,以及地址id设置默认地址
      *
      * @return

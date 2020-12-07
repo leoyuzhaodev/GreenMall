@@ -647,6 +647,18 @@ const gm = greemmall = {
         return this.http.get("/auth/verify");
     },
     /**
+     * 判断对象是否为空
+     * @param list
+     * @returns {boolean}
+     */
+    isObjectNotEmpty(obj) {
+        if (obj !== undefined && obj != null) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+    /**
      * 判断集合是否为空
      * @param list
      * @returns {boolean}
@@ -721,6 +733,73 @@ const gm = greemmall = {
             return item[attr];
         })
         return arr;
+    },
+    /**
+     * 根据物流公司的标识获取物流公司的名称
+     * @param flag
+     * @returns {string}
+     */
+    getLogisticsName(flag) {
+        if (flag == "STO") {
+            return "申通快递";
+        } else if (flag == "YTO") {
+            return "圆通";
+        } else if (flag == "HTKY") {
+            return "百世快递";
+        } else if (flag == "HHTT") {
+            return "天天快递";
+        }
+        return "数据不合法";
+    },
+
+    /**
+     * 根据状态标识获取订单状态名称
+     * @param flag
+     * @returns {string}
+     */
+    getOrderStateStr(flag) {
+        if (flag == 10) {
+            return "完成付款/待发货";
+        } else if (flag == 20) {
+            return "已发货/待签收";
+        } else if (flag == 30) {
+            return "交易完成";
+        } else if (flag == 40) {
+            return "交易关闭";
+        }
+        return "非法数据";
+    },
+
+    /**
+     * 根据状态标识获取订单详情状态名称
+     * @param flag
+     * @returns {string}
+     */
+    getOrderDetailStateStr(flag) {
+        if (flag == 10) {
+            return "正常";
+        } else if (flag == 20) {
+            return "退款中";
+        } else if (flag == 30) {
+            return "完成退款";
+        } else {
+            return "数据异常";
+        }
+    },
+    /* 获取物流状态 */
+    getLogisticsStateStr(flag) {
+
+        if (flag == "0") {
+            return "暂无轨迹信息";
+        } else if (flag == "1") {
+            return "已揽收";
+        } else if (flag == "2") {
+            return "在途中";
+        } else if (flag == "3") {
+            return "签收";
+        } else {
+            return "问题件";
+        }
     }
 
 }
