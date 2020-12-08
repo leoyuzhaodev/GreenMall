@@ -5,8 +5,10 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.yzf.greenmall.bo.Comment;
 import com.yzf.greenmall.bo.EvaluateBo;
+import com.yzf.greenmall.common.Message;
 import com.yzf.greenmall.common.PageResult;
 import com.yzf.greenmall.common.QueryPage;
+import com.yzf.greenmall.common.jwt.UserInfo;
 import com.yzf.greenmall.entity.Evaluate;
 import com.yzf.greenmall.entity.User;
 import com.yzf.greenmall.mapper.EvaluateMapper;
@@ -207,5 +209,32 @@ public class EvaluateService {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 发表评论
+     *
+     * @param list
+     * @param loginUser
+     * @return
+     */
+    public Message comment(List<Evaluate> list, UserInfo loginUser) {
+
+        if (CollectionUtils.isEmpty(list)) {
+            throw new RuntimeException("评论list为空，无法进行评论！");
+        }
+
+        list.forEach(item -> {
+            // 设置评论用户
+            item.setAccountId(loginUser.getId());
+
+            // 设置评论时间
+            item.setCreateTime(new Date());
+
+            // 存入数据库中
+            evaluateMapper.insertSelective(item);
+        });
+
+        return new Message(1, "");
     }
 }

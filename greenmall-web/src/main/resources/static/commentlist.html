@@ -1,310 +1,257 @@
 <!DOCTYPE html>
 <html>
 
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=0">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=0">
 
-		<title>发表评论</title>
+    <title>发表评论</title>
+    <link href="AmazeUI-2.4.2/assets/css/admin.css" rel="stylesheet" type="text/css">
+    <link href="AmazeUI-2.4.2/assets/css/amazeui.css" rel="stylesheet" type="text/css"
+    <link href="css/personal.css" rel="stylesheet" type="text/css">
+    <link href="css/appstyle.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
 
-		<link href="AmazeUI-2.4.2/assets/css/admin.css" rel="stylesheet" type="text/css">
-		<link href="AmazeUI-2.4.2/assets/css/amazeui.css" rel="stylesheet" type="text/css">
+    <!-- 引入 vue，以及相关工具js -->
+    <script src="http://www.greenmall.com/js/validate.js"></script>
+    <script src="http://www.greenmall.com/js/vue/vue.js"></script>
+    <script src="http://www.greenmall.com/js/vue/vuetify.js"></script>
+    <script src="http://www.greenmall.com/js/axios.min.js"></script>
+    <script src="http://www.greenmall.com/js/common.js"></script>
+    <!-- 引入layui -->
+    <script src="http://www.greenmall.com/layui/layui.js"></script>
+    <link href="http://www.greenmall.com/layui/css/layui.css" rel="stylesheet" type="text/css">
 
-		<link href="css/personal.css" rel="stylesheet" type="text/css">
-		<link href="css/appstyle.css" rel="stylesheet" type="text/css">
-		<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
-	</head>
+    <style type="text/css">
+        .item-opinion li {
+            width: 20%;
+        }
 
-	<body>
-		<!--头 -->
-		<header>
-			<article>
-				<div class="mt-logo">
-					<!--顶部导航条 -->
-					<div class="am-container header">
-						<ul class="message-l">
-							<div class="topMessage">
-								<div class="menu-hd">
-									<a href="#" target="_top" class="h">亲，请登录</a>
-									<a href="#" target="_top">免费注册</a>
-								</div>
-							</div>
-						</ul>
-						<ul class="message-r">
-							<div class="topMessage home">
-								<div class="menu-hd"><a href="#" target="_top" class="h">商城首页</a></div>
-							</div>
-							<div class="topMessage my-shangcheng">
-								<div class="menu-hd MyShangcheng"><a href="#" target="_top"><i class="am-icon-user am-icon-fw"></i>个人中心</a></div>
-							</div>
-							<div class="topMessage mini-cart">
-								<div class="menu-hd"><a id="mc-menu-hd" href="#" target="_top"><i class="am-icon-shopping-cart  am-icon-fw"></i><span>购物车</span><strong id="J_MiniCartNum" class="h">0</strong></a></div>
-							</div>
-							<div class="topMessage favorite">
-								<div class="menu-hd"><a href="#" target="_top"><i class="am-icon-heart am-icon-fw"></i><span>收藏夹</span></a></div>
-						</ul>
-						</div>
+        .layui-upload-img {
+            width: 80px;
+            height: 80px;
+            margin-right: 10px;
+        }
 
-						<!--悬浮搜索框-->
+    </style>
 
-						<div class="nav white">
-							<div class="logoBig">
-								<li><img src="images/logobig.png" /></li>
-							</div>
+</head>
 
-							<div class="search-bar pr">
-								<a name="index_none_header_sysc" href="#"></a>
-								<form>
-									<input id="searchInput" name="index_none_header_sysc" type="text" placeholder="搜索" autocomplete="off">
-									<input id="ai-topsearch" class="submit am-btn" value="搜索" index="1" type="submit">
-								</form>
-							</div>
-						</div>
+<body>
+<div id="commentApp" style="background-color: white;border: 1px solid white">
 
-						<div class="clear"></div>
-					</div>
-				</div>
-			</article>
-		</header>
-            <div class="nav-table">
-					   <div class="long-title"><span class="all-goods">全部分类</span></div>
-					   <div class="nav-cont">
-							<ul>
-								<li class="index"><a href="#">首页</a></li>
-                                <li class="qc"><a href="#">闪购</a></li>
-                                <li class="qc"><a href="#">限时抢</a></li>
-                                <li class="qc"><a href="#">团购</a></li>
-                                <li class="qc last"><a href="#">大包装</a></li>
-							</ul>
-						    <div class="nav-extra">
-						    	<i class="am-icon-user-secret am-icon-md nav-user"></i><b></b>我的福利
-						    	<i class="am-icon-angle-right" style="padding-left: 10px;"></i>
-						    </div>
-						</div>
-			</div>
-			<b class="line"></b>
-		<div class="center">
-			<div class="col-main">
-				<div class="main-wrap">
+    <div class="user-comment">
+        <!--标题 -->
+        <div class="am-cf am-padding">
+            <div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">发表评论</strong> /
+                <small>CommentList</small></div>
+        </div>
+        <hr>
 
-					<div class="user-comment">
-						<!--标题 -->
-						<div class="am-cf am-padding">
-							<div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">发表评论</strong> / <small>Make&nbsp;Comments</small></div>
-						</div>
-						<hr/>
+        <div class="comment-main">
 
-						<div class="comment-main">
-							<div class="comment-list">
-								<div class="item-pic">
-									<a href="#" class="J_MakePoint">
-										<img src="images/comment.jpg_400x400.jpg" class="itempic">
-									</a>
-								</div>
+            <div v-for="(item,index) in orderDetailList" class="comment-list" style="height: 400px">
+                <div class="item-pic">
+                    <a :href="'http://www.greenmall.com/goods/introduction/'+item.goodsId+'.html'"
+                       class="J_MakePoint">
+                        <img :src="item.goodsImage" class="itempic">
+                    </a>
+                </div>
 
-								<div class="item-title">
+                <div class="item-title">
 
-									<div class="item-name">
-										<a href="#">
-											<p class="item-basic-info">美康粉黛醉美唇膏 持久保湿滋润防水不掉色</p>
-										</a>
-									</div>
-									<div class="item-info">
-										<div class="info-little">
-											<span>颜色：洛阳牡丹</span>
-											<span>包装：裸装</span>
-										</div>
-										<div class="item-price">
-											价格：<strong>19.88元</strong>
-										</div>										
-									</div>
-								</div>
-								<div class="clear"></div>
-								<div class="item-comment">
-									<textarea placeholder="请写下对宝贝的感受吧，对他人帮助很大哦！"></textarea>
-								</div>
-								<div class="filePic">
-									<input type="file" class="inputPic" allowexts="gif,jpeg,jpg,png,bmp" accept="image/*" >
-									<span>晒照片(0/5)</span>
-									<img src="images/image.jpg" alt="">
-								</div>
-								<div class="item-opinion">
-									<li><i class="op1"></i>好评</li>
-									<li><i class="op2"></i>中评</li>
-									<li><i class="op3"></i>差评</li>
-								</div>
-							</div>
-							
-							<!--多个商品评论-->
-							<div class="comment-list">
-								<div class="item-pic">
-									<a href="#" class="J_MakePoint">
-										<img src="images/comment.jpg_400x400.jpg" class="itempic">
-									</a>
-								</div>
+                    <div class="item-name">
+                        <a href="#">
+                            <p class="item-basic-info">{{item.goodsTitle}}</p>
+                        </a>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-price">
+                            价格：<strong> {{gm.gmFormatPrice(item.unitPrice)}}元</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="clear"></div>
+                <div class="item-comment">
+                    <textarea @blur="evaluateContent(item.goodsId)" v-model="item.content"
+                              placeholder="请写下对宝贝的感受吧，对他人帮助很大哦！"></textarea>
+                    <div class="layui-upload">
+                        <blockquote class="layui-elem-quote layui-quote-nm" style="margin-top: 10px;padding: 10px;">
+                            图片预览：
+                            <div class="layui-upload-list" :id="'demo'+item.goodsId"></div>
+                        </blockquote>
+                        <button type="button" @click="uploadImage(item.goodsId)"
+                                class="layui-btn layui-btn-warm layui-btn-sm test" :id="'test'+item.goodsId">
+                            图片评论
+                        </button>
+                    </div>
+                </div>
+                <div class="item-opinion">
+                    <li @click="evaluateScore(item.goodsId,1)"><i class="op3"></i>1分</li>
+                    <li @click="evaluateScore(item.goodsId,2)"><i class="op3"></i>2分</li>
+                    <li @click="evaluateScore(item.goodsId,3)"><i class="op2 active"></i>3分</li>
+                    <li @click="evaluateScore(item.goodsId,4)"><i class="op1"></i>4分</li>
+                    <li @click="evaluateScore(item.goodsId,5)"><i class="op1"></i>5分</li>
+                </div>
+            </div>
 
-								<div class="item-title">
+            <div class="info-btn">
+                <div @click="publishComment" class="am-btn am-btn-danger">发表评论</div>
+            </div>
+        </div>
 
-									<div class="item-name">
-										<a href="#">
-											<p class="item-basic-info">美康粉黛醉美唇膏 持久保湿滋润防水不掉色</p>
-										</a>
-									</div>
-									<div class="item-info">
-										<div class="info-little">
-											<span>颜色：洛阳牡丹</span>
-											<span>包装：裸装</span>
-										</div>
-										<div class="item-price">
-											价格：<strong>19.88元</strong>
-										</div>
-									</div>
-								</div>
-								<div class="clear"></div>
-								<div class="item-comment">
-									<textarea placeholder="请写下对宝贝的感受吧，对他人帮助很大哦！"></textarea>
-								</div>
-								<div class="filePic">
-									<input type="file" class="inputPic" allowexts="gif,jpeg,jpg,png,bmp" accept="image/*" >
-									<span>晒照片(0/5)</span>
-									<img src="images/image.jpg" alt="">
-								</div>
-								<div class="item-opinion">
-									<li><i class="op1"></i>好评</li>
-									<li><i class="op2"></i>中评</li>
-									<li><i class="op3"></i>差评</li>
-								</div>
-							</div>
-							
-							<div class="comment-list">
-								<div class="item-pic">
-									<a href="#" class="J_MakePoint">
-										<img src="images/comment.jpg_400x400.jpg" class="itempic">
-									</a>
-								</div>
+    </div>
 
-								<div class="item-title">
+</div>
+</body>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(".comment-list .item-opinion li").click(function () {
+            $(this).prevAll().children('i').removeClass("active");
+            $(this).nextAll().children('i').removeClass("active");
+            $(this).children('i').addClass("active");
+        });
+    })
+</script>
+<script>
 
-									<div class="item-name">
-										<a href="#">
-											<p class="item-basic-info">美康粉黛醉美唇膏 持久保湿滋润防水不掉色</p>
-										</a>
-									</div>
-									<div class="item-info">
-										<div class="info-little">
-											<span>颜色：洛阳牡丹</span>
-											<span>包装：裸装</span>
-										</div>
-										<div class="item-price">
-											价格：<strong>19.88元</strong>
-										</div>
-									</div>
-								</div>
-								<div class="clear"></div>
-								<div class="item-comment">
-									<textarea placeholder="请写下对宝贝的感受吧，对他人帮助很大哦！"></textarea>
-								</div>
-								<div class="filePic">
-									<input type="file" class="inputPic" allowexts="gif,jpeg,jpg,png,bmp" accept="image/*" >
-									<span>晒照片(0/5)</span>
-									<img src="images/image.jpg" alt="">
-								</div>
-								<div class="item-opinion">
-									<li><i class="op1"></i>好评</li>
-									<li><i class="op2"></i>中评</li>
-									<li><i class="op3"></i>差评</li>
-								</div>
-							</div>							
-								<div class="info-btn">
-									<div class="am-btn am-btn-danger">发表评论</div>
-								</div>							
-					<script type="text/javascript">
-						$(document).ready(function() {
-							$(".comment-list .item-opinion li").click(function() {	
-								$(this).prevAll().children('i').removeClass("active");
-								$(this).nextAll().children('i').removeClass("active");
-								$(this).children('i').addClass("active");
-								
-							});
-				     })
-					</script>					
-					
-												
-							
-						</div>
+    var vm = new Vue({
+        el: "#commentApp",
+        data: {
+            gm, // 必须引用到实例中，在html标签中才能使用
+            orderId: -1,// 订单id
+            orderDetailList: [], // 订单详情项
+            uploadIngGoodsId: -1,
+            flagNumber: 0
+        },
+        created() {
+            // 1,加载用户信息
+            this.loadUserData();
+            // 2,获取待评价的订单信息
+            this.loadEvaluateInfo();
+            // 3,加载layui
+            this.loadLayui();
+        }
+        ,
+        watch: {}
+        ,
+        computed: {}
+        ,
+        methods: {
+            /* 加载用户信息 */
+            loadUserData() {
+                var isLogin = 0;
+                // 1，登录验证
+                gm.verifyUser().then(() => {
+                    isLogin = 1;
+                }).catch(() => {
+                    if (isLogin === 0) {
+                        alert("您还没有登录，请登录之后做相关操作。")
+                        window.location.href = "http://www.greenmall.com/login.html";
+                    } else {
+                        alert("加载用户信息异常...")
+                    }
+                })
+            },
+            /* 加载待评价的订单信息 */
+            loadEvaluateInfo() {
+                var commentOrder = gm.store.get("commentOrder");
+                this.orderId = commentOrder.id;
+                this.orderDetailList = commentOrder.orderDetailList;
+                // 为集合中的对象添加属性
+                gm.addAttr(this.orderDetailList, "score", 3);
+                gm.addAttr(this.orderDetailList, "content", "不错哦");
+                gm.addAttr(this.orderDetailList, "images");
+            },
+            /* 评分 */
+            evaluateScore(goodsId, score) {
+                gm.updateArrayElement(this.orderDetailList, "goodsId", goodsId, "score", score);
+            },
+            /* 评价 文字内容 */
+            evaluateContent(goodsId) {
+                gm.updateArrayElement(this.orderDetailList, "goodsId", goodsId, "content");
+            },
+            /* layui */
+            loadLayui() {
+                const vue_this = this;
+                layui.use(['layer', 'upload'], function () {
+                    var upload = layui.upload;
+                    var layer = layui.layer;
+                    //多图片上传
+                    upload.render({
+                        elem: '.test'
+                        , url: 'http://www.greenmall.com/upload/image' //改成您自己的上传接口
+                        , multiple: true
+                        , number: 3
+                        , acceptMime: 'image/*'
+                        , accept: 'images'
+                        , size: 1024 * 2
+                        , before: function (obj) {
+                            //预读本地文件示例，不支持ie8
+                            obj.preview(function (index, file, result) {
+                                $('#demo' + vue_this.uploadIngGoodsId).append('<img class="layui-upload-img" src="' + result + '" alt="' + file.name + '" >')
+                            });
+                        }
+                        , done: function (res) {
 
-					</div>
+                            console.log("图片上传：goodsId:" + vue_this.uploadIngGoodsId);
 
-				</div>
-				<!--底部-->
-				<div class="footer">
-					<div class="footer-hd">
-						<p>
-							<a href="#">恒望科技</a>
-							<b>|</b>
-							<a href="#">商城首页</a>
-							<b>|</b>
-							<a href="#">支付宝</a>
-							<b>|</b>
-							<a href="#">物流</a>
-						</p>
-					</div>
-					<div class="footer-bd">
-						<p>
-							<a href="#">关于恒望</a>
-							<a href="#">合作伙伴</a>
-							<a href="#">联系我们</a>
-							<a href="#">网站地图</a>
-							<em>© 2015-2025 Hengwang.com 版权所有</em>
-						</p>
-					</div>
-				</div>
-			</div>
+                            //上传完毕
+                            var goodsIndex = gm.findListIndex(vue_this.orderDetailList, "goodsId", vue_this.uploadIngGoodsId);
+                            if (!gm.isObjectNotEmpty(vue_this.orderDetailList[goodsIndex].images)) {
+                                vue_this.orderDetailList[goodsIndex].images = new Array();
+                            }
+                            vue_this.orderDetailList[goodsIndex].images.push(res.info);
+                            vue_this.orderDetailList.splice(goodsIndex, 1, vue_this.orderDetailList[goodsIndex]);
+                        }
+                        , error: function () {
+                            layer.msg("图片上传失败!")
+                        }
+                    });
+                })
+            },
+            /* 多图片上传 */
+            uploadImage(goodsId) {
+                this.uploadIngGoodsId = goodsId;
+            },
+            /* 发表评论 */
+            publishComment() {
 
-			<aside class="menu">
-				<ul>
-					<li class="person">
-						<a href="index.html">个人中心</a>
-					</li>
-					<li class="person">
-						<a href="#">个人资料</a>
-						<ul>
-							<li> <a href="information.html">个人信息</a></li>
-							<li> <a href="safety.html">安全设置</a></li>
-							<li> <a href="address.html">收货地址</a></li>
-						</ul>
-					</li>
-					<li class="person">
-						<a href="#">我的交易</a>
-						<ul>
-							<li><a href="order.html">订单管理</a></li>
-							<li> <a href="change.html">退款售后</a></li>
-						</ul>
-					</li>
-					<li class="person">
-						<a href="#">我的资产</a>
-						<ul>
-							<li> <a href="coupon.html">优惠券 </a></li>
-							<li> <a href="bonus.html">红包</a></li>
-							<li> <a href="bill.html">账单明细</a></li>
-						</ul>
-					</li>
+                // 1，组装评论数据
+                var evaluateLists = [];
+                this.orderDetailList.forEach(item => {
+                    var comment = {
+                        orderId: this.orderId,
+                        goodsId: item.goodsId,
+                        score: item.score,
+                        content: item.content,
+                        images: (item.images) ? item.images.join(",") : null
+                    }
+                    evaluateLists.push(comment);
+                });
 
-					<li class="person">
-						<a href="#">我的小窝</a>
-						<ul>
-							<li> <a href="collection.html">收藏</a></li>
-							<li> <a href="foot.html">足迹</a></li>
-							<li class="active"> <a href="comment.html">评价</a></li>
-							<li> <a href="news.html">消息</a></li>
-						</ul>
-					</li>
+                // 2,提交评论到后台
+                this.gm.http.post("/evaluate/auth/comment", evaluateLists).then(resp => {
+                    if (resp.status === 200) {
+                        var data = resp.data;
+                        if (data.state == 1) {
+                            alert("发表评论成功!");
+                            // 清空 localStorage 中的内容
+                            gm.store.set("commentOrder", {});
+                            // 回到订单管理页面
+                            window.location.href = "http://www.greenmall.com/personalcenter.html?open=forder"
+                        } else {
+                            alert("发表评论失败!");
+                        }
+                    } else {
+                        alert("发表评论失败!")
+                    }
+                }).catch(() => {
+                    alert("发表评论异常。")
+                });
 
-				</ul>
-
-			</aside>
-		</div>
-
-	</body>
-
+            }
+        }
+    })
+</script>
 </html>

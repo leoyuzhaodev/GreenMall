@@ -60,7 +60,7 @@
                     <hr style="color: darkgrey">
                 </div>
                 <div style="margin-left: 0px" class="item-info">
-                    <p class="log-status">物流状态:<span>{{gm.getLogisticsStateStr(logisticsInfo.State)}}</span></p>
+                    <p class="log-status">物流状态：<span>{{gm.getLogisticsStateStr(logisticsInfo.State)}}</span></p>
                     <p>承运公司：{{gm.getLogisticsName(logisticsInfo.ShipperCode)}}</p>
                     <p>快递单号：{{logisticsInfo.LogisticCode}}</p>
                 </div>
@@ -77,8 +77,15 @@
                     </div>
                 </li>
             </ul>
+            <hr style="color: darkgrey;margin-top: 30px">
         </div>
     </div>
+    <div style="margin: 0px auto;text-align:center; margin-top: 30px; padding-bottom: 100px;">
+        <div @click="goBackPage" class="am-btn am-btn-danger anniu">
+            返回
+        </div>
+    </div>
+
 </div>
 </div>
 
@@ -160,6 +167,10 @@
                     .catch(() => {
                         alert("加载物流信息异常!")
                     })
+            },
+            /* 返回到上一个页面 */
+            goBackPage() {
+                window.history.back();
             }
         }
     })

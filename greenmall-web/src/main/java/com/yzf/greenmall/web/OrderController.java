@@ -11,10 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -62,6 +59,40 @@ public class OrderController {
                 return ResponseEntity.notFound().build();
             }
             return ResponseEntity.ok(list);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    /**
+     * 查询登录用户的所有订单
+     *
+     * @return
+     */
+    @GetMapping(path = "/confirmReceipt/{orderId}")
+    public ResponseEntity<Message> confirmReceipt(@PathVariable(name = "orderId") Long orderId) {
+        try {
+            UserInfo loginUser = LoginInterceptor.getLoginUser();
+            Message message = orderService.confirmReceipt(orderId);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    /**
+     * 删除订单
+     *
+     * @return
+     */
+    @GetMapping(path = "/deleteOrder/{orderId}")
+    public ResponseEntity<Message> deleteOrder(@PathVariable(name = "orderId") Long orderId) {
+        try {
+            UserInfo loginUser = LoginInterceptor.getLoginUser();
+            Message message = orderService.deleteOrder(orderId);
+            return ResponseEntity.ok(message);
         } catch (Exception e) {
             e.printStackTrace();
         }

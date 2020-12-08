@@ -800,6 +800,26 @@ const gm = greemmall = {
         } else {
             return "问题件";
         }
+    },
+    /* 为集合中的对象添加属性 */
+    addAttr(list, attr, val) {
+        list.forEach(item => {
+            if (this.isObjectNotEmpty(val)) {
+                item[attr] = val;
+            } else {
+                item[attr] = null;
+            }
+        })
+    },
+    /* 更新数组中的元素 */
+    updateArrayElement(list, attr, val, updateAttr, updateVal) {
+        var goodsIndex = this.findListIndex(list, attr, val);
+        if (this.isObjectNotEmpty(updateVal)) {
+            list[goodsIndex][updateAttr] = updateVal;
+        } else {
+            list[goodsIndex][updateAttr] = list[goodsIndex][updateAttr];
+        }
+        list.splice(goodsIndex, 1, list[goodsIndex]);
     }
 
 }

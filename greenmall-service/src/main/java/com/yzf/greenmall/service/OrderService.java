@@ -252,4 +252,41 @@ public class OrderService {
         return list;
     }
 
+    /**
+     * 确认收货
+     *
+     * @param orderId
+     * @return
+     */
+    public Message confirmReceipt(Long orderId) {
+        Order order = this.orderMapper.selectByPrimaryKey(orderId);
+        if (order == null) {
+            return new Message(2, "订单编号为：" + orderId + " 的订单不存在！");
+        }
+        order.setState(Order.STATE_FINISHED);
+        orderMapper.updateByPrimaryKeySelective(order);
+        return new Message(1, "收货成功");
+    }
+
+    /**
+     * 根据订单ID删除订单
+     *
+     * @param orderId
+     * @return
+     */
+    public Message deleteOrder(Long orderId) {
+
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (order == null) {
+            new RuntimeException("需要删除的订单不存在");
+        }
+
+        if (!(order.getState() == Order.STATE_FINISHED || order.getState() == Order.STATE_CLOSED)) {
+            return new Message(2, "没有交易完成，或者交易关闭的订单不能删除!");
+        }
+        order.setValid(Order.EVALUATE_NO);
+        orderMapper.updateByPrimaryKeySelective(order);
+
+        return new Message(1, "");
+    }
 }
