@@ -521,4 +521,19 @@ public class UserService {
         userMapper.updateByPrimaryKeySelective(user);
         return true;
     }
+
+    /**
+     * 指定用户退款
+     *
+     * @param id         用户id
+     * @param totalPrice 退款金额
+     */
+    public void transferAccounts(Long id, Double totalPrice) {
+        User user = userMapper.selectByPrimaryKey(id);
+        if (user == null) {
+            throw new RuntimeException("指定用户退款异常：无法根据用户id找到用户！");
+        }
+        user.setPossession(NumberCalUtil.add(user.getPossession(), totalPrice));
+        userMapper.updateByPrimaryKeySelective(user);
+    }
 }

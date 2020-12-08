@@ -180,4 +180,30 @@ function getLogisticsStateStr(flag) {
     }
 }
 
+/**
+ * 获取退款类型
+ * @param flag
+ * @returns {string}
+ */
+function getRefundTypeStr(flag) {
+    if (flag == "1") {
+        return "仅退款";
+    }
+    return "数据异常";
+}
 
+/**
+ * 获取退款原因
+ * @param flag
+ * @returns {string}
+ */
+function getRefundReasonStr(flag) {
+    if (flag == "1") {
+        return "不想要了";
+    } else if (flag == "2") {
+        return "买错了";
+    } else if (flag == "3") {
+        return "与说明不符";
+    }
+    return "数据异常";
+}

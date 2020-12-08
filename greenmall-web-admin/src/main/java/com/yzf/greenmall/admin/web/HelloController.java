@@ -23,13 +23,7 @@ public class HelloController {
      */
     @RequestMapping(path = "/")
     public String toHome() {
-        UserInfo loginUser = LoginInterceptor.getLoginUser();
-        System.out.println("执行了...");
-        if (loginUser == null) {
-            return "forward:login.html";
-        } else {
-            return "forward:index.html";
-        }
+        return "forward:index.html";
     }
 
 }

@@ -400,4 +400,18 @@ public class GoodsService {
         return true;
     }
 
+    /**
+     * 查找商品和商品详情经常使用的字段: 商品的图片，商品的名称，商品的价格
+     *
+     * @param goodsId
+     * @return
+     */
+    public Object[] findImageTitlePrice(Long goodsId) {
+        Goods goods = goodsMapper.selectByPrimaryKey(goodsId);
+        if (goods == null) {
+            return null;
+        }
+        GoodsDetail goodsDetail = goodsDetailMapper.selectByPrimaryKey(goodsId);
+        return new Object[]{goodsDetail.getImages(), goods.getTitle(), goodsDetail.getPrice()};
+    }
 }

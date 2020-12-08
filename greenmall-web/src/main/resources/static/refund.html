@@ -104,17 +104,16 @@
                 <div class="am-form-group">
                     <label for="refund-reason" class="am-form-label">退款原因</label>
                     <div class="am-form-content">
-                        <select v-model="refundInfo.reason" style="height: 30px"
-                                name="reason"
+                        <select v-model="refundInfo.reasonType" style="height: 30px"
+                                name="reasonType"
                                 data-vv-as="退款原因"
                                 v-validate="'required'">
-
                             <option value="" selected>请选择退款原因</option>
                             <option value="1" selected>不想要了</option>
                             <option value="2">买错了</option>
                             <option value="3">与说明不符</option>
                         </select>
-                        <span class="gmErrorInfo">{{ errors.first('reason') }}</span>
+                        <span class="gmErrorInfo">{{ errors.first('reasonType') }}</span>
                     </div>
                 </div>
 
@@ -128,7 +127,13 @@
                 <div class="am-form-group">
                     <label for="refund-info" class="am-form-label">退款说明<span>（可不填）</span></label>
                     <div class="am-form-content">
-                        <textarea v-model="refundInfo.description" placeholder="请输入退款说明"></textarea>
+                        <textarea v-model="refundInfo.description" placeholder="请输入退款说明(50字以内)"
+                                  name="description"
+                                  data-vv-as="退款说明"
+                                  v-validate="'max:50'">
+                        </textarea>
+                        <br>
+                        <span class="gmErrorInfo">{{ errors.first('description') }}</span>
                     </div>
                 </div>
             </div>
@@ -168,7 +173,7 @@
             refundData: {},
             refundInfo: {
                 type: 1,
-                reason: "",
+                reasonType: "",
                 description: "",
             }
         },
@@ -208,22 +213,31 @@
                 this.$validator.validateAll().then(d => {
                     if (d) {
                         // 1，封装数据
-						/*
-						private Long id;
-						-private Long orderId;
-						-private Long goodsId;
-						private Long accountId;
-						@JsonSerialize(using = DoubleSerialize.class)
-						-private Double unitPrice;
-						-private Integer num;
-						@JsonSerialize(using = DoubleSerialize.class)
-						private Double totalPrice;
-						-private Byte type; // 1,仅退款
-						-private Byte reason;
-						-private String description;
-						private String images;
-						private Date createTime;
-						 */
+                        this.refundInfo["orderId"] = this.refundData.id;
+                        this.refundInfo["goodsId"] = this.refundData.refundGoodsInfo.goodsId;
+                        this.refundInfo["unitPrice"] = this.refundData.refundGoodsInfo.unitPrice;
+                        this.refundInfo["num"] = this.refundData.refundGoodsInfo.num;
+                        // 2，提交申请
+                        this.gm.http.post("/refund/auth/refund", this.refundInfo).then(resp => {
+                            if (resp.status === 200) {
+                                var data = resp.data;
+                                if (data.state == 1) {
+                                    // 置空临时数据
+                                    gm.store.set("refundData", {});
+                                    alert("提交退款申请成功！");
+                                    // 跳转到退款售后列表
+                                    window.top.location.href = "http://www.greenmall.com/personalcenter.html?open=fchange";
+                                } else if (data.state == 2) {
+                                    alert(data.info);
+                                } else {
+                                    alert("提交退款申请失败!")
+                                }
+                            } else {
+                                alert("提交退款申请失败!")
+                            }
+                        }).catch(() => {
+                            alert("提交退款申请异常。")
+                        });
                     }
                 });
             }

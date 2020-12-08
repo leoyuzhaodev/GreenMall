@@ -367,7 +367,7 @@
                                             {{item.content}}
                                         </div>
                                         <!-- 评论图片 -->
-                                        <div class="tb-r-act-bar" style="margin-top: 10px">
+                                        <div v-if="gm.isStringNotEmpty(item.images)" class="tb-r-act-bar" style="margin-top: 10px">
                                             <div class="comment_img" v-for="(img,index) in item.images.split(',')"
                                                  :key="index">
                                                 <img width="100%" height="100%" :src="img"/>

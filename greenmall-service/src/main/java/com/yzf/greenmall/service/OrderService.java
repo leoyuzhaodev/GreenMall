@@ -9,7 +9,6 @@ import com.yzf.greenmall.common.QueryPage;
 import com.yzf.greenmall.common.jwt.UserInfo;
 import com.yzf.greenmall.entity.*;
 import com.yzf.greenmall.mapper.*;
-import org.mockito.internal.matchers.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +16,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import tk.mybatis.mapper.entity.Example;
 
-import java.time.temporal.Temporal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -137,7 +135,6 @@ public class OrderService {
 
         // 3，封装分页信息，并返回
         return new LayuiPage<Order>().initLayuiPage(orderList);
-
     }
 
     /**
@@ -200,10 +197,13 @@ public class OrderService {
     public List<Order> findOrder(UserInfo loginUser) {
 
         // 1，查找所有的订单
-        Order record = new Order();
-        record.setAccountId(loginUser.getId());
-        record.setValid(Order.VALID_YES); // 用户未删除
-        List<Order> orderList = orderMapper.select(record);
+        Example example = new Example(Order.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("accountId", loginUser.getId());
+        criteria.andEqualTo("valid", Order.VALID_YES);
+        example.setOrderByClause("create_time desc"); // 按照创建时间降序查找
+
+        List<Order> orderList = orderMapper.selectByExample(example);
         if (CollectionUtils.isEmpty(orderList)) {
             return null;
         }
@@ -288,5 +288,64 @@ public class OrderService {
         orderMapper.updateByPrimaryKeySelective(order);
 
         return new Message(1, "");
+    }
+
+    /**
+     * 退款：更改订单中产品的状态，如果订单中的商品全部退款，交易将会关闭
+     *
+     * @param orderId
+     * @param goodsId
+     */
+    public void refundGoods(Long orderId, Long goodsId) {
+        OrderDetail record = new OrderDetail();
+        record.setOrderId(orderId);
+        record.setGoodsId(goodsId);
+        OrderDetail orderDetail = orderDetailMapper.selectOne(record);
+        if (orderDetail.getState() != OrderDetail.STATE_NORMAL) {
+            throw new RuntimeException("退款：更改订单中产品的状态，该产品已退款，无法进行二次退款!");
+        }
+        if (orderDetail == null) {
+            throw new RuntimeException("退款：更改订单中产品的状态，根据订单ID,产品ID无法查询到订单详情!");
+        }
+
+        // 更新订单详情状态
+        orderDetail.setState(OrderDetail.STATE_REFUNDED);
+        orderDetailMapper.updateByPrimaryKeySelective(orderDetail);
+
+        // 判断交易是否关闭
+        // 1，查询订单详情正常的条目数，如果正常的条目数为 0 则表示交易关闭
+        record = new OrderDetail();
+        record.setOrderId(orderId);
+        record.setState(OrderDetail.STATE_NORMAL);
+        int count = orderDetailMapper.selectCount(record);
+        if (count == 0) {
+            // 更新订单状态
+            Order order = orderMapper.selectByPrimaryKey(orderId);
+            if (order == null) {
+                throw new RuntimeException("退款：更改订单状态，根据订单ID无法查询到订单!");
+            }
+            order.setState(Order.STATE_CLOSED);
+            // 更新数据库中的订单状态
+            orderMapper.updateByPrimaryKeySelective(order);
+        }
+
+    }
+
+    /**
+     * 获取订单中的某件商品的退款状态
+     *
+     * @param orderId
+     * @param goodsId
+     * @return
+     */
+    public Byte findRefundState(Long orderId, Long goodsId) {
+        OrderDetail record = new OrderDetail();
+        record.setOrderId(orderId);
+        record.setGoodsId(goodsId);
+        OrderDetail orderDetail = orderDetailMapper.selectOne(record);
+        if (orderDetail == null) {
+            throw new RuntimeException("获取订单中的某件商品的退款状态异常：根据商品ID和订单ID无法查找到订单详情！");
+        }
+        return orderDetail.getState().byteValue();
     }
 }

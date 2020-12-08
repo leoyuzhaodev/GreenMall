@@ -77,7 +77,7 @@
                         <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="userOrderDetail">订单详情</a>
                         {{#  if(d.state == 10){  }}
                         <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="send">发货</a>
-                        {{# }else{  }}
+                        {{# }else if(d.state != 40){  }}
                         <a class="layui-btn layui-btn-xs" lay-event="logisticsDetail">物流详情</a>
                         {{# }  }}
                     </script>
@@ -148,9 +148,7 @@
         var transfer = layui.transfer;
         var table = layui.table;
         var logisticsLayerIndex = -1;
-        var searchData = {
-            "id,name": ""
-        }
+        var searchData = {};
         var transferData = null;
         /* *************************************** 订单数据表 *************************************** */
         table.render({

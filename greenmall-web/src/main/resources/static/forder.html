@@ -65,7 +65,7 @@
                         <td class="td-inner">数量</td>
                     </div>
                     <div class="th th-operation">
-                        <td class="td-inner">商品操作</td>
+                        <td class="td-inner">商品状态/操作</td>
                     </div>
                     <div class="th th-amount">
                         <td class="td-inner">合计</td>
@@ -81,11 +81,10 @@
                 <div class="order-main">
                     <!-- 单条订单 -->
                     <div v-if="gm.isCollectionNotEmpty(allOrderList)"
-                         v-for="(item,index) in allOrderList"
-                         :key="item.id+'allOrderList'"
                          class="order-list">
-
-                        <div class="order-status3">
+                        <div class="order-status3"
+                             v-for="(item,index) in allOrderList"
+                             :key="item.id+'allOrderList'">
                             <div class="order-title">
                                 <div class="dd-num">订单编号：<a href="javascript:;">{{item.id}}</a></div>
                                 <span>成交时间：{{gm.renderTime(item.createTime)}}</span>
@@ -131,6 +130,10 @@
                                         </li>
                                         <li class="td td-operation">
                                             <div class="item-operation">
+                                                <a>状态：{{gm.getOrderDetailStateStr(od.state)}}</a>
+                                            </div>
+                                            <div v-if="item.state == 10 && od.state == 10" class="item-operation">
+                                                <a @click="refund(item.id,od.goodsId)">退款</a>
                                             </div>
                                         </li>
                                     </ul>
@@ -253,7 +256,7 @@
                         <td class="td-inner">数量</td>
                     </div>
                     <div class="th th-operation">
-                        <td class="td-inner">商品操作</td>
+                        <td class="td-inner">商品状态/操作</td>
                     </div>
                     <div class="th th-amount">
                         <td class="td-inner">合计</td>
@@ -268,12 +271,11 @@
                 <!-- 订单内容区域 -->
                 <div class="order-main">
                     <!-- 单条订单 -->
-                    <div v-if="gm.isCollectionNotEmpty(sendList)"
-                         v-for="(item,index) in sendList"
-                         :key="item.id+'sendList'"
-                         class="order-list">
+                    <div v-if="gm.isCollectionNotEmpty(sendList)" class="order-list">
 
-                        <div class="order-status3">
+                        <div class="order-status3"
+                             v-for="(item,index) in sendList"
+                             :key="item.id+'sendList'">
                             <div class="order-title">
                                 <div class="dd-num">订单编号：<a href="javascript:;">{{item.id}}</a></div>
                                 <span>成交时间：{{gm.renderTime(item.createTime)}}</span>
@@ -320,6 +322,9 @@
                                         <!-- 退款 -->
                                         <li class="td td-operation">
                                             <div class="item-operation">
+                                                <a>状态：{{gm.getOrderDetailStateStr(od.state)}}</a>
+                                            </div>
+                                            <div v-if="item.state == 10 && od.state == 10" class="item-operation">
                                                 <a @click="refund(item.id,od.goodsId)">退款</a>
                                             </div>
                                         </li>
@@ -367,7 +372,7 @@
                         <td class="td-inner">数量</td>
                     </div>
                     <div class="th th-operation">
-                        <td class="td-inner">商品操作</td>
+                        <td class="td-inner">商品状态</td>
                     </div>
                     <div class="th th-amount">
                         <td class="td-inner">合计</td>
@@ -382,12 +387,12 @@
                 <!-- 订单内容区域 -->
                 <div class="order-main">
                     <!-- 单条订单 -->
-                    <div v-if="gm.isCollectionNotEmpty(receiveList)"
-                         v-for="(item,index) in receiveList"
-                         :key="item.id+'receiveList'"
-                         class="order-list">
+                    <div v-if="gm.isCollectionNotEmpty(receiveList)" class="order-list">
 
-                        <div class="order-status3">
+                        <div class="order-status3"
+                             v-for="(item,index) in receiveList"
+                             :key="item.id+'receiveList'">
+
                             <div class="order-title">
                                 <div class="dd-num">订单编号：<a href="javascript:;">{{item.id}}</a></div>
                                 <span>成交时间：{{gm.renderTime(item.createTime)}}</span>
@@ -433,6 +438,7 @@
                                         </li>
                                         <li class="td td-operation">
                                             <div class="item-operation">
+                                                <a>状态：{{gm.getOrderDetailStateStr(od.state)}}</a>
                                             </div>
                                         </li>
                                     </ul>
@@ -482,7 +488,7 @@
                         <td class="td-inner">数量</td>
                     </div>
                     <div class="th th-operation">
-                        <td class="td-inner">商品操作</td>
+                        <td class="td-inner">商品状态</td>
                     </div>
                     <div class="th th-amount">
                         <td class="td-inner">合计</td>
@@ -496,12 +502,10 @@
                 </div>
                 <!-- 单条订单 -->
                 <div class="order-main">
-                    <div v-if="gm.isCollectionNotEmpty(evaluateList)" class="order-list"
-                         v-for="(item,index) in evaluateList"
-                         :key="item.id+'evaluateList'"
-                         class="order-list">
-
-                        <div class="order-status4">
+                    <div v-if="gm.isCollectionNotEmpty(evaluateList)" class="order-list">
+                        <div class="order-status4"
+                             v-for="(item,index) in evaluateList"
+                             :key="item.id+'evaluateList'">
                             <div class="order-title">
                                 <div class="dd-num">订单编号：<a href="javascript:;">{{item.id}}</a></div>
                                 <span>成交时间：{{gm.renderTime(item.createTime)}}</span>
@@ -547,6 +551,7 @@
                                         </li>
                                         <li class="td td-operation">
                                             <div class="item-operation">
+                                                <a>状态：{{gm.getOrderDetailStateStr(od.state)}}</a>
                                             </div>
                                         </li>
                                     </ul>
@@ -739,7 +744,7 @@
                 }
 
                 // 4，临时存储退款信息
-                gm.store.set("refundData",refundData);
+                gm.store.set("refundData", refundData);
 
                 // 5，跳转到退款页面
                 window.location.href = "http://www.greenmall.com/refund.html";
