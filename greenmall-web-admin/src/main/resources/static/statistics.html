@@ -23,16 +23,43 @@
             <div class="layui-card">
                 <div class="layui-card-header">用户注册统计</div>
                 <div class="layui-card-body">
-                    <div id="box" style="width: 600px;height: 400px;"></div>
+                    <div class="layui-row">
+                        <div class="layui-col-xs12">
+                            <div id="userStatisticBox" style="height: 400px;" class="grid-demo grid-demo-bg1"></div>
+                        </div>
+                    </div>
+                    <div class="layui-row">
+                        <div class="layui-col-xs12" style="text-align: center">
+                            年份：
+                            <select id="userStatisticYearLoad">
+                                <option value="2020">2020</option>
+                                <option value="2019">2019</option>
+                                <option value="2018">2018</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="layui-col-md6">
             <div class="layui-card">
-                <div class="layui-card-header">商品销售TOP10</div>
+                <div class="layui-card-header">商品销售量TOP10</div>
                 <div class="layui-card-body">
-                    结合 layui 的栅格系统<br>
-                    轻松实现响应式布局
+                    <div class="layui-row">
+                        <div class="layui-col-xs12">
+                            <div id="goodsStatisticBox" style="height: 400px;" class="grid-demo grid-demo-bg1"></div>
+                        </div>
+                    </div>
+                    <div class="layui-row">
+                        <div class="layui-col-xs12" style="text-align: center">
+                            年份：
+                            <select id="goodsStatisticYearLoad">
+                                <option value="2020">2020</option>
+                                <option value="2019">2019</option>
+                                <option value="2018">2018</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -40,7 +67,21 @@
             <div class="layui-card">
                 <div class="layui-card-header">销售额统计</div>
                 <div class="layui-card-body">
-                    内容
+                    <div class="layui-row">
+                        <div class="layui-col-xs12">
+                            <div id="saleStatisticBox" style="height: 400px;" class="grid-demo grid-demo-bg1"></div>
+                        </div>
+                    </div>
+                    <div class="layui-row">
+                        <div class="layui-col-xs12" style="text-align: center">
+                            年份：
+                            <select id="saleStatisticYearLoad">
+                                <option value="2020">2020</option>
+                                <option value="2019">2019</option>
+                                <option value="2018">2018</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -64,44 +105,319 @@
         var form = layui.form;
         var transfer = layui.transfer;
         var table = layui.table;
+        var userChart = null;
+        var goodsChart = null;
+        var saleRoomChart = null;
+        var salesvolumeInfo = null;
 
-        //初始化ehcharts实例
-        var myChart=echarts.init(document.getElementById("box"));
-        //指定图表的配置项和数据
-        var option={
-            //标题
-            title:{
-                text:'用户注册量统计'
-            },
-            //工具箱
-            //保存图片
-            toolbox:{
-                show:true,
-                feature:{
-                    saveAsImage:{
-                        show:true
+        // 加载用户统计图
+        function loadUserStatisticBox() {
+            //初始化ehcharts实例
+            userChart = echarts.init(document.getElementById("userStatisticBox"));
+            //指定图表的配置项和数据
+            var option = {
+                //标题
+                title: {
+                    text: '用户注册量统计'
+                },
+                // 提示框
+                tooltip: {
+                    textStyle: {
+                        align: 'left'
+                    },
+                    trigger: 'axis',
+                    formatter: '月份：{b}<br>' + '注册量：{c}'
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                //工具箱
+                toolbox: {
+                    show: true,
+                    feature: {
+                        saveAsImage: {
+                            show: true
+                        }
                     }
+                },
+                //图例-每一条数据的名字叫销量
+                legend: {
+                    data: ['注册量']
+                },
+                //x轴
+                xAxis: {
+                    data: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+                },
+                //y轴没有显式设置，根据值自动生成y轴
+                yAxis: {},
+                //数据-data是最终要显示的数据
+                series: [{
+                    name: '注册量',
+                    type: 'line',
+                    data: [40, 20, 35, 60, 55, 100, 33, 22, 112, 123, 5, 5]
+                }]
+            };
+            //使用刚刚指定的配置项和数据项显示图表
+            userChart.setOption(option);
+
+        }
+
+        // 初始化用户注册统计图
+        loadUserStatisticBox();
+
+        //加载用户注册统计图
+        function loadUserStatisticBoxData(year) {
+
+            // 加载数据
+            greenMallGet("/order/statisticRegistNum", {"year": year},
+                function (data) {
+                    // 动态加载注册量
+                    userChart.setOption({
+                        title: {
+                            text: data['year'] + '用户注册量统计'
+                        },
+                        legend: {
+                            data: [data['year'] + '注册量']
+                        },
+                        xAxis: {
+                            data: getListAttrs(data['registNumInfo'], "regist_month")
+                        },
+                        series: [
+                            {
+                                name: data['year'] + '注册量',
+                                type: 'line',
+                                data: getListAttrs(data['registNumInfo'], "num")
+                            }
+                        ]
+                    })
+                },
+                function () {
+                    layer.msg("加载用户注册统计图失败!");
                 }
-            },
-            //图例-每一条数据的名字叫销量
-            legend:{
-                data:['注册量']
-            },
-            //x轴
-            xAxis:{
-                data:["苹果","橘子","橙子","香蕉","菠萝","榴莲"]
-            },
-            //y轴没有显式设置，根据值自动生成y轴
-            yAxis:{},
-            //数据-data是最终要显示的数据
-            series:[{
-                name:'注册量',
-                type:'line',
-                data:[40,20,35,60,55,10]
-            }]
-        };
-        //使用刚刚指定的配置项和数据项显示图表
-        myChart.setOption(option);
+            )
+        }
+
+        // 使用当前年份加载数据
+        loadUserStatisticBoxData(new Date().getFullYear());
+
+        $("#userStatisticYearLoad").change(function () {
+            var year = $(this).val();
+            loadUserStatisticBoxData(year);
+        })
+
+        /* ************************************************************************************** */
+
+        // 加载商品销量TOP10统计图
+        function loadGoodsStatisticBox() {
+            goodsChart = echarts.init(document.getElementById('goodsStatisticBox'));
+            // 指定图表的配置项和数据
+            goodsChart.setOption({
+                title: {
+                    text: '2020商品销量TOP10统计图',
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    },
+                    formatter: function (data) {
+                        return "商品ID：" + data[0]['name'] + "<br>商品名称：" + getGoodsName(data[0]['name']) + "<br>商品销量：" + data[0]['data'];
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                legend: {
+                    /*  data: [ '2012年']*/
+                },
+                xAxis: {
+                    type: 'value',
+                    boundaryGap: [0, 0.01]
+                },
+                yAxis: {
+                    type: 'category',
+                    data: ['商品1', '商品2', '商品3', '商品4', '商品5', '商品6', '商品7', '商品8', '商品9', '商品10']
+                },
+                series: [
+                    {
+                        name: '2020年',
+                        type: 'bar',
+                        data: [10, 20, 31, 14, 11, 67, 100, 12, 9, 1]
+                    }
+                ]
+            });
+        }
+
+        // 初始化用户注册统计图
+        loadGoodsStatisticBox();
+
+        // 加载商品销量TOP10统计图
+        function loadGoodsStatisticBoxData(year) {
+            // 加载数据
+            greenMallGet("/order/statisticSalesvolume", {"year": year},
+                function (data) {
+                    // 保存统计数据，方便tip使用
+                    salesvolumeInfo = data['salesvolumeInfo'];
+
+                    // 动态加载注册量
+                    goodsChart.setOption({
+                        title: {
+                            text: data['year'] + '商品销量TOP10统计图',
+                        },
+                        yAxis: {
+                            type: 'category',
+                            data: getListAttrs(data['salesvolumeInfo'], "goods_id")
+                        },
+                        series: [
+                            {
+                                name: data['year'] + '年',
+                                type: 'bar',
+                                data: getListAttrs(data['salesvolumeInfo'], "sales_volume")
+                            }
+                        ]
+                    })
+                },
+                function () {
+                    layer.msg("加载商品销量TOP10统计图失败!");
+                }
+            );
+        }
+
+        // 使用当前年份加载数据
+        loadGoodsStatisticBoxData(new Date().getFullYear());
+
+        $("#goodsStatisticYearLoad").change(function () {
+            var year = $(this).val();
+            loadGoodsStatisticBoxData(year);
+        })
+
+        // 获取商品名称
+        function getGoodsName(goods_id) {
+            return findList(salesvolumeInfo, 'goods_id', goods_id)[0]['goods_name'];
+        }
+
+        /* ************************************************************************************** */
+
+
+        // 销售额统计
+        function loadSaleStatisticBox() {
+            saleRoomChart = echarts.init(document.getElementById('saleStatisticBox'));
+            // 指定图表的配置项和数据
+            var option = {
+                title: {
+                    text: '2018-2020销售额'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['2020年销售额', '2019年销售额', '2018年销售额']
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                toolbox: {
+                    feature: {
+                        saveAsImage: {}
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        name: '2020年销售额',
+                        type: 'line',
+                        data: [120, 132, 101, 134, 90, 230, 210, 101, 134, 90, 230, 210]
+                    },
+                    {
+                        name: '2019年销售额',
+                        type: 'line',
+                        data: [220, 182, 191, 234, 290, 330, 310, 101, 134, 90, 230, 210]
+                    },
+                    {
+                        name: '2018年销售额',
+                        type: 'line',
+                        data: [150, 232, 201, 154, 190, 330, 410, 101, 134, 90, 230, 210]
+                    }
+                ]
+            };
+            saleRoomChart.setOption(option);
+        }
+
+        loadSaleStatisticBox();
+
+        // 加载商品销量TOP10统计图
+        function loadSaleStatisticBoxData(year) {
+            // 加载数据
+            greenMallGet("/order/statisticSaleroom", {"year": year},
+                function (data) {
+
+                    getListAttrs(data, 'year');
+
+                    // 动态加载注册量
+                    saleRoomChart.setOption({
+                        title: {
+                            text: data[0]['year'] + '-' + data[2]['year'] + '销售额'
+                        },
+                        legend: {
+                            data: [data[0]['year'] + '年销售额', data[1]['year'] + '年销售额', data[2]['year'] + '年销售额']
+                        },
+                        xAxis: {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+                        },
+                        series: [
+                            {
+                                name: data[0]['year'] + '年销售额',
+                                type: 'line',
+                                // stack: '总量',
+                                data: getListAttrs(data[0]['saleroomInfo'], 'total')
+                            },
+                            {
+                                name: data[1]['year'] + '年销售额',
+                                type: 'line',
+                                // stack: '总量',
+                                data: getListAttrs(data[1]['saleroomInfo'], 'total')
+                            },
+                            {
+                                name: data[2]['year'] + '年销售额',
+                                type: 'line',
+                                // stack: '总量',
+                                data: getListAttrs(data[2]['saleroomInfo'], 'total')
+                            }
+                        ]
+                    })
+                },
+                function () {
+                    layer.msg("加载商品销量TOP10统计图失败!");
+                }
+            );
+        }
+
+        // 使用当前年份加载数据
+        loadSaleStatisticBoxData(new Date().getFullYear());
+
+        $("#saleStatisticYearLoad").change(function () {
+            var year = $(this).val();
+            loadSaleStatisticBoxData(year);
+        })
+
 
     });
 </script>

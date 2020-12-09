@@ -19,4 +19,8 @@ public interface SalesVolumeMapper extends Mapper<SalesVolume> {
      */
     @Select("select sum(sales_volume) from tb_sales_volume where goods_id = #{goodsId}")
     Long findGoodsAllSalesVolume(@Param("goodsId") Long goodsId);
+
+
+
+
 }

@@ -223,3 +223,30 @@ function getUserSexStr(flag) {
     }
     return "数据异常";
 }
+
+/**
+ * 获取对象数组中某个属性的集合
+ * @param array
+ * @param attr
+ * @returns {*}
+ */
+function getListAttrs(array, attr) {
+    var arr = array.map((item) => {
+        return item[attr];
+    })
+    return arr;
+}
+
+/**
+ * 根据属性以及对应的值在数组中查找数据
+ * @param list
+ * @param attr
+ * @param val
+ * @returns {*}
+ */
+function findList(list, attr, val) {
+    var items = list.filter(function (item) {
+        return item[attr] == val;
+    })
+    return items;
+}

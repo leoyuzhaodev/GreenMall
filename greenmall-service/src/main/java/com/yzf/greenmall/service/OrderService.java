@@ -9,6 +9,7 @@ import com.yzf.greenmall.common.QueryPage;
 import com.yzf.greenmall.common.jwt.UserInfo;
 import com.yzf.greenmall.entity.*;
 import com.yzf.greenmall.mapper.*;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,9 +17,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @description:OrderService
@@ -348,4 +347,94 @@ public class OrderService {
         }
         return orderDetail.getState().byteValue();
     }
+
+    /**
+     * 统计指定年份 1-12月 的销售额
+     *
+     * @param year
+     * @return
+     */
+    public List<Map<String, Object>> statisticSaleroom(Integer year) {
+
+        // 1，获取当前年份
+        Calendar calendar = Calendar.getInstance();
+        int curYear = calendar.get(Calendar.YEAR);
+        List<Integer> yearList = new ArrayList<>();
+
+        // 2，组装需要查询的年份
+        if (year == null || year > curYear) {
+            year = curYear;
+        }
+        for (int i = 1; i <= 3; i++) {
+            if (year >= curYear) {
+                yearList.add(year - 3 + i);
+            } else {
+                yearList.add(year - 2 + i);
+            }
+        }
+        // 3，根据年份进行后台查询，并组装前台数据
+        List<Map<String, Object>> listInfo = new ArrayList<>();
+        yearList.forEach(qYear -> {
+            Map<String, Object> mapInfo = new HashMap<>();
+            List<Map<String, Object>> list = orderMapper.statisticSaleroom(qYear);
+            mapInfo.put("year", qYear);
+            mapInfo.put("saleroomInfo", list);
+            listInfo.add(mapInfo);
+        });
+
+        return listInfo;
+    }
+
+    /**
+     * 统计指定年份，商品销售量top10
+     *
+     * @param year
+     * @return
+     */
+    public Map<String, Object> statisticSalesvolume(Integer year) {
+        // 年份获取
+        Calendar calendar = Calendar.getInstance();
+        int curYear = calendar.get(Calendar.YEAR);
+        if (year == null || year > curYear) {
+            year = curYear;
+        }
+        // 查询数据
+        List<Map<String, Object>> maps = orderMapper.statisticSalesvolume(year);
+        // 组装商品名称到map中
+        if (!CollectionUtils.isEmpty(maps)) {
+            for (Map<String, Object> map : maps) {
+                Long goods_id = (Long) map.get("goods_id");
+                Goods goods = goodsMapper.selectByPrimaryKey(goods_id);
+                map.put("goods_name", goods.getTitle());
+            }
+        }
+        // 组装返回数据
+        Map<String, Object> info = new HashMap<>();
+        info.put("year", year);
+        info.put("salesvolumeInfo", maps);
+        return info;
+    }
+
+    /**
+     * 统计指定年份 1-12月 的用户注册量
+     *
+     * @param year
+     * @return
+     */
+    public Map<String, Object> statisticRegistNum(Integer year) {
+        // 年份获取
+        Calendar calendar = Calendar.getInstance();
+        int curYear = calendar.get(Calendar.YEAR);
+        if (year == null || year > curYear) {
+            year = curYear;
+        }
+        // 查询数据
+        List<Map<String, Object>> maps = orderMapper.statisticRegistNum(year);
+        // 组装返回数据
+        Map<String, Object> info = new HashMap<>();
+        info.put("year", year);
+        info.put("registNumInfo", maps);
+        return info;
+    }
+
 }

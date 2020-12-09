@@ -27,12 +27,6 @@ public class TestController {
 
     @PostMapping(path = "/test")
     public ResponseEntity<Void> search() {
-        try {
-            evaluateService.addTestData();
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 

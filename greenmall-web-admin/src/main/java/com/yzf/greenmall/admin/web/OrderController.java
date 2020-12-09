@@ -90,5 +90,62 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
+    /**
+     * 统计指定年份 1-12月 的销售额
+     *
+     * @param year
+     * @return
+     */
+    @GetMapping(path = "/statisticSaleroom")
+    public ResponseEntity<List<Map<String, Object>>> statisticSaleroom(
+            @RequestParam(name = "year", required = false) Integer year) {
+        try {
+            List<Map<String, Object>> info = orderService.statisticSaleroom(year);
+            return ResponseEntity.ok(info);
+        } catch (Exception e) {
+            LOGGER.info("统计指定年份 1-12月 的销售额:服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    /**
+     * 统计指定年份，商品销售量top10
+     *
+     * @param year
+     * @return
+     */
+    @GetMapping(path = "/statisticSalesvolume")
+    public ResponseEntity<Map<String, Object>> statisticSalesvolume(
+            @RequestParam(name = "year", required = false) Integer year) {
+        try {
+            Map<String, Object> info = orderService.statisticSalesvolume(year);
+            return ResponseEntity.ok(info);
+        } catch (Exception e) {
+            LOGGER.info("统计指定年份，商品销售量top10:服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    /**
+     * 统计指定年份 1-12月 的用户注册量
+     *
+     * @param year
+     * @return
+     */
+    @GetMapping(path = "/statisticRegistNum")
+    public ResponseEntity<Map<String, Object>> statisticRegistNum(
+            @RequestParam(name = "year", required = false) Integer year) {
+        try {
+            Map<String, Object> info = orderService.statisticRegistNum(year);
+            return ResponseEntity.ok(info);
+        } catch (Exception e) {
+            LOGGER.info("统计指定年份 1-12月 的用户注册量:服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
 
 }
