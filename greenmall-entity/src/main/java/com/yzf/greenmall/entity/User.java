@@ -9,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @description: User
@@ -54,4 +56,10 @@ public class User implements Serializable {
     // 状态 1：未初始化，刚刚注册 2:初始化完成 4:支付密码设置完成
     private Integer state;
 
+    public static Map<String, String> originalQueryMap() {
+        Map<String, String> queryMap = new HashMap<>();
+        queryMap.put("id,name,nickName,phone,email", "");
+        queryMap.put("valid", "");
+        return queryMap;
+    }
 }

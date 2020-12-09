@@ -100,7 +100,7 @@ public class RefundService {
      * @param queryPage
      * @return
      */
-    public LayuiPage<Refund> findOrderByPage(QueryPage<Refund> queryPage) {
+    public LayuiPage<Refund> findRefundByPage(QueryPage<Refund> queryPage) {
 
         if (CollectionUtils.isEmpty(queryPage.getQueryMap())) {
             queryPage.setQueryMap(Refund.originalQueryMap());

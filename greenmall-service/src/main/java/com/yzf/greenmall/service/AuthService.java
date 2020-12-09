@@ -40,7 +40,7 @@ public class AuthService {
         try {
             // 1，查找用户
             User user = userService.findUserByKeyAndPwd(key, password);
-            if (user == null) {
+            if (user == null || user.getValid() == User.USER_VALID_NO) {
                 return null;
             }
             // 2，根据用户信息生成token

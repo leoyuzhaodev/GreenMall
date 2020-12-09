@@ -45,6 +45,7 @@ public class Refund {
     private static final Byte REFUND_REASON_ABANDON = 1; // 不想要了
     private static final Byte REFUND_REASON_WRONG = 2; // 买错了
     private static final Byte REFUND_REASON_CHEAT = 3; // 与说明不符
+
     /**
      * 查询条件
      *
@@ -52,8 +53,7 @@ public class Refund {
      */
     public static Map<String, String> originalQueryMap() {
         Map<String, String> queryMap = new HashMap<>();
-        queryMap.put("id,accountId,addressId", "");
-        queryMap.put("state", "");
+        queryMap.put("id,orderId,goodsId,accountId", "");
         return queryMap;
     }
 }

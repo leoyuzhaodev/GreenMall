@@ -1,10 +1,9 @@
 package com.yzf.greenmall.service;
 
-import com.yzf.greenmall.common.CodecUtils;
-import com.yzf.greenmall.common.Message;
-import com.yzf.greenmall.common.NumberCalUtil;
-import com.yzf.greenmall.common.NumberUtils;
+import com.github.pagehelper.PageHelper;
+import com.yzf.greenmall.common.*;
 import com.yzf.greenmall.common.jwt.UserInfo;
+import com.yzf.greenmall.entity.Refund;
 import com.yzf.greenmall.mapper.UserMapper;
 import com.yzf.greenmall.entity.User;
 import org.apache.commons.lang3.StringUtils;
@@ -17,10 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -535,5 +536,52 @@ public class UserService {
         }
         user.setPossession(NumberCalUtil.add(user.getPossession(), totalPrice));
         userMapper.updateByPrimaryKeySelective(user);
+    }
+
+    /**
+     * 分页查询用户
+     *
+     * @param queryPage
+     * @return
+     */
+    public LayuiPage<User> findOrderByPage(QueryPage<User> queryPage) {
+
+        if (CollectionUtils.isEmpty(queryPage.getQueryMap())) {
+            queryPage.setQueryMap(User.originalQueryMap());
+        }
+        Example example = queryPage.generateExample(User.class, true);
+        // 2，分页查询
+        PageHelper.startPage(queryPage.getPage(), queryPage.getLimit());
+        List<User> refundList = userMapper.selectByExample(example);
+
+        if (CollectionUtils.isEmpty(refundList)) {
+            return new LayuiPage<User>();
+        }
+
+        // 3，封装分页信息，并返回
+        return new LayuiPage<User>().initLayuiPage(refundList);
+    }
+
+    /**
+     * 禁用或者解禁用户
+     *
+     * @param type
+     * @param userId
+     * @return
+     */
+    public Message userValid(Integer type, Long userId) {
+        User user = userMapper.selectByPrimaryKey(userId);
+        if (user == null) {
+            throw new RuntimeException("根据用户ID禁用或者解禁用户异常：根据用户ID无法查找到用户信息！");
+        }
+        if (type == 1) {
+            // 禁用
+            user.setValid(User.USER_VALID_NO);
+        } else {
+            // 解禁
+            user.setValid(User.USER_VALID_YES);
+        }
+        userMapper.updateByPrimaryKeySelective(user);
+        return new Message(1, "");
     }
 }

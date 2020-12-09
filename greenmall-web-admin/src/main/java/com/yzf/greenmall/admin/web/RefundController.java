@@ -37,7 +37,7 @@ public class RefundController {
     @PostMapping(path = "/queryRefundByPage")
     public ResponseEntity<LayuiPage<Refund>> queryOrderByPage(@RequestBody QueryPage<Refund> queryPage) {
         try {
-            LayuiPage<Refund> orderPage = refundService.findOrderByPage(queryPage);
+            LayuiPage<Refund> orderPage = refundService.findRefundByPage(queryPage);
             return ResponseEntity.ok(orderPage);
         } catch (Exception e) {
             LOGGER.info("分页查询退款申请:服务器内部错误：{}", e.getMessage());

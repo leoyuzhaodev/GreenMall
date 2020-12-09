@@ -207,3 +207,19 @@ function getRefundReasonStr(flag) {
     }
     return "数据异常";
 }
+
+/**
+ * 1：男，0：女 2：保密
+ * 获取用户性别
+ * @param flag
+ */
+function getUserSexStr(flag) {
+    if (flag == "1") {
+        return "男";
+    } else if (flag == "0") {
+        return "女";
+    } else if (flag == "2") {
+        return "保密";
+    }
+    return "数据异常";
+}

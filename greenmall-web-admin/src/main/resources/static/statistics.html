@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>数据统计</title>
+    <link rel="stylesheet" href="http://manager.greenmall.com/layui/css/layui.css">
+    <link rel="stylesheet" href="http://manager.greenmall.com/layui/css/GreenMall.css">
+</head>
+<body>
+<!-- 面包屑 -->
+<div id="breadcrumb">
+    <span class="layui-breadcrumb">
+      <a href="/">首页</a>
+      <a href="javascript:void(0);">数据总览</a>
+      <a><cite>数据统计</cite></a>
+    </span>
+</div>
+
+<!-- 面板 -->
+<div style="padding: 20px; background-color: #F2F2F2;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md6">
+            <div class="layui-card">
+                <div class="layui-card-header">用户注册统计</div>
+                <div class="layui-card-body">
+                    <div id="box" style="width: 600px;height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md6">
+            <div class="layui-card">
+                <div class="layui-card-header">商品销售TOP10</div>
+                <div class="layui-card-body">
+                    结合 layui 的栅格系统<br>
+                    轻松实现响应式布局
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">销售额统计</div>
+                <div class="layui-card-body">
+                    内容
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="http://manager.greenmall.com/layui/layui.js"></script>
+<script src="http://manager.greenmall.com/layui/jquery-3.5.1.min.js" charset="utf-8"></script>
+<script src="http://manager.greenmall.com/layui/GreenMall.js"></script>
+<script src="http://manager.greenmall.com/js/GMVerify.js" charset="utf-8"></script>
+<script src="http://manager.greenmall.com/js/echarts.min.js" charset="utf-8"></script>
+<script>
+    //JavaScript代码区域
+    layui.use(['transfer', 'form', 'jquery', 'element', 'tree', 'util', 'table'], function () {
+        var $ = layui.jquery;
+        var element = layui.element;
+        var tree = layui.tree;
+        var layer = layui.layer;
+        var util = layui.util;
+        var form = layui.form;
+        var transfer = layui.transfer;
+        var table = layui.table;
+
+        //初始化ehcharts实例
+        var myChart=echarts.init(document.getElementById("box"));
+        //指定图表的配置项和数据
+        var option={
+            //标题
+            title:{
+                text:'用户注册量统计'
+            },
+            //工具箱
+            //保存图片
+            toolbox:{
+                show:true,
+                feature:{
+                    saveAsImage:{
+                        show:true
+                    }
+                }
+            },
+            //图例-每一条数据的名字叫销量
+            legend:{
+                data:['注册量']
+            },
+            //x轴
+            xAxis:{
+                data:["苹果","橘子","橙子","香蕉","菠萝","榴莲"]
+            },
+            //y轴没有显式设置，根据值自动生成y轴
+            yAxis:{},
+            //数据-data是最终要显示的数据
+            series:[{
+                name:'注册量',
+                type:'line',
+                data:[40,20,35,60,55,10]
+            }]
+        };
+        //使用刚刚指定的配置项和数据项显示图表
+        myChart.setOption(option);
+
+    });
+</script>
+</html>
