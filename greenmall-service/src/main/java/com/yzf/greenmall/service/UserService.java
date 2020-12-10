@@ -160,6 +160,8 @@ public class UserService {
         user.setState(User.USER_STATE_NOT_INIT);
         // 7，设置默认金额 10000
         user.setPossession(10000D);
+        // 8，设置默认头像
+        user.setPortrait("http://www.greenmall.com/images/hwbn40x40.jpg");
         int i = userMapper.insertSelective(user);
         if (i > 0) {
             return true;

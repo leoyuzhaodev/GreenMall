@@ -66,4 +66,18 @@ public class Goods implements Serializable {
         queryMap.put("valid", "1");
         return queryMap;
     }
+
+    /**
+     * 判断商品是否能够用于搜索
+     *
+     * @return
+     */
+    public boolean searchGoods() {
+        // 判断 [库存] [是否下架] [是否删除]
+        if (this.getGoodsDetail().getStock() <= 0 || this.getSaleable() == false || this.getValid() == false) {
+            return false;
+        }
+        return true;
+    }
+
 }

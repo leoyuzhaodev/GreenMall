@@ -42,7 +42,7 @@ public class GoodsSearch implements Serializable {
 
     }
 
-    public GoodsSearch(Long id, String subTitle, String all, String images, Long cid1, Long cid2, Long cid3, Date createTime, Long salesVolume, Double price) {
+    public GoodsSearch(Long id, String subTitle, String all, String images, Long cid1, Long cid2, Long cid3, Date createTime, Double price) {
         this.id = id;
         this.subTitle = subTitle;
         this.all = all;
@@ -51,7 +51,6 @@ public class GoodsSearch implements Serializable {
         this.cid2 = cid2;
         this.cid3 = cid3;
         this.createTime = createTime;
-        this.salesVolume = salesVolume;
         this.price = price;
         this.evaluationScores = evaluationScores;
     }
@@ -72,7 +71,6 @@ public class GoodsSearch implements Serializable {
                 goods.getCid2(),
                 goods.getCid3(),
                 goods.getCreateTime(),
-                goods.getSalesVolume() == null ? 0 : goods.getSalesVolume(),
                 goods.getGoodsDetail().getPrice()
         );
         return goodsSearch;

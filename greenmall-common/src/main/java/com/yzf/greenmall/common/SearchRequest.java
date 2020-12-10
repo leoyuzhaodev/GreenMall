@@ -8,6 +8,7 @@ public class SearchRequest {
     private Integer page; // 当前页
     private String sortBy; // 排序字段
     private Boolean isAsc; // 是否升序
+    private Long cid3; // 分类
 
     private static final Integer DEFAULT_SIZE = 12;// 每页大小，不从页面接收，而是固定大小
     private static final Integer DEFAULT_PAGE = 1;// 默认页

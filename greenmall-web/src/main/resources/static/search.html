@@ -43,7 +43,9 @@
                     <div class="theme-popover">
                         <ul class="select">
                             <p class="title font-normal">
-                                <span class="fl">【{{searchInfo.key}}】</span>
+                                <span v-if="gm.isStringNotEmpty(searchInfo.key)"
+                                      class="fl">关键字:【{{searchInfo.key}}】</span>
+                                <span v-if="gm.isStringNotEmpty(categoryName)" class="fl">分类:【{{categoryName}}】</span>
                                 <span class="total fl">
                                     搜索到：<strong style="color: red;font-weight: bold;" class="num">
                                     {{this.pageInfo.total}}</strong>&nbsp;件相关商品
@@ -147,12 +149,16 @@
                 page: 1,// 当前页码
                 totalPage: 0, // 总页面数
                 total: 0 // 数据总条数
-            }
+            },
+            categoryName: null
         }, created() {
             // 判断是否有请求参数
             if (!location.search) {
                 return;
             }
+            // 获取分类名称
+            this.categoryName = gm.getUrlParam("categoryName");
+
             // 初始化请求参数
             this.initSearchData(gm.parse(location.search.substring(1)));
 

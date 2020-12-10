@@ -49,6 +49,9 @@ public class OrderService {
     @Autowired
     private EvaluateService evaluateService;
 
+    @Autowired
+    private SalesVolumeService salesVolumeService;
+
     /**
      * 提交订单
      *
@@ -124,6 +127,7 @@ public class OrderService {
             queryPage.setQueryMap(Order.originalQueryMap());
         }
         Example example = queryPage.generateExample(Order.class, false);
+        example.setOrderByClause("create_time desc");
         // 2，分页查询
         PageHelper.startPage(queryPage.getPage(), queryPage.getLimit());
         List<Order> orderList = orderMapper.selectByExample(example);
@@ -183,6 +187,12 @@ public class OrderService {
         order.setLogisticsFlag(logisticsFlag);
         order.setState(Order.STATE_SENT_SIGN);
         orderMapper.updateByPrimaryKeySelective(order);
+
+        // 3，发货之后更新库存
+        goodsService.updateStock(new Long(orderId));
+
+        // 4，发货之后更新销量
+        salesVolumeService.updateSalesVolume(new Long(orderId));
 
         return new Message(1, "");
     }

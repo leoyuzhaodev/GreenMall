@@ -48,4 +48,14 @@ public interface EvaluateMapper extends Mapper<Evaluate>, SelectByIdListMapper<E
      */
     @Select("SELECT count(*) FROM `tb_evaluate` where goods_id = #{id} and score < 3")
     Long getBadEvaluateNum(@Param("id") Long id);
+
+    /**
+     * 获取商品评分：向下取整
+     *
+     * @param goodsId
+     * @return
+     */
+    @Select("SELECT FLOOR(AVG(score)) FROM `tb_evaluate` WHERE goods_id = #{goodsId}")
+    Integer getGoodsAvgScore(@Param("goodsId") Long goodsId);
+
 }

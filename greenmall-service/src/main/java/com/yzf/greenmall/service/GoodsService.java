@@ -9,11 +9,10 @@ import com.yzf.greenmall.bo.GoodsIntroduction;
 import com.yzf.greenmall.bo.ParamBo;
 import com.yzf.greenmall.common.LayuiPage;
 import com.yzf.greenmall.common.QueryPage;
-import com.yzf.greenmall.entity.Goods;
-import com.yzf.greenmall.entity.GoodsDetail;
-import com.yzf.greenmall.entity.Param;
+import com.yzf.greenmall.entity.*;
 import com.yzf.greenmall.mapper.GoodsDetailMapper;
 import com.yzf.greenmall.mapper.GoodsMapper;
+import com.yzf.greenmall.mapper.OrderDetailMapper;
 import com.yzf.greenmall.mapper.ParamMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -59,6 +58,9 @@ public class GoodsService {
 
     @Autowired
     private SalesVolumeService salesVolumeService;
+
+    @Autowired
+    private OrderDetailMapper orderDetailMapper;
 
     // 日志
     private static final Logger LOGGER = LoggerFactory.getLogger(GoodsService.class);
@@ -117,8 +119,17 @@ public class GoodsService {
         }
 
         // 发送消息
-        this.amqpTemplate.convertAndSend("greenmall.goods.exchange", "goods.update.goods", goodsId);
+        updateGoodsSearch(goodsId);
 
+    }
+
+    /**
+     * 发送消息更新索引库数据
+     *
+     * @param goodsId
+     */
+    public void updateGoodsSearch(Long goodsId) {
+        this.amqpTemplate.convertAndSend("greenmall.goods.exchange", "goods.update.goods", goodsId);
     }
 
     /**
@@ -194,6 +205,8 @@ public class GoodsService {
             record.setValid(false);
             record.setSaleable(false);
             goodsMapper.updateByPrimaryKeySelective(record);
+            // 发送消息
+            updateGoodsSearch(id);
         }
     }
 
@@ -207,6 +220,8 @@ public class GoodsService {
             Goods record = new Goods(id);
             record.setValid(true);
             goodsMapper.updateByPrimaryKeySelective(record);
+            // 发送消息
+            updateGoodsSearch(id);
         }
     }
 
@@ -221,6 +236,8 @@ public class GoodsService {
             record.setSaleable(true);
             record.setValid(true);
             goodsMapper.updateByPrimaryKeySelective(record);
+            // 发送消息
+            updateGoodsSearch(id);
         }
     }
 
@@ -235,6 +252,8 @@ public class GoodsService {
             Goods record = new Goods(id);
             record.setSaleable(false);
             goodsMapper.updateByPrimaryKeySelective(record);
+            // 发送消息
+            updateGoodsSearch(id);
         }
     }
 
@@ -413,5 +432,35 @@ public class GoodsService {
         }
         GoodsDetail goodsDetail = goodsDetailMapper.selectByPrimaryKey(goodsId);
         return new Object[]{goodsDetail.getImages(), goods.getTitle(), goodsDetail.getPrice()};
+    }
+
+    /**
+     * 根据订单ID更新库存
+     *
+     * @param orderId
+     */
+    public void updateStock(Long orderId) {
+
+        // 0，验证数据
+        if (orderId == null) {
+            throw new RuntimeException("根据订单ID更新库存：订单ID为空");
+        }
+
+        // 1，根据订单Id 查询订单详情
+        OrderDetail record = new OrderDetail();
+        record.setOrderId(orderId);
+        List<OrderDetail> orderDetails = orderDetailMapper.select(record);
+        if (CollectionUtils.isEmpty(orderDetails)) {
+            throw new RuntimeException("根据订单ID更新库存：根据订单ID无法查询到订单详情");
+        }
+
+        // 2，根据订单详情更新库存
+        for (OrderDetail item : orderDetails) {
+            GoodsDetail goodsDetail = goodsDetailMapper.selectByPrimaryKey(item.getGoodsId());
+            // 减少库存
+            goodsDetail.setStock(goodsDetail.getStock() - item.getNum());
+            goodsDetailMapper.updateByPrimaryKeySelective(goodsDetail);
+        }
+
     }
 }

@@ -218,7 +218,7 @@
     </div>
     <li>
         <div class="clearfix tb-btn tb-btn-buy theme-login">
-            <a id="LikBuy" title="点此按钮到下一步确认购买信息" href="#">立即购买</a>
+            <a id="LikBuy" title="点此按钮到下一步确认购买信息" @click="buyGoods">立即购买</a>
         </div>
     </li>
     <li>
@@ -367,7 +367,8 @@
                                             {{item.content}}
                                         </div>
                                         <!-- 评论图片 -->
-                                        <div v-if="gm.isStringNotEmpty(item.images)" class="tb-r-act-bar" style="margin-top: 10px">
+                                        <div v-if="gm.isStringNotEmpty(item.images)" class="tb-r-act-bar"
+                                             style="margin-top: 10px">
                                             <div class="comment_img" v-for="(img,index) in item.images.split(',')"
                                                  :key="index">
                                                 <img width="100%" height="100%" :src="img"/>
@@ -656,6 +657,39 @@
                     if (this.num > 1) {
                         this.num--;
                     }
+                },
+                /* 立即购买 */
+                buyGoods() {
+                    var isLogin = 0;
+                    gm.verifyUser().then(() => {
+                        isLogin = 1;
+
+                        // 1，组装商品数据
+                        var data = {
+                            payDate: new Date(),
+                            goodsData: []
+                        }
+                        var goodsInfo = {
+                            goodsId: this.introduction.id,
+                            goodsImage: this.introduction.images.split(",")[0],
+                            goodsSubTitle: this.introduction.subtitle,
+                            goodsTitle: this.introduction.title,
+                            num: this.num,
+                            price: this.introduction.price,
+                            stock: this.introduction.stock
+                        }
+                        data.goodsData.push(goodsInfo);
+                        // 2，在浏览器存储临时数据
+                        gm.store.set("payData", data);
+                        // 3，跳转到支付页面
+                        window.location.href = "http://www.greenmall.com/pay.html";
+                    }).catch(() => {
+                        if (isLogin === 0) {
+                            alert("您还没有登录，请登录之后做相关操作。")
+                        } else {
+                            alert("立即购买异常...")
+                        }
+                    })
                 }
             }
         })

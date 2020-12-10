@@ -38,6 +38,9 @@ public class EvaluateService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private GoodsService goodsService;
+
     /**
      * 加载评论
      *
@@ -233,8 +236,25 @@ public class EvaluateService {
 
             // 存入数据库中
             evaluateMapper.insertSelective(item);
+
+            // 更新索引库
+            Long goodsId = item.getGoodsId();
+            goodsService.updateGoodsSearch(goodsId);
         });
 
         return new Message(1, "");
     }
+
+    /**
+     * 根据商品Id 获得该商品的评分
+     *
+     * @param id
+     * @return
+     */
+    public Integer getGoodsAvgScore(Long id) {
+        Integer goodsAvgScore = evaluateMapper.getGoodsAvgScore(id);
+        return goodsAvgScore == null ? 0 : goodsAvgScore;
+    }
+
 }
+
