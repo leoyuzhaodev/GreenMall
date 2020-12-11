@@ -3,10 +3,7 @@ package com.yzf.greenmall.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
-import com.yzf.greenmall.bo.EvaluateBo;
-import com.yzf.greenmall.bo.GoodsBo;
-import com.yzf.greenmall.bo.GoodsIntroduction;
-import com.yzf.greenmall.bo.ParamBo;
+import com.yzf.greenmall.bo.*;
 import com.yzf.greenmall.common.LayuiPage;
 import com.yzf.greenmall.common.QueryPage;
 import com.yzf.greenmall.entity.*;
@@ -462,5 +459,64 @@ public class GoodsService {
             goodsDetailMapper.updateByPrimaryKeySelective(goodsDetail);
         }
 
+    }
+
+
+    /**
+     * 查询新上架的商品 8 个
+     *
+     * @return
+     */
+    public List<GoodsSVBo> findNewGoods() {
+
+        // 1，查询新上架的商品
+        PageHelper.startPage(1, 8);
+        Example example = new Example(Goods.class);
+        example.setOrderByClause("create_time desc");
+        List<Goods> goodsList = goodsMapper.selectByExample(example);
+        if (goodsList == null) {
+            return null;
+        }
+        // 2，封装数据
+        List<GoodsSVBo> goodsSVBosList = new ArrayList<>();
+        for (int i = 0; i < goodsList.size(); i++) {
+            Goods good = goodsList.get(i);
+            GoodsDetail goodsDetail = goodsDetailMapper.selectByPrimaryKey(good.getId());
+            GoodsSVBo goodsSVBo = GoodsSVBo.generateGoodsSVBo(good, goodsDetail);
+            goodsSVBosList.add(goodsSVBo);
+        }
+        return goodsSVBosList;
+    }
+
+    /**
+     * 查询销量前12的商品
+     *
+     * @return
+     */
+    public List<GoodsSVBo> findTopSaleVolumeGoods() {
+
+        // 1，查询出销量前12的商品ID
+        List<Long> saleVolumeTopGoodsIds = goodsMapper.findSaleVolumeTopGoods(12);
+
+        // 2，组装goodsBo
+        if (CollectionUtils.isEmpty(saleVolumeTopGoodsIds)) {
+            return null;
+        }
+        List<GoodsSVBo> goodsSVBosList = new ArrayList<>();
+
+        for (int i = 0; i < saleVolumeTopGoodsIds.size(); i++) {
+
+            Goods good = goodsMapper.selectByPrimaryKey(saleVolumeTopGoodsIds.get(i));
+            GoodsDetail goodsDetail = goodsDetailMapper.selectByPrimaryKey(good.getId());
+            GoodsSVBo goodsSVBo = GoodsSVBo.generateGoodsSVBo(good, goodsDetail);
+            // 1，设置销量
+            Long salesVolume = salesVolumeService.getGoodsAllSalesVolume(good.getId());
+            goodsSVBo.setSaleVolume(salesVolume);
+            // 2，设置名次
+            goodsSVBo.setTopNumber(new Long(i+1));
+            goodsSVBosList.add(goodsSVBo);
+        }
+
+        return goodsSVBosList;
     }
 }

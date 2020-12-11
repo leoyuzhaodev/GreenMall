@@ -32,12 +32,15 @@
 <body>
 <div id="registerApp">
     <div class="login-boxtitle">
-        <a href="home/demo.html"><img alt="" src="images/logobig.png"/></a>
+        <a href="http://www.greenmall.com/"><img alt="logo" src="images/gm_logo.png"/></a>
     </div>
-    <div class="res-banner">
+    <div class="res-banner" style="background-color: #0E932E">
         <div class="res-main">
-            <div class="login-banner-bg"><span></span><img src="images/big.jpg"/></div>
-            <div class="login-box">
+            <div class="login-banner-bg">
+                <img src="images/login.jpg"/>
+                <span></span>
+            </div>
+            <div class="login-box" style="opacity: 0.9">
 
                 <div class="am-tabs" id="doc-my-tabs">
                     <ul class="am-tabs-nav am-nav am-nav-tabs am-nav-justify">
@@ -82,7 +85,8 @@
 
                             </div>
                             <div class="am-cf">
-                                <input @click.stop="submit" type="button" name="" value="注册" class="am-btn am-btn-primary am-btn-sm am-fl">
+                                <input @click.stop="submit" type="button" name="" value="注册"
+                                       class="am-btn am-btn-primary am-btn-sm am-fl">
                             </div>
                             <hr>
                         </div>
@@ -90,29 +94,8 @@
                 </div>
             </div>
         </div>
-
-        <div class="footer ">
-            <div class="footer-hd ">
-                <p>
-                    <a href="# ">恒望科技</a>
-                    <b>|</b>
-                    <a href="# ">商城首页</a>
-                    <b>|</b>
-                    <a href="# ">支付宝</a>
-                    <b>|</b>
-                    <a href="# ">物流</a>
-                </p>
-            </div>
-            <div class="footer-bd ">
-                <p>
-                    <a href="# ">关于恒望</a>
-                    <a href="# ">合作伙伴</a>
-                    <a href="# ">联系我们</a>
-                    <a href="# ">网站地图</a>
-                    <em>© 2015-2025 Hengwang.com 版权所有</em>
-                </p>
-            </div>
-        </div>
+        <!-- 页脚 -->
+        <gm-footer></gm-footer>
     </div>
 </div>
 </body>
@@ -173,7 +156,9 @@
                 }
             })
         },
-        components: {},
+        components: {
+            gmFooter: () => import("http://www.greenmall.com/js/pages/footer.js"),
+        },
         watch: {},
         computed: {},
         methods: {

@@ -14,10 +14,10 @@
     <link href="http://www.greenmall.com/css/optstyle.css" rel="stylesheet" type="text/css"/>
     <script type="text/javascript" src="http://www.greenmall.com/AmazeUI-2.4.2/assets/js/jquery.min.js"></script>
     <!-- 引入 vue，以及相关工具js -->
+    <script src="http://www.greenmall.com/js/math.js"></script>
     <script src="http://www.greenmall.com/js/vue/vue.js"></script>
     <script src="http://www.greenmall.com/js/axios.min.js"></script>
     <script src="http://www.greenmall.com/js/common.js"></script>
-    <script src="http://www.greenmall.com/js/math.js"></script>
 
 </head>
 
@@ -317,25 +317,24 @@
             },
             /* 商品总金额 */
             totalPrice() {
-                var totalPrice = 0;
+                let totalPrice = 0.0;
                 if (this.checkVal != null && this.checkVal.length > 0) {
                     this.checkVal.forEach(goodsId => {
                         var cartItem = this.getCartItem(goodsId);
                         if (undefined != cartItem && cartItem != null) {
-                            totalPrice += Math.floor(parseFloat(cartItem.price * 100 * cartItem.num)) / 100;
+                            totalPrice = gm.gmadd(gm.gmmultiply(cartItem.price, cartItem.num), totalPrice);
                         }
                     })
                 }
 
-                return totalPrice.toFixed(2);
+                return totalPrice;
             }
         },
         methods: {
             /*解决计算精度问题*/
             calPrice(unitPrice, num) {
-                var temp = Math.floor(parseFloat(unitPrice * 100 * num)) / 100;
-                return temp.toFixed(2);
-                // return math.format(unitPrice * num, 14);
+                var result = math.round(unitPrice * num, 2);
+                return result.toFixed(2);
             },
             /* 加载购物车数据 */
             loadShopCartData() {

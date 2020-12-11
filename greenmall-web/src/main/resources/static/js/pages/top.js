@@ -54,7 +54,7 @@ const gmTop = {
         <div class='logo'><img src='http://www.greenmall.com/images/gmlogo.png'/></div>\
         <div class='logoBig'>\
             <li>\
-            <a href='http://www.greenmall.com/'><img style='margin-top: 15px;' src='http://www.greenmall.com/images/gmlogo.png'/></a>\
+            <a href='http://www.greenmall.com/'><img style='margin-top: 15px;' src='http://www.greenmall.com/images/gm_logo.png'/></a>\
             </li>\
         </div>\
         <div class='search-bar pr'>\

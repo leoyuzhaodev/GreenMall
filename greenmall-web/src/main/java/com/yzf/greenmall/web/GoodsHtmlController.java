@@ -1,15 +1,21 @@
 package com.yzf.greenmall.web;
 
+import com.yzf.greenmall.bo.GoodsBo;
 import com.yzf.greenmall.bo.GoodsIntroduction;
+import com.yzf.greenmall.bo.GoodsSVBo;
 import com.yzf.greenmall.service.GoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @description:GoodsHtmlController（商品详情展示）
@@ -39,4 +45,44 @@ public class GoodsHtmlController {
         model.addAttribute("introduction", introduction);
         return "introduction";
     }
+
+    /**
+     * 查询新上架的商品
+     *
+     * @return
+     */
+    @GetMapping(path = "/newGoods")
+    public ResponseEntity<List<GoodsSVBo>> queryNewGoods() {
+        try {
+            List<GoodsSVBo> list = goodsService.findNewGoods();
+            if (CollectionUtils.isEmpty(list)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(list);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    /**
+     * 查询销量前12的商品
+     *
+     * @return
+     */
+    @GetMapping(path = "/queryTopSaleVolumeGoods")
+    public ResponseEntity<List<GoodsSVBo>> queryTopSaleVolumeGoods() {
+        try {
+            List<GoodsSVBo> list = goodsService.findTopSaleVolumeGoods();
+            if (CollectionUtils.isEmpty(list)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(list);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+
 }

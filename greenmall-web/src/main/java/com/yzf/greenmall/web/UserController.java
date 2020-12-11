@@ -358,4 +358,24 @@ public class UserController {
         }
     }
 
+    /**
+     * 加载登录用户的信息：头像和昵称
+     *
+     * @return
+     */
+    @GetMapping(path = "/auth/loginUserInfo")
+    public ResponseEntity<Map<String, String>> loginUserInfo() {
+        UserInfo loginUser = LoginInterceptor.getLoginUser();
+        try {
+            if (loginUser == null) {
+                throw new RuntimeException("用户信息加载异常!");
+            }
+            Map<String, String> userInfo = userService.loadLoginUserInfo(loginUser);
+            return ResponseEntity.ok(userInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

@@ -16,6 +16,7 @@
     <script type="text/javascript" src="http://www.greenmall.com/js/script.js"></script>
     <script type="text/javascript" src="http://www.greenmall.com/basic/js/quick_links.js"></script>
     <!-- 引入 vue，以及相关工具js -->
+    <script src="http://www.greenmall.com/js/math.js"></script>
     <script src="http://www.greenmall.com/js/vue/vue.js"></script>
     <script src="http://www.greenmall.com/js/vue/vuetify.js"></script>
     <script src="http://www.greenmall.com/js/axios.min.js"></script>
@@ -150,7 +151,8 @@
                 totalPage: 0, // 总页面数
                 total: 0 // 数据总条数
             },
-            categoryName: null
+            categoryName: null,
+            firstLoadFlag: true
         }, created() {
             // 判断是否有请求参数
             if (!location.search) {
@@ -176,8 +178,9 @@
                 handler(val, old) {
                     console.log("监听搜索信息变化...");
                     // val 当前 search 对象，old 上一个 search 对象
-                    if (!old || !old.key) {
-                        console.log("监听搜索信息变化!!!")
+                    if (this.firstLoadFlag == true || !(gm.isStringNotEmpty(val.key) || gm.isStringNotEmpty(val.cid3))) {
+                        console.log("监听搜索信息变化!!!");
+                        this.firstLoadFlag = false;
                         return;
                     }
                     // 把search对象变成请求参数拼接到请求路径之后

@@ -17,9 +17,21 @@
     <script type="text/javascript " src="http://www.greenmall.com/basic/js/quick_links.js "></script>
 
     <!-- 引入 vue，以及相关工具js -->
+    <script src="http://www.greenmall.com/js/math.js"></script>
     <script src="http://www.greenmall.com/js/vue/vue.js"></script>
     <script src="http://www.greenmall.com/js/axios.min.js"></script>
     <script src="http://www.greenmall.com/js/common.js"></script>
+
+    <style type="text/css">
+        .introduceWeb {
+            color: black;
+            word-wrap: break-word;
+            word-break: normal;
+            line-height: 30px;
+            font-weight: bold;
+            font-family: KaiTi;
+        }
+    </style>
 
 </head>
 
@@ -37,10 +49,10 @@
                     <!--轮播 -->
                     <div class="am-slider am-slider-default scoll" data-am-flexslider id="demo-slider-0">
                         <ul class="am-slides">
-                            <li class="banner1"><a href="introduction.html"><img src="images/ad1.jpg"/></a></li>
-                            <li class="banner2"><a><img src="images/ad2.jpg"/></a></li>
-                            <li class="banner3"><a><img src="images/ad3.jpg"/></a></li>
-                            <li class="banner4"><a><img src="images/ad4.jpg"/></a></li>
+                            <li class="banner1"><a href="introduction.html"><img src="images/lb1.jpg"/></a></li>
+                            <li class="banner2"><a><img src="images/lb2.jpg"/></a></li>
+                            <li class="banner3"><a><img src="images/lb3.jpg"/></a></li>
+                            <li class="banner4"><a><img src="images/lb4.jpg"/></a></li>
                         </ul>
                     </div>
                     <div class="clear"></div>
@@ -140,50 +152,43 @@
 
                         <!--走马灯 -->
 
-                        <div class="marqueen">
-                            <span class="marqueen-title">商城头条</span>
+                        <div class="marqueen" style="opacity: 0.9">
+                            <span class="marqueen-title"></span>
                             <div class="demo">
 
                                 <ul>
-                                    <li class="title-first"><a target="_blank" href="#">
-                                        <img src="images/TJ2.jpg"></img>
-                                        <span>[特惠]</span>商城爆品1分秒
-                                    </a></li>
-                                    <li class="title-first"><a target="_blank" href="#">
-                                        <span>[公告]</span>商城与广州市签署战略合作协议
-                                        <img src="images/TJ.jpg"></img>
-                                        <p>XXXXXXXXXXXXXXXXXX</p>
-                                    </a></li>
 
                                     <div class="mod-vip">
-                                        <div class="m-baseinfo">
+                                        <div v-if="gm.isObjectNotEmpty(userInfo)" class="m-baseinfo">
                                             <a href="person/index.html">
-                                                <img src="images/getAvatar.do.jpg">
+                                                <img height="50px" width="50px" :src="userInfo.portrait">
                                             </a>
                                             <em>
-                                                Hi,<span class="s-name">小叮当</span>
-                                                <a href="#"><p>点击更多优惠活动</p></a>
+                                                Hi,<span class="s-name">{{userInfo.nickName}}</span>
                                             </em>
                                         </div>
-                                        <div class="member-logout">
+
+                                        <div v-else class="m-baseinfo">
+                                            <a href="person/index.html">
+                                                <img height="50px" width="50px" src="images/getAvatar.do.jpg">
+                                            </a>
+                                            <em>
+                                                Hi,<span class="s-name">游客</span>
+                                            </em>
+                                        </div>
+
+                                        <div v-if="gm.isObjectNotEmpty(userInfo) == false" class="member-logout">
                                             <a class="am-btn-warning btn" href="login.html">登录</a>
                                             <a class="am-btn-warning btn" href="register.html">注册</a>
                                         </div>
-                                        <div class="member-login">
-                                            <a href="#"><strong>0</strong>待收货</a>
-                                            <a href="#"><strong>0</strong>待发货</a>
-                                            <a href="#"><strong>0</strong>待付款</a>
-                                            <a href="#"><strong>0</strong>待评价</a>
-                                        </div>
-                                        <div class="clear"></div>
+
                                     </div>
 
-                                    <li><a target="_blank" href="#"><span>[特惠]</span>洋河年末大促，低至两件五折</a></li>
-                                    <li><a target="_blank" href="#"><span>[公告]</span>华北、华中部分地区配送延迟</a></li>
-                                    <li><a target="_blank" href="#"><span>[特惠]</span>家电狂欢千亿礼券 买1送1！</a></li>
-
+                                    <p class="introduceWeb"
+                                    >
+                                        绿色商城：商城致力于为用户提供优质的服务，高质量的绿色产品。良心的价格，优质的商品希望得到您的青睐。
+                                    </p>
                                 </ul>
-                                <div class="advTip"><img src="images/advTip.jpg"/></div>
                             </div>
                         </div>
                         <div class="clear"></div>
@@ -194,7 +199,6 @@
                     <div class="shopMain" id="shopmain">
 
                         <!--今日推荐 -->
-
                         <div class="am-g am-g-fixed recommendation">
                             <div class="clock am-u-sm-3">
                                 <img src="images/2020.png "></img>
@@ -231,6 +235,7 @@
                         </div>
                         <div class="clear "></div>
                         <!-- 网站新品四个 -->
+
                         <div class="am-container activity ">
                             <div class="shopTitle ">
                                 <h4>新品</h4>
@@ -239,54 +244,27 @@
                               <a class="more-link " href="# ">商城新品</a>
                             </span>
                             </div>
+                            <!-- 新品 -->
+                            <div v-if="gm.isCollectionNotEmpty(newGoodsList)" class="am-g am-g-fixed ">
 
-                            <div class="am-g am-g-fixed ">
-                                <div class="am-u-sm-3 ">
-                                    <div class="icon-sale one "></div>
-                                    <h4>秒杀</h4>
-                                    <div class="activityMain ">
-                                        <img src="images/activity1.jpg "></img>
-                                    </div>
-                                    <div class="info ">
-                                        <h3>春节送礼优选</h3>
-                                    </div>
-                                </div>
-
-                                <div class="am-u-sm-3 ">
+                                <div style="margin-top: 10px;" v-for="(item,index) in newGoodsList" :key="index+'new'"
+                                     class="am-u-sm-3 ">
                                     <div class="icon-sale two "></div>
-                                    <h4>特惠</h4>
+                                    <h4>新品</h4>
                                     <div class="activityMain ">
-                                        <img src="images/activity2.jpg "></img>
+                                        <a :href="'http://www.greenmall.com/goods/introduction/'+item.goodsId+'.html'"
+                                           style="cursor: pointer">
+                                            <img width="296px" height="314px" :src="item.goodsImage"/>
+                                        </a>
                                     </div>
                                     <div class="info ">
-                                        <h3>春节送礼优选</h3>
-                                    </div>
-                                </div>
-
-                                <div class="am-u-sm-3 ">
-                                    <div class="icon-sale three "></div>
-                                    <h4>团购</h4>
-                                    <div class="activityMain ">
-                                        <img src="images/activity3.jpg "></img>
-                                    </div>
-                                    <div class="info ">
-                                        <h3>春节送礼优选</h3>
-                                    </div>
-                                </div>
-
-                                <div class="am-u-sm-3 last ">
-                                    <div class="icon-sale "></div>
-                                    <h4>超值</h4>
-                                    <div class="activityMain ">
-                                        <img src="images/activity.jpg "></img>
-                                    </div>
-                                    <div class="info ">
-                                        <h3>春节送礼优选</h3>
+                                        <h3>上架时间：{{gm.renderTime(item.createTime)}}</h3>
                                     </div>
                                 </div>
 
                             </div>
                         </div>
+
                         <div class="clear "></div>
 
                         <!-- 销量top12 -->
@@ -303,116 +281,21 @@
                             </div>
                         </div>
                         <div class="am-g am-g-fixed flood method3 ">
-                            <ul class="am-thumbnails ">
-                                <li>
+                            <ul v-if="gm.isCollectionNotEmpty(topSVGoods)" class="am-thumbnails ">
+                                <li v-for="(item,index) in topSVGoods" :key="index+'top'">
                                     <div class="list ">
-                                        <a href="# ">
-                                            <img src="images/cp.jpg "/>
-                                            <div class="pro-title ">萨拉米 1+1小鸡腿</div>
-                                            <span class="e-price ">￥29.90</span>
+                                        <a :href="'http://www.greenmall.com/goods/introduction/'+item.goodsId+'.html'">
+                                            <img width="188px" height="188px" :src="item.goodsImage"/>
+                                            <div class="pro-title ">
+                                                {{item.goodsTitle.length > 10 ? item.goodsTitle.substring(0,10) +
+                                                '...': item.goodsTitle}}
+                                            </div>
+                                            <span class="e-price ">￥{{gm.gmFormatPrice(item.goodsPrice)}}</span>
+                                            <br>
+                                            <span class="e-price ">第&nbsp;{{item.topNumber}}&nbsp;名&nbsp;&nbsp;总销量:{{item.saleVolume}}</span>
                                         </a>
                                     </div>
                                 </li>
-                                <li>
-                                    <div class="list ">
-                                        <a href="# ">
-                                            <img src="images/cp2.jpg "/>
-                                            <div class="pro-title ">ZEK 原味海苔</div>
-                                            <span class="e-price ">￥8.90</span>
-                                        </a>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="list ">
-                                        <a href="# ">
-                                            <img src="images/cp.jpg "/>
-                                            <div class="pro-title ">萨拉米 1+1小鸡腿</div>
-                                            <span class="e-price ">￥29.90</span>
-                                        </a>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="list ">
-                                        <a href="# ">
-                                            <img src="images/cp2.jpg "/>
-                                            <div class="pro-title ">ZEK 原味海苔</div>
-                                            <span class="e-price ">￥8.90</span>
-                                        </a>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="list ">
-                                        <a href="# ">
-                                            <img src="images/cp.jpg "/>
-                                            <div class="pro-title ">萨拉米 1+1小鸡腿</div>
-                                            <span class="e-price ">￥29.90</span>
-                                        </a>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="list ">
-                                        <a href="# ">
-                                            <img src="images/cp2.jpg "/>
-                                            <div class="pro-title ">ZEK 原味海苔</div>
-                                            <span class="e-price ">￥8.90</span>
-                                        </a>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="list ">
-                                        <a href="# ">
-                                            <img src="images/cp.jpg "/>
-                                            <div class="pro-title ">萨拉米 1+1小鸡腿</div>
-                                            <span class="e-price ">￥29.90</span>
-                                        </a>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="list ">
-                                        <a href="# ">
-                                            <img src="images/cp2.jpg "/>
-                                            <div class="pro-title ">ZEK 原味海苔</div>
-                                            <span class="e-price ">￥8.90</span>
-                                        </a>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="list ">
-                                        <a href="# ">
-                                            <img src="images/cp.jpg "/>
-                                            <div class="pro-title ">萨拉米 1+1小鸡腿</div>
-                                            <span class="e-price ">￥29.90</span>
-                                        </a>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="list ">
-                                        <a href="# ">
-                                            <img src="images/cp2.jpg "/>
-                                            <div class="pro-title ">ZEK 原味海苔</div>
-                                            <span class="e-price ">￥8.90</span>
-                                        </a>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="list ">
-                                        <a href="# ">
-                                            <img src="images/cp2.jpg "/>
-                                            <div class="pro-title ">ZEK 原味海苔</div>
-                                            <span class="e-price ">￥8.90</span>
-                                        </a>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="list ">
-                                        <a href="# ">
-                                            <img src="images/cp2.jpg "/>
-                                            <div class="pro-title ">ZEK 原味海苔</div>
-                                            <span class="e-price ">￥8.90</span>
-                                        </a>
-                                    </div>
-                                </li>
-
                             </ul>
 
                         </div>
@@ -450,12 +333,19 @@
         data: {
             gm, // 必须引用到实例中，在html标签中才能使用
             categoryTree: [],
-            flag: 1
+            flag: 1,
+            userInfo: null,
+            newGoodsList: [],
+            topSVGoods: []
         }, created() {
             // 1，加载分类树
             this.loadCategoryTree();
-            // 2，绑定事件
-
+            // 2，加载用户的昵称和头像
+            this.loadUserInfo();
+            // 3，加载新品
+            this.loadNewGoodsList();
+            // 4，加载销量前12的商品
+            this.loadTopSVGoods();
         },
         components: {
             gmTop: () => import("http://www.greenmall.com/js/pages/top.js"),
@@ -493,6 +383,49 @@
                 $(item).removeClass("hover")
                 $(item).children("div.menu-in").css("display", "none")
             },
+            /* 加载用户信息 */
+            loadUserInfo() {
+                gm.http.get("/user/auth/loginUserInfo")
+                    .then(resp => {
+                        if (resp.status === 200) {
+                            var data = resp.data;
+                            if (gm.isObjectNotEmpty(data)) {
+                                this.userInfo = data;
+                            }
+                        }
+                    })
+                    .catch(() => {
+
+                    })
+            },
+            /* 加载上架的新品 */
+            loadNewGoodsList() {
+                gm.http.get("/goods/newGoods")
+                    .then(resp => {
+                        if (resp.status === 200) {
+                            var data = resp.data;
+                            if (gm.isCollectionNotEmpty(data)) {
+                                this.newGoodsList = data;
+                            }
+                        }
+                    })
+                    .catch(() => {
+                    })
+            },
+            /* 加载销量前12的商品 */
+            loadTopSVGoods() {
+                gm.http.get("/goods/queryTopSaleVolumeGoods")
+                    .then(resp => {
+                        if (resp.status === 200) {
+                            var data = resp.data;
+                            if (gm.isCollectionNotEmpty(data)) {
+                                this.topSVGoods = data;
+                            }
+                        }
+                    })
+                    .catch(() => {
+                    })
+            }
         }
     });
 </script>

@@ -19,10 +19,10 @@
     <script type="text/javascript" src="js/address.js"></script>
 
     <!-- 引入 vue，以及相关工具js -->
+    <script src="http://www.greenmall.com/js/math.js"></script>
     <script src="http://www.greenmall.com/js/vue/vue.js"></script>
     <script src="http://www.greenmall.com/js/axios.min.js"></script>
     <script src="http://www.greenmall.com/js/common.js"></script>
-    <script src="http://www.greenmall.com/js/math.js"></script>
 
     <style>
         #gmHr {
@@ -270,13 +270,14 @@
         computed: {
             /* 计算总金额 */
             calTotalPrice() {
+                let totalPrice1 = 0.0;
                 if (gm.isCollectionNotEmpty(this.goodsList)) {
                     this.goodsList.forEach(item => {
-                        this.totalPrice += Math.floor(parseFloat(item.price * 100 * item.num)) / 100;
+                        totalPrice1 = gm.gmadd(gm.gmmultiply(item.price, item.num), totalPrice1);
                     })
                 }
-
-                return this.totalPrice.toFixed(2);
+                this.totalPrice = totalPrice1;
+                return this.totalPrice;
             }
         },
         methods: {
@@ -309,8 +310,8 @@
             },
             /* 计算商品金额 */
             calPrice(unitPrice, num) {
-                var temp = Math.floor(parseFloat(unitPrice * 100 * num)) / 100;
-                return temp.toFixed(2);
+                var temp = gm.gmmultiply(unitPrice, num);
+                return temp;
             },
             /* 加载用户地址 */
             loadUserAddress() {

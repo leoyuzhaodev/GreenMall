@@ -524,6 +524,8 @@ axios.defaults.timeout = 5000;
 // 跨域访问
 axios.defaults.withCredentials = true
 
+
+
 // 配置对象
 const gm = greemmall = {
     /* 格式化时间 */
@@ -719,8 +721,53 @@ const gm = greemmall = {
      * 格式化价格
      */
     gmFormatPrice(number) {
-        var temp = Math.floor(parseFloat(number * 100)) / 100;
-        return temp.toFixed(2);
+        return this.gmmultiply(number, 1);
+    },
+    /**
+     * 加法：number1+number2
+     * @param {Object} number1
+     * @param {Object} number2
+     */
+    gmadd(number1, number2) {
+        return math.round(parseFloat(number1) + parseFloat(number2), 2).toFixed(2);
+    }
+    ,
+    /**
+     * 减法：number1-number2
+     * @param {Object} number1
+     * @param {Object} number2
+     */
+    gmsubtract(number1, number2) {
+        return math.round(parseFloat(number1) - parseFloat(number2), 2).toFixed(2);
+    }
+    ,
+    /**
+     * 乘法：number1*number2
+     * @param {Object} number1
+     * @param {Object} number2
+     */
+    gmmultiply(number1, number2) {
+        return math.round(parseFloat(number1) * parseFloat(number2), 2).toFixed(2);
+    }
+    ,
+    /**
+     * 除法：number1/number2
+     * @param {Object} number1
+     * @param {Object} number2
+     */
+    gmdivide(number1, number2) {
+        return math.round(parseFloat(number1) / parseFloat(number2), 2).toFixed(2);
+    }
+    ,
+    moneyFormatDecimal(num, decimal) {
+        num = num.toString()
+        let index = num.indexOf('.');
+        if (index !== -1) {
+            num = num.substring(0, decimal + index + 1)
+        } else {
+            num = num.substring(0)
+        }
+        return parseFloat(num).toFixed(decimal)
     },
     /**
      * 获取对象数组中某个属性的集合

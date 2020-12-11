@@ -586,4 +586,22 @@ public class UserService {
         userMapper.updateByPrimaryKeySelective(user);
         return new Message(1, "");
     }
+
+
+    /**
+     * 加载登录用户的信息：头像和昵称
+     *
+     * @param loginUser
+     * @return
+     */
+    public Map<String, String> loadLoginUserInfo(UserInfo loginUser) {
+        User user = userMapper.selectByPrimaryKey(loginUser.getId());
+        if (user == null) {
+            return null;
+        }
+        Map<String, String> userInfo = new HashMap<>();
+        userInfo.put("portrait", user.getPortrait());
+        userInfo.put("nickName", user.getNickName());
+        return userInfo;
+    }
 }
