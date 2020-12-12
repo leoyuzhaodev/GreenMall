@@ -1,10 +1,8 @@
 package com.yzf.greenmall.entity;
 
 import lombok.Data;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -16,6 +14,10 @@ import java.util.Date;
 @Data
 @Table(name = "tb_evaluate")
 public class Evaluate implements Serializable {
+
+    public static final Byte VALID_YES = 1; // 订单有效
+    public static final Byte VALID_NO = 0; // 订单失效
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,4 +29,11 @@ public class Evaluate implements Serializable {
     private String content;
     private String images;
     private Date createTime;
+    private Byte valid; // 1 有效 0 失效
+
+    @Transient
+    private String goodsTitle; // 商品名称
+    @Transient
+    private String goodsImage; // 商品图片
+
 }

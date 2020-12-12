@@ -15,12 +15,24 @@
     <script src="AmazeUI-2.4.2/assets/js/jquery.min.js"></script>
     <script src="AmazeUI-2.4.2/assets/js/amazeui.js"></script>
 
+    <!-- 引入 vue，以及相关工具js -->
+    <script src="http://www.greenmall.com/js/math.js"></script>
+    <script src="http://www.greenmall.com/js/validate.js"></script>
+    <script src="http://www.greenmall.com/js/vue/vue.js"></script>
+    <script src="http://www.greenmall.com/js/vue/vuetify.js"></script>
+    <script src="http://www.greenmall.com/js/axios.min.js"></script>
+    <script src="http://www.greenmall.com/js/common.js"></script>
+    <!-- 引入layui -->
+    <script src="http://www.greenmall.com/layui/layui.js"></script>
+    <link href="http://www.greenmall.com/layui/css/layui.css" rel="stylesheet" type="text/css">
+
+
 </head>
 
-<body  style="background-color: white">
+<body style="background-color: white">
 
 
-<div class="user-comment">
+<div id="userCommentApp" class="user-comment">
     <!--标题 -->
     <div class="am-cf am-padding">
         <div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">评价管理</strong> /
@@ -33,17 +45,16 @@
         <ul class="am-avg-sm-2 am-tabs-nav am-nav am-nav-tabs">
             <li class="am-active"><a href="#tab1">所有评价</a></li>
             <li><a href="#tab2">有图评价</a></li>
-
         </ul>
-
+        <!-- 评价主体内容 -->
         <div class="am-tabs-bd">
+            <!-- 无图评价 -->
             <div class="am-tab-panel am-fade am-in am-active" id="tab1">
-
                 <div class="comment-main">
-                    <div class="comment-list">
-                        <ul class="item-list">
-
-
+                    <div v-if="gm.isCollectionNotEmpty(noneImgCommentList)" class="comment-list">
+                        <ul v-for="(item,index) in noneImgCommentList" :key="index+'noneImag'" class="item-list">
+                            <hr>
+                            <!-- 表头 -->
                             <div class="comment-top">
                                 <div class="th th-price">
                                     <td class="td-inner">评价</td>
@@ -55,46 +66,61 @@
                             <li class="td td-item">
                                 <div class="item-pic">
                                     <a href="#" class="J_MakePoint">
-                                        <img src="images/kouhong.jpg_80x80.jpg" class="itempic">
+                                        <img width="80px" height="80px" :src="item.goodsImage" class="itempic">
                                     </a>
                                 </div>
                             </li>
 
                             <li class="td td-comment">
                                 <div class="item-title">
-                                    <div class="item-opinion">好评</div>
+
+                                    <div v-if="item.score>=4" class="item-opinion">好评</div>
+                                    <div v-else-if="item.score>=3" class="item-opinion">中评</div>
+                                    <div v-else="item.score>=1" class="item-opinion">差评</div>
+
                                     <div class="item-name">
                                         <a href="#">
-                                            <p class="item-basic-info">美康粉黛醉美唇膏 持久保湿滋润防水不掉色</p>
+                                            <p class="item-basic-info">
+                                                <a @click="goIntroduction(item.goodsId)">
+                                                    商品名称:【{{item.goodsTitle.length > 10 ?
+                                                    item.goodsTitle.substring(0,10)
+                                                    + '...':
+                                                    item.goodsTitle}}】
+                                                </a>
+                                            </p>
                                         </a>
                                     </div>
                                 </div>
                                 <div class="item-comment">
-                                    宝贝非常漂亮，超级喜欢！！！ 口红颜色很正呐，还有第两支半价，买三支免单一支的活动，下次还要来买。就是物流太慢了，还要我自己去取快递，店家不考虑换个物流么？
+                                    <p style="color: grey"> {{item.content}}</p>
                                 </div>
 
                                 <div class="item-info">
                                     <div>
-                                        <p class="info-little"><span>颜色：12#玛瑙</span> <span>包装：裸装</span></p>
-                                        <p class="info-time">2015-12-24</p>
-
+                                        <!-- <p class="info-little"><span>颜色：12#玛瑙</span> <span>包装：裸装</span></p>-->
+                                        <a class="info-little" style="color: red;" @click="deleteComment(item.id,2)">删除评价</a>
+                                        <p class="info-time">{{gm.renderTime(item.createTime)}}</p>
                                     </div>
                                 </div>
                             </li>
 
                         </ul>
-
+                    </div>
+                    <!-- 空评价 -->
+                    <div v-else class="comment-list">
+                        <p style="line-height: 100px; text-align: center;">这里什么也没有，空空如也...￣□￣｜｜</p>
                     </div>
                 </div>
-
             </div>
+            <!-- 有图评价 -->
             <div class="am-tab-panel am-fade" id="tab2">
 
-                <div class="comment-main">
+                <div v-if="gm.isCollectionNotEmpty(imgCommentList)" class="comment-main">
                     <div class="comment-list">
-                        <ul class="item-list">
-
-
+                        <!-- 单条有图评价 -->
+                        <ul v-for="(item,index) in imgCommentList" :key="index+'img'" class="item-list"
+                            style="margin-top: 10px">
+                            <hr>
                             <div class="comment-top">
                                 <div class="th th-price">
                                     <td class="td-inner">评价</td>
@@ -106,46 +132,163 @@
                             <li class="td td-item">
                                 <div class="item-pic">
                                     <a href="#" class="J_MakePoint">
-                                        <img src="images/kouhong.jpg_80x80.jpg" class="itempic">
+                                        <img width="80px" height="80px" :src="item.goodsImage" class="itempic">
                                     </a>
                                 </div>
                             </li>
 
                             <li class="td td-comment">
+
                                 <div class="item-title">
-                                    <div class="item-opinion">好评</div>
+                                    <div v-if="item.score>=4" class="item-opinion">好评</div>
+                                    <div v-else-if="item.score>=3" class="item-opinion">中评</div>
+                                    <div v-else="item.score>=1" class="item-opinion">差评</div>
                                     <div class="item-name">
-                                        <a href="#">
-                                            <p class="item-basic-info">美康粉黛醉美唇膏 持久保湿滋润防水不掉色</p>
+                                        <a @click="goIntroduction(item.goodsId)">
+                                            商品名称:【{{item.goodsTitle.length > 10 ? item.goodsTitle.substring(0,10) +
+                                            '...':
+                                            item.goodsTitle}}】
                                         </a>
                                     </div>
                                 </div>
-                                <div class="item-comment">
-                                    宝贝非常漂亮，超级喜欢！！！ 口红颜色很正呐，还有第两支半价，买三支免单一支的活动，下次还要来买。就是物流太慢了，还要我自己去取快递，店家不考虑换个物流么？
-                                    <div class="filePic"><img src="images/image.jpg" alt=""></div>
-                                </div>
 
+                                <div class="item-comment">
+                                    <p style="color: grey">
+                                        {{item.content}}
+                                    </p>
+                                    <div style="height: 120px">
+                                        <div v-for="(imgItem,index) in item.images.split(',')"
+                                             :key="index+'imgItem'"
+                                             style="float: left; margin-left: 10px;" class="filePic">
+                                            <img height="100px" width="100px" :src="imgItem" alt="">
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
                                 <div class="item-info">
                                     <div>
-                                        <p class="info-little"><span>颜色：12#玛瑙</span> <span>包装：裸装</span></p>
-                                        <p class="info-time">2015-12-24</p>
-
+                                        <p class="info-little">
+                                            <a @click="deleteComment(item.id,1)" class="info-time"
+                                               style="color:red;font-size: 12px;cursor: pointer;">删除评价</a>
+                                        </p>
+                                        <p class="info-time">{{gm.renderTime(item.createTime)}}</p>
                                     </div>
                                 </div>
                             </li>
 
                         </ul>
-
                     </div>
                 </div>
-
+                <!-- 空评价 -->
+                <div v-else class="comment-list">
+                    <p style="line-height: 100px; text-align: center;">这里什么也没有，空空如也...￣□￣｜｜</p>
+                </div>
             </div>
         </div>
     </div>
 
 </div>
-
-				
 </body>
+
+<script>
+
+    var vm = new Vue({
+        el: "#userCommentApp",
+        data: {
+            gm, // 必须引用到实例中，在html标签中才能使用
+            imgCommentList: [], // 有图评价
+            noneImgCommentList: [], // 无图评价
+            commentList: [] // 所有评价
+        },
+        created() {
+            // 1, 加载用户信息
+            this.loadUserData();
+
+            // 2，加载评论信息
+            this.loadUserComment();
+        }
+        ,
+        watch: {}
+        ,
+        computed: {}
+        ,
+        methods: {
+            /* 加载用户信息 */
+            loadUserData() {
+                var isLogin = 0;
+                // 1，登录验证
+                gm.verifyUser().then(() => {
+                    isLogin = 1;
+                }).catch(() => {
+                    if (isLogin === 0) {
+                        alert("您还没有登录，请登录之后做相关操作。")
+                        window.location.href = "http://www.greenmall.com/login.html";
+                    } else {
+                        alert("加载用户信息异常...")
+                    }
+                })
+            },
+            /* 加载用户评论 */
+            loadUserComment() {
+                gm.http.get("/evaluate/auth/queryComment")
+                    .then(resp => {
+                        var data = resp.data;
+                        if (resp.status === 200) {
+                            this.commentList = data;
+                            this.typeCommentList(this.commentList);
+                        } else {
+
+                        }
+                    })
+                    .catch(() => {
+                        alert("加载用户订单信息异常!")
+                    })
+            },
+            /* 将用户评论分类 */
+            typeCommentList(allList) {
+                allList.forEach(item => {
+                    if (gm.isStringNotEmpty(item.images)) {
+                        this.imgCommentList.push(item);
+                    } else {
+                        this.noneImgCommentList.push(item);
+                    }
+                })
+            },
+            /* 删除评论 */
+            deleteComment(commentId, type) {
+                gm.http.get("/evaluate/auth/deleteComment/" + commentId)
+                    .then(resp => {
+                        var data = resp.data;
+                        if (resp.status === 200) {
+                            var data = resp.data;
+                            if (data.state == 1) {
+                                alert("删除评论成功!");
+                                var delIndex = -1;
+                                if (type == 1) {
+                                    delIndex = gm.findListIndex(this.imgCommentList, "id", commentId);
+                                    this.imgCommentList.splice(delIndex, 1);
+                                } else {
+                                    delIndex = gm.findListIndex(this.noneImgCommentList, "id", commentId);
+                                    this.noneImgCommentList.splice(delIndex, 1);
+                                }
+                            } else {
+                                alert("删除评论失败!");
+                            }
+                        } else {
+                            alert("删除评论失败!");
+                        }
+                    })
+                    .catch(() => {
+                        alert("删除评论异常!")
+                    })
+            },
+            /* 查看商品详情 */
+            goIntroduction(goodsId) {
+                window.top.location.href = "http://www.greenmall.com/goods/introduction/" + goodsId + ".html"
+            }
+        }
+    })
+</script>
+
 
 </html>

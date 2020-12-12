@@ -12,9 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -53,6 +52,38 @@ public class EvaluateController {
         try {
             UserInfo loginUser = LoginInterceptor.getLoginUser();
             Message message = this.evaluateService.comment(list, loginUser);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    @GetMapping(path = "/auth/queryComment")
+    public ResponseEntity<List<Evaluate>> queryComment() {
+        try {
+            UserInfo loginUser = LoginInterceptor.getLoginUser();
+            List<Evaluate> eList = evaluateService.findComment(loginUser);
+            if (CollectionUtils.isEmpty(eList)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(eList);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    /**
+     * 删除评论
+     *
+     * @return
+     */
+    @GetMapping(path = "/auth/deleteComment/{id}")
+    public ResponseEntity<Message> deleteComment(@PathVariable("id") Long id) {
+        try {
+            UserInfo loginUser = LoginInterceptor.getLoginUser();
+            Message message = evaluateService.deleteComment(id);
             return ResponseEntity.ok(message);
         } catch (Exception e) {
             e.printStackTrace();

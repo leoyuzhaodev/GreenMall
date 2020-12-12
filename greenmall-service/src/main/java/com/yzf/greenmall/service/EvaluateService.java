@@ -10,8 +10,12 @@ import com.yzf.greenmall.common.PageResult;
 import com.yzf.greenmall.common.QueryPage;
 import com.yzf.greenmall.common.jwt.UserInfo;
 import com.yzf.greenmall.entity.Evaluate;
+import com.yzf.greenmall.entity.Goods;
+import com.yzf.greenmall.entity.GoodsDetail;
 import com.yzf.greenmall.entity.User;
 import com.yzf.greenmall.mapper.EvaluateMapper;
+import com.yzf.greenmall.mapper.GoodsDetailMapper;
+import com.yzf.greenmall.mapper.GoodsMapper;
 import com.yzf.greenmall.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +44,12 @@ public class EvaluateService {
 
     @Autowired
     private GoodsService goodsService;
+
+    @Autowired
+    private GoodsMapper goodsMapper;
+
+    @Autowired
+    private GoodsDetailMapper goodsDetailMapper;
 
     /**
      * 加载评论
@@ -107,6 +117,8 @@ public class EvaluateService {
         Example.Criteria criteria = example.createCriteria();
         // 添加商品id条件
         criteria.andEqualTo("goodsId", "" + queryPage.getQueryMap().get("goodsId"));
+        // 只能查询有效评论
+        criteria.andEqualTo("valid", Evaluate.VALID_YES);
         // 按时间降序排列
         example.setOrderByClause("create_time desc");
         Integer eType = 6;
@@ -256,5 +268,54 @@ public class EvaluateService {
         return goodsAvgScore == null ? 0 : goodsAvgScore;
     }
 
+    /**
+     * 根据用户加载评论
+     *
+     * @param loginUser
+     * @return
+     */
+    public List<Evaluate> findComment(UserInfo loginUser) {
+
+        // 1，根据用户ID查找评论
+        Example example = new Example(Evaluate.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("accountId", loginUser.getId());
+        criteria.andEqualTo("valid", Evaluate.VALID_YES);
+        example.setOrderByClause("create_time desc");
+        List<Evaluate> list = evaluateMapper.selectByExample(example);
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+
+        // 2，封装数据，商品图片，商品id
+        for (Evaluate evaluate : list) {
+            Long goodsId = evaluate.getGoodsId();
+            Object[] infos = goodsService.findImageTitlePrice(goodsId);
+            evaluate.setGoodsImage(((String) infos[0]).split(",")[0]);
+            evaluate.setGoodsTitle((String) infos[1]);
+        }
+
+        return list;
+    }
+
+    /**
+     * 根据id删除评论
+     *
+     * @param id 评论ID
+     * @return
+     */
+    public Message deleteComment(Long id) {
+
+        // 1，查找评论
+        Evaluate evaluate = evaluateMapper.selectByPrimaryKey(id);
+        if (evaluate == null) {
+            return new Message(2, "根据ID删除评论：根据ID无法搜索到评论数据!");
+        }
+        // 2，删除
+        evaluate.setValid(Evaluate.VALID_NO);
+        evaluateMapper.updateByPrimaryKeySelective(evaluate);
+
+        return new Message(1, "");
+    }
 }
 
