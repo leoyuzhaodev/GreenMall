@@ -1,5 +1,6 @@
 package com.yzf.greenmall.web;
 
+import com.yzf.greenmall.bo.OrderDetailItemBo;
 import com.yzf.greenmall.common.Message;
 import com.yzf.greenmall.common.jwt.UserInfo;
 import com.yzf.greenmall.entity.Order;
@@ -93,6 +94,27 @@ public class OrderController {
             UserInfo loginUser = LoginInterceptor.getLoginUser();
             Message message = orderService.deleteOrder(orderId);
             return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    /**
+     * 查询用户的订单详情项
+     *
+     * @return
+     */
+    @GetMapping(path = "/queryUserOrderDetailItem/{type}")
+    public ResponseEntity<List<OrderDetailItemBo>> queryUserOrderDetailItem(
+            @PathVariable(name = "type", required = false) Integer type) {
+        try {
+            UserInfo loginUser = LoginInterceptor.getLoginUser();
+            List<OrderDetailItemBo> items = orderService.findUserOrderDetailItem(type, loginUser);
+            if (CollectionUtils.isEmpty(items)) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(items);
         } catch (Exception e) {
             e.printStackTrace();
         }

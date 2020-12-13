@@ -1,5 +1,6 @@
 package com.yzf.greenmall.mapper;
 
+import com.yzf.greenmall.bo.OrderDetailItemBo;
 import com.yzf.greenmall.entity.Order;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -43,4 +44,16 @@ public interface OrderMapper extends Mapper<Order>, SelectByIdListMapper<Order, 
     @Select("select * from v_regist_num WHERE regist_year = #{year}  ORDER BY regist_month")
     List<Map<String, Object>> statisticRegistNum(@Param("year") int year);
 
+    /**
+     * 插叙指定时间段的数据
+     *
+     * @param startTimeStr 开始时间
+     * @param endTimeStr   结束时间
+     * @param accountId    用户ID
+     * @return
+     */
+    @Select("select * from v_orderdetail_item where accountId = #{accountId} and createTime BETWEEN #{startTimeStr} and #{endTimeStr} order by createTime desc")
+    List<OrderDetailItemBo> findOrderDetailItems(@Param("startTimeStr") String startTimeStr,
+                                                 @Param("endTimeStr") String endTimeStr,
+                                                 @Param("accountId") Long accountId);
 }

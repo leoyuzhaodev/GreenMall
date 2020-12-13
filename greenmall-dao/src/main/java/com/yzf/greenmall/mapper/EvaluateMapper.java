@@ -18,7 +18,7 @@ public interface EvaluateMapper extends Mapper<Evaluate>, SelectByIdListMapper<E
      * @param id 商品id
      * @return
      */
-    @Select("SELECT count(*) FROM `tb_evaluate` where goods_id = #{id}")
+    @Select("SELECT count(*) FROM `tb_evaluate` where goods_id = #{id} and valid = 1")
     Long getTotalEvaluate(@Param("id") Long id);
 
     /**
@@ -27,7 +27,7 @@ public interface EvaluateMapper extends Mapper<Evaluate>, SelectByIdListMapper<E
      * @param id
      * @return
      */
-    @Select("SELECT count(*) FROM `tb_evaluate` where goods_id = #{id} and score = 3")
+    @Select("SELECT count(*) FROM `tb_evaluate` where goods_id = #{id} and score = 3 and valid = 1")
     Long getCommonEvaluateNum(@Param("id") Long id);
 
     /**
@@ -36,7 +36,7 @@ public interface EvaluateMapper extends Mapper<Evaluate>, SelectByIdListMapper<E
      * @param id
      * @return
      */
-    @Select("SELECT count(*) FROM `tb_evaluate` where goods_id = #{id} and score > 3")
+    @Select("SELECT count(*) FROM `tb_evaluate` where goods_id = #{id} and score > 3 and valid = 1")
     Long getGoodEvaluateNum(@Param("id") Long id);
 
 
@@ -46,7 +46,7 @@ public interface EvaluateMapper extends Mapper<Evaluate>, SelectByIdListMapper<E
      * @param id
      * @return
      */
-    @Select("SELECT count(*) FROM `tb_evaluate` where goods_id = #{id} and score < 3")
+    @Select("SELECT count(*) FROM `tb_evaluate` where goods_id = #{id} and score < 3 and valid = 1")
     Long getBadEvaluateNum(@Param("id") Long id);
 
     /**
@@ -55,7 +55,7 @@ public interface EvaluateMapper extends Mapper<Evaluate>, SelectByIdListMapper<E
      * @param goodsId
      * @return
      */
-    @Select("SELECT FLOOR(AVG(score)) FROM `tb_evaluate` WHERE goods_id = #{goodsId}")
+    @Select("SELECT FLOOR(AVG(score)) FROM `tb_evaluate` WHERE goods_id = #{goodsId} and valid = 1")
     Integer getGoodsAvgScore(@Param("goodsId") Long goodsId);
 
 }

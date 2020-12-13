@@ -329,7 +329,7 @@ public class GoodsService {
                 goods.getId());
 
         // 6，加载商品总销量
-        Long allSalesVolume = salesVolumeService.getGoodsAllSalesVolume(goods.getId());
+        Long allSalesVolume = evaluate.getTotalEvaluate();
 
         // 7，构建 GoodsIntroduction
         GoodsIntroduction goodsIntroduction = new GoodsIntroduction();

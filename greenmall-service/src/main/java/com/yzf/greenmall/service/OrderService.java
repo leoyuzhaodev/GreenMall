@@ -2,10 +2,8 @@ package com.yzf.greenmall.service;
 
 
 import com.github.pagehelper.PageHelper;
-import com.yzf.greenmall.common.LayuiPage;
-import com.yzf.greenmall.common.Message;
-import com.yzf.greenmall.common.NumberCalUtil;
-import com.yzf.greenmall.common.QueryPage;
+import com.yzf.greenmall.bo.OrderDetailItemBo;
+import com.yzf.greenmall.common.*;
 import com.yzf.greenmall.common.jwt.UserInfo;
 import com.yzf.greenmall.entity.*;
 import com.yzf.greenmall.mapper.*;
@@ -51,6 +49,7 @@ public class OrderService {
 
     @Autowired
     private SalesVolumeService salesVolumeService;
+
 
     /**
      * 提交订单
@@ -447,4 +446,54 @@ public class OrderService {
         return info;
     }
 
+    /**
+     * @param type      1：天 2：周（默认） 3：月 4：年 5：全部
+     * @param loginUser
+     * @return
+     */
+    public List<OrderDetailItemBo> findUserOrderDetailItem(Integer type, UserInfo loginUser) {
+
+        if (type == null) {
+            type = 2;
+        }
+        Date endTime = new Date();
+        String endTimeStr = CalendarUtils.getDateStr(endTime);
+        String startTimeStr = null;
+        Calendar rightNow = Calendar.getInstance();
+        // 1,算出时间段
+        switch (type) {
+            case 1:
+                startTimeStr = CalendarUtils.getDateBeforeOrAfterDay(endTime, false, 1);
+                break;
+            case 2:
+                startTimeStr = CalendarUtils.getDateBeforeOrAfterDay(endTime, false, 7);
+                break;
+            case 3:
+                startTimeStr = CalendarUtils.getDateBeforeOrAfterDay(endTime, false, 30);
+                break;
+            case 4:
+                startTimeStr = CalendarUtils.getDateBeforeOrAfterDay(endTime, false, 365);
+                break;
+            case 5:
+                startTimeStr = "2000-1-1 00:00:00";
+                break;
+            default:
+                break;
+        }
+        // 2,查找数据
+        List<OrderDetailItemBo> list = orderMapper.findOrderDetailItems(startTimeStr, endTimeStr, loginUser.getId());
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        // 3,封装数据
+        list.forEach(item -> {
+            Object[] info = goodsService.findImageTitlePrice(item.getGoodsId());
+            // 封装图片
+            item.setGoodsImage(info[0].toString().split(",")[0]);
+            // 封装标题
+            item.setGoodsTitle(info[1].toString());
+        });
+
+        return list;
+    }
 }
