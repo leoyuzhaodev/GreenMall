@@ -1,8 +1,10 @@
 package com.yzf.greenmall.admin.web;
 
+import com.yzf.greenmall.admin.interceptor.LoginInterceptor;
 import com.yzf.greenmall.common.LayuiPage;
 import com.yzf.greenmall.common.Message;
 import com.yzf.greenmall.common.QueryPage;
+import com.yzf.greenmall.common.jwt.UserInfo;
 import com.yzf.greenmall.entity.Refund;
 import com.yzf.greenmall.entity.User;
 import com.yzf.greenmall.service.UserService;
@@ -13,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * @description:
@@ -50,6 +54,7 @@ public class UserController {
 
     /**
      * 禁用或者解禁用户
+     *
      * @param type
      * @param userId
      * @return
@@ -65,5 +70,41 @@ public class UserController {
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+
+    /**
+     * 查询登录管理员的昵称
+     *
+     * @return
+     */
+    @GetMapping(path = "/queryAdminNickName")
+    public ResponseEntity<Message> userValid() {
+        try {
+            UserInfo loginUser = LoginInterceptor.getLoginUser();
+            Message message = userService.findAdminNickName(loginUser);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    /**
+     * 更新管理员密码
+     *
+     * @param map {password:,newPassword:}
+     * @return
+     */
+    @PostMapping(path = "/updatePassword")
+    public ResponseEntity<Message> updatePassword(@RequestBody Map<String, String> map) {
+        try {
+            UserInfo loginUser = LoginInterceptor.getLoginUser();
+            Message message = userService.updateAdminPassword(loginUser, map);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
 
 }

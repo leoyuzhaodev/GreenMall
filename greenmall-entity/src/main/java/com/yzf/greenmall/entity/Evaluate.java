@@ -5,6 +5,8 @@ import lombok.Data;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @description:Evaluate
@@ -21,7 +23,6 @@ public class Evaluate implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private Long orderId;
     private Long goodsId;
     private Long accountId;
@@ -36,4 +37,15 @@ public class Evaluate implements Serializable {
     @Transient
     private String goodsImage; // 商品图片
 
+
+    /**
+     * 查询条件
+     *
+     * @return
+     */
+    public static Map<String, String> originalQueryMap() {
+        Map<String, String> queryMap = new HashMap<>();
+        queryMap.put("id,orderId,goodsId,accountId", "");
+        return queryMap;
+    }
 }

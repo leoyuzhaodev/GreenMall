@@ -5,14 +5,12 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.yzf.greenmall.bo.Comment;
 import com.yzf.greenmall.bo.EvaluateBo;
+import com.yzf.greenmall.common.LayuiPage;
 import com.yzf.greenmall.common.Message;
 import com.yzf.greenmall.common.PageResult;
 import com.yzf.greenmall.common.QueryPage;
 import com.yzf.greenmall.common.jwt.UserInfo;
-import com.yzf.greenmall.entity.Evaluate;
-import com.yzf.greenmall.entity.Goods;
-import com.yzf.greenmall.entity.GoodsDetail;
-import com.yzf.greenmall.entity.User;
+import com.yzf.greenmall.entity.*;
 import com.yzf.greenmall.mapper.EvaluateMapper;
 import com.yzf.greenmall.mapper.GoodsDetailMapper;
 import com.yzf.greenmall.mapper.GoodsMapper;
@@ -315,6 +313,51 @@ public class EvaluateService {
         evaluate.setValid(Evaluate.VALID_NO);
         evaluateMapper.updateByPrimaryKeySelective(evaluate);
 
+        return new Message(1, "");
+    }
+
+    /**
+     * 后端管理：分页查找评价
+     *
+     * @param queryPage
+     * @return
+     */
+    public LayuiPage<Evaluate> findEvaluateByPageAdmin(QueryPage<Evaluate> queryPage) {
+        if (CollectionUtils.isEmpty(queryPage.getQueryMap())) {
+            queryPage.setQueryMap(Evaluate.originalQueryMap());
+        }
+        Example example = queryPage.generateExample(Evaluate.class, false);
+        // 2，分页查询
+        PageHelper.startPage(queryPage.getPage(), queryPage.getLimit());
+        List<Evaluate> evaluateList = evaluateMapper.selectByExample(example);
+        if (CollectionUtils.isEmpty(evaluateList)) {
+            return new LayuiPage<Evaluate>();
+        }
+
+        // 3，封装分页信息，并返回
+        return new LayuiPage<Evaluate>().initLayuiPage(evaluateList);
+    }
+
+    /**
+     * 删除或者撤销删除评论
+     *
+     * @param type       1：删除 0：撤销
+     * @param evaluateId
+     * @return
+     */
+    public Message evaluateValid(Integer type, Long evaluateId) {
+
+        Evaluate evaluate = evaluateMapper.selectByPrimaryKey(evaluateId);
+        if (evaluate == null) {
+            throw new RuntimeException("根据评论ID删除或者撤销删除评论异常：根据评论ID无法查找到评论信息！");
+        }
+
+        if (type == 1) {
+            evaluate.setValid(Evaluate.VALID_NO);
+        } else if (type == 0) {
+            evaluate.setValid(Evaluate.VALID_YES);
+        }
+        evaluateMapper.updateByPrimaryKeySelective(evaluate);
         return new Message(1, "");
     }
 }

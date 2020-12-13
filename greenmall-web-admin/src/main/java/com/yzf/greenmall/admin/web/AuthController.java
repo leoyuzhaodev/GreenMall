@@ -79,4 +79,33 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
+    /**
+     * 退出登录
+     *
+     * @return
+     */
+    @GetMapping(path = "/logout")
+    public ResponseEntity<Message> userLogout(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            // 退出登录
+            logOut(request, response);
+            return ResponseEntity.ok(new Message(1, ""));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
+    /**
+     * 退出登录用户浏览器的cookie置空
+     *
+     * @param request
+     * @param response
+     */
+    public void logOut(HttpServletRequest request, HttpServletResponse response) {
+        CookieUtils.setCookie(request, response, jwtProperties.getCookieName(),
+                "", jwtProperties.getCookieMaxAge(), null, true);
+    }
+
 }

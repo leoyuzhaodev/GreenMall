@@ -27,7 +27,6 @@ public class RefundController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CategoryController.class);
 
-
     /**
      * 分页查询退款申请
      *
@@ -37,8 +36,8 @@ public class RefundController {
     @PostMapping(path = "/queryRefundByPage")
     public ResponseEntity<LayuiPage<Refund>> queryOrderByPage(@RequestBody QueryPage<Refund> queryPage) {
         try {
-            LayuiPage<Refund> orderPage = refundService.findRefundByPage(queryPage);
-            return ResponseEntity.ok(orderPage);
+            LayuiPage<Refund> refundPage = refundService.findRefundByPage(queryPage);
+            return ResponseEntity.ok(refundPage);
         } catch (Exception e) {
             LOGGER.info("分页查询退款申请:服务器内部错误：{}", e.getMessage());
             e.printStackTrace();

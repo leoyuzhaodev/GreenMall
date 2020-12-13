@@ -3,7 +3,9 @@ package com.yzf.greenmall.service;
 import com.github.pagehelper.PageHelper;
 import com.yzf.greenmall.common.*;
 import com.yzf.greenmall.common.jwt.UserInfo;
+import com.yzf.greenmall.entity.GMAdmin;
 import com.yzf.greenmall.entity.Refund;
+import com.yzf.greenmall.mapper.GMAdminMapper;
 import com.yzf.greenmall.mapper.UserMapper;
 import com.yzf.greenmall.entity.User;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +44,10 @@ public class UserService {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private GMAdminMapper adminMapper;
+
     // 注册验证码前缀
     static final String KEY_PREFIX = "user:code:phone:";
     // 设置支付密码验证码前缀
@@ -603,5 +609,56 @@ public class UserService {
         userInfo.put("portrait", user.getPortrait());
         userInfo.put("nickName", user.getNickName());
         return userInfo;
+    }
+
+    /**
+     * @param loginUser
+     * @return
+     */
+    public Message findAdminNickName(UserInfo loginUser) {
+        if (loginUser == null || loginUser.getId() == null) {
+            throw new RuntimeException("根据ID查找管理员的昵称：ID为空无法查找!");
+        }
+        GMAdmin gmAdmin = adminMapper.selectByPrimaryKey(loginUser.getId());
+        if (gmAdmin == null) {
+            throw new RuntimeException("根据ID查找管理员的昵称：根据ID无法查找到管理员信息!");
+        }
+        return new Message(1, gmAdmin.getNickName());
+    }
+
+    /**
+     * 更新管理员密码
+     *
+     * @param loginUser
+     * @param map       {password:,newPassword:}
+     * @return
+     */
+    public Message updateAdminPassword(UserInfo loginUser, Map<String, String> map) {
+
+        String password = map.get("password");
+        String newPassword = map.get("newPassword");
+        if (StringUtils.isEmpty(password) || StringUtils.isEmpty(newPassword)) {
+            throw new RuntimeException("更新管理员密码：缺少必要的参数!");
+        }
+
+        // 1，查询管理员信息，并比对原密码
+        GMAdmin gmAdmin = adminMapper.selectByPrimaryKey(loginUser.getId());
+        if (gmAdmin == null) {
+            throw new RuntimeException("更新管理员密码：根据管理员ID无法查询到管理员信息!");
+        }
+
+        // 2，比对密码
+        if (!gmAdmin.getPassword().equals(CodecUtils.md5Hex(password, gmAdmin.getSalt()))) {
+            return new Message(2, "原密码错误");
+        }
+
+        // 3，更新密码
+        String salt = CodecUtils.generateSalt();
+        String pwd = CodecUtils.md5Hex(newPassword, salt);
+        gmAdmin.setSalt(salt);
+        gmAdmin.setPassword(pwd);
+        adminMapper.updateByPrimaryKey(gmAdmin);
+
+        return new Message(1, "");
     }
 }

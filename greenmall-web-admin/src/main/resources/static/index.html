@@ -17,15 +17,14 @@
         <ul class="layui-nav layui-layout-right">
             <li class="layui-nav-item">
                 <a href="javascript:;">
-                    <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
-                    贤心
+                    【<span id="adminNickName"></span>】
                 </a>
                 <dl class="layui-nav-child">
-                    <dd><a href="">基本资料</a></dd>
-                    <dd><a href="">安全设置</a></dd>
+                   <!-- <dd><a id="updateNN">修改昵称</a></dd>-->
+                    <dd><a id="updatePassword">修改密码</a></dd>
                 </dl>
             </li>
-            <li class="layui-nav-item"><a href="">退了</a></li>
+            <li class="layui-nav-item"><a id="adminLogout" style="cursor: pointer">退了</a></li>
         </ul>
     </div>
 
@@ -52,24 +51,13 @@
                     <dl class="layui-nav-child">
                         <dd><a href="order.html">订单管理</a></dd>
                         <dd><a href="refund.html">售后管理</a></dd>
-                    </dl>
-                </li>
-                <li class="layui-nav-item">
-                    <a href="javascript:;">门户管理</a>
-                    <dl class="layui-nav-child">
-                        <dd><a href="javascript:;">商品推荐</a></dd>
+                        <dd><a href="comment.html">评价管理</a></dd>
                     </dl>
                 </li>
                 <li class="layui-nav-item">
                     <a href="javascript:;">数据总览</a>
                     <dl class="layui-nav-child">
                         <dd><a href="statistics.html">数据统计</a></dd>
-                    </dl>
-                </li>
-                <li class="layui-nav-item">
-                    <a href="javascript:;">个人管理</a>
-                    <dl class="layui-nav-child">
-                        <dd><a href="javascript:;">个人信息</a></dd>
                     </dl>
                 </li>
             </ul>
@@ -94,9 +82,192 @@
 <script src="http://manager.greenmall.com/js/GMVerify.js" charset="utf-8"></script>
 <script>
     //JavaScript代码区域
-    layui.use(['jquery', 'element'], function () {
+    layui.use(['transfer', 'form', 'jquery', 'element', 'tree', 'util', 'table'], function () {
         var $ = layui.jquery;
         var element = layui.element;
+        var tree = layui.tree;
+        var layer = layui.layer;
+        var util = layui.util;
+        var form = layui.form;
+        var transfer = layui.transfer;
+        var table = layui.table;
+        var upLayerIndex = -1;
+        var upNNLayerIndex = -1;
+
+        // 1，加载管理员的昵称
+        loadAdminNickName();
+
+        function loadAdminNickName() {
+            greenMallGet("/user/queryAdminNickName", {},
+                function (data) {
+                    if (data.state == 1) {
+                        // 设置管理员的昵称
+                        $("#adminNickName").text(data.info);
+                    } else {
+
+                    }
+                },
+                function () {
+
+                }
+            )
+        }
+
+        // 2，退出登录
+        $("#adminLogout").click(function () {
+            // 退出登录
+            greenMallGet("/auth/logout", {},
+                function (data) {
+                    window.top.location.href = "http://manager.greenmall.com/login.html";
+                },
+                function () {
+                }
+            )
+        })
+
+        // 3，修改密码
+        $("#updatePassword").click(function () {
+            layer.open({
+                type: 1,
+                area: ['500px', '360px'],
+                title: "修改密码",
+                content: $('#updatePwdForm'),
+                id: "updatePasswordLayer",
+                btn: ['保存']
+                , yes: function (index, layero) {
+                    upLayerIndex = index;
+                    $("#updatePwd").click();
+                }, success: function (layero, index) {
+                    upLayerIndex = index;
+                }, end: function (layero, index) {
+
+                }
+            });
+        })
+
+        /* 重置密码信息表单信息验证 */
+        form.verify({
+            password: function (value) {
+                if (isStringEmpty(value)) {
+                    return "原密码不能为空!";
+                }
+            },
+            newPassword: function (value) {
+                var reg = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[~!@#$%^&*()_+`\-={}:";'<>?,.\/]).{4,16}$/;
+                var flag = reg.test(value);
+                if (flag == false) {
+                    return "新密码必须由 4-16位字母、数字、特殊符号线组成。";
+                }
+            },
+            confirmPwd: function (value) {
+                var pwd = $("#newPassword").val();
+                if (!(pwd === value)) {
+                    return "两次密码输入不一致。";
+                }
+            }
+        });
+
+
+        /* 监听重置密码信息表单提交 */
+        form.on('submit(updatePwd)', function (data) {
+            // 获取表单数据
+            var upPwdFromData = data.field;
+
+            // 发送请求重置密码
+            greenMallPost("/user/updatePassword", {
+                    password: upPwdFromData['password'],
+                    newPassword: upPwdFromData['newPassword']
+                },
+                function (data) {
+                    if (data.state == 1) {
+                        alert("密码修改成功，将去往登录页面...");
+                        window.top.location.href = "http://manager.greenmall.com/login.html";
+                    } else {
+                        layer.msg(data.info)
+                    }
+                },
+                function () {
+                    layer.msg("密码设置失败!")
+                }
+            )
+            // 关闭弹框
+            layer.close(upLayerIndex);
+            // 重置表单
+            resetUpdatePwdForm();
+            // false 防止浏览器提交表单
+            return false;
+        });
+
+        /* 重置密码信息表单 */
+        function resetUpdatePwdForm() {
+            $("#password").val("");
+            $("#newPassword").val("");
+            $("#confirmPwd").val("");
+            layui.form.render();
+        }
+
+        // 4，修改昵称
+        $("#updateNN").click(function () {
+
+
+            // 1，获取页面上的昵称回显昵称
+            $("#nickName").val($("#adminNickName").val());
+            layui.form.render();
+            layer.open({
+                type: 1,
+                area: ['500px', '360px'],
+                title: "修改昵称",
+                content: $('#updateNickForm'),
+                id: "updateNickLayer",
+                btn: ['保存']
+                , yes: function (index, layero) {
+                    upNNLayerIndex = index;
+                    $("#updateNickName").click();
+                }, success: function (layero, index) {
+                    upNNLayerIndex = index;
+                }, end: function (layero, index) {
+
+                }
+            });
+        })
+
+        /* 重置密码信息表单信息验证 */
+        form.verify({
+            nickName: function (value) {
+                if (isStringEmpty(value)) {
+                    return "昵称不能为空!";
+                }
+            }
+        });
+
+
+        /* 监听重置密码信息表单提交 */
+        form.on('submit(updateNickName)', function (data) {
+            // 获取表单数据
+            var upNNFromData = data.field;
+
+            // 发送请求重置密码
+            greenMallPost("/user/updateNickName", {
+                    password: upNNFromData['nickName'],
+                },
+                function (data) {
+                    if (data.state == 1) {
+                        layer.msg("昵称修改成功");
+                        $("#adminNickName").val(upNNFromData['nickName']);
+                    } else {
+                        layer.msg(data.info)
+                    }
+                },
+                function () {
+                    layer.msg("昵称修改失败!")
+                }
+            )
+            // 关闭弹框
+            layer.close(upNNLayerIndex);
+            // false 防止浏览器提交表单
+            return false;
+        });
+
 
         // 菜单栏页面跳转
         $("dd>a").click(function (e) {
@@ -109,7 +280,63 @@
             // 更改iframe的src
             iframeMain.attr("src", hrefVal);
         });
+
+
     });
 </script>
 </body>
+<!-- 修改昵称 -->
+<form id="updateNickForm" lay-filter="updateNickForm" class="layui-form"
+      style="padding: 20px 30px 20px 0px;" action="">
+
+   <!--  参数名称 -->
+    <div class="layui-form-item">
+        <label class="layui-form-label">昵称</label>
+        <div class="layui-input-block">
+            <input type="text" id="nickName" name="nickName" lay-verify="nickName" autocomplete="off"
+                   placeholder="请输入昵称"
+                   class="layui-input">
+        </div>
+    </div>
+
+   <!-- <button style="display: none" id="updateNickName" lay-submit lay-filter="updateNickName" class="layui-btn"
+            data-type="reload"/>-->
+</form>
+
+<!-- 修改密码 -->
+<form id="updatePwdForm" lay-filter="updatePwdForm" class="layui-form"
+      style="padding: 20px 30px 20px 0px;" action="">
+
+    <!-- 参数名称 -->
+    <div class="layui-form-item">
+        <label class="layui-form-label">原密码</label>
+        <div class="layui-input-block">
+            <input type="password" id="password" name="password" lay-verify="password" autocomplete="off"
+                   placeholder="请输入原密码"
+                   class="layui-input">
+        </div>
+    </div>
+    <!-- 参数名称 -->
+    <div class="layui-form-item">
+        <label class="layui-form-label">新密码</label>
+        <div class="layui-input-block">
+            <input type="password" id="newPassword" name="newPassword" lay-verify="newPassword" autocomplete="off"
+                   placeholder="请输入新密码"
+                   class="layui-input">
+        </div>
+    </div>
+    <!-- 参数名称 -->
+    <div class="layui-form-item">
+        <label class="layui-form-label">确认密码</label>
+        <div class="layui-input-block">
+            <input type="password" id="confirmPwd" name="confirmPwd" lay-verify="confirmPwd" autocomplete="off"
+                   placeholder="请确认密码"
+                   class="layui-input">
+        </div>
+    </div>
+    <button style="display: none" id="updatePwd" lay-submit lay-filter="updatePwd" class="layui-btn"
+            data-type="reload"/>
+</form>
+
+
 </html>
