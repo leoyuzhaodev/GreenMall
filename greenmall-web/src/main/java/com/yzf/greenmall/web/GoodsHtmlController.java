@@ -84,5 +84,24 @@ public class GoodsHtmlController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
+    /**
+     * 查询推荐的商品
+     *
+     * @return
+     */
+    @GetMapping(path = "/queryRecommendGoods")
+    public ResponseEntity<List<GoodsSVBo>> queryRecommendGoods() {
+        try {
+            List<GoodsSVBo> list = goodsService.queryRecommendGoods();
+            if (CollectionUtils.isEmpty(list)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(list);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
 
 }

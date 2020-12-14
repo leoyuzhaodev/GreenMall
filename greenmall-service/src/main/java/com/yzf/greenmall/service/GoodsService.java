@@ -5,12 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.yzf.greenmall.bo.*;
 import com.yzf.greenmall.common.LayuiPage;
+import com.yzf.greenmall.common.Message;
 import com.yzf.greenmall.common.QueryPage;
 import com.yzf.greenmall.entity.*;
-import com.yzf.greenmall.mapper.GoodsDetailMapper;
-import com.yzf.greenmall.mapper.GoodsMapper;
-import com.yzf.greenmall.mapper.OrderDetailMapper;
-import com.yzf.greenmall.mapper.ParamMapper;
+import com.yzf.greenmall.mapper.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +91,6 @@ public class GoodsService {
             // 3，保存商品详情
             goodsBo.setGoodsId(goods.getId());
             // 当 i>0 表明数据已经存入数据库
-            goodsBo.setGoodsId(goods.getId());
             int j = goodsDetailMapper.insertSelective(goodsBo);
             if (j <= 0) {
                 throw new RuntimeException("GoodsDetail数据保存失败");
@@ -201,6 +198,7 @@ public class GoodsService {
             Goods record = new Goods(id);
             record.setValid(false);
             record.setSaleable(false);
+            record.setRecommend((byte) 0);
             goodsMapper.updateByPrimaryKeySelective(record);
             // 发送消息
             updateGoodsSearch(id);
@@ -248,6 +246,7 @@ public class GoodsService {
         if (id != null) {
             Goods record = new Goods(id);
             record.setSaleable(false);
+            record.setRecommend((byte) 0);
             goodsMapper.updateByPrimaryKeySelective(record);
             // 发送消息
             updateGoodsSearch(id);
@@ -513,10 +512,76 @@ public class GoodsService {
             Long salesVolume = salesVolumeService.getGoodsAllSalesVolume(good.getId());
             goodsSVBo.setSaleVolume(salesVolume);
             // 2，设置名次
-            goodsSVBo.setTopNumber(new Long(i+1));
+            goodsSVBo.setTopNumber(new Long(i + 1));
             goodsSVBosList.add(goodsSVBo);
         }
 
         return goodsSVBosList;
+    }
+
+    /**
+     * 推荐或者取消推荐商品
+     *
+     * @param type    1:推荐 2:取消推荐
+     * @param goodsId
+     * @return
+     */
+    public Message recommendGoods(Integer type, Long goodsId) {
+
+        // 1,查询商品信息
+        Goods goods = goodsMapper.findGoodsAndDetail(goodsId);
+        if (goods == null) {
+            throw new RuntimeException("根据ID推荐或者取消推荐商品：无法根据商品ID查找到商品数据");
+        }
+
+        if (type == 1) {
+            // 2,判断商品信息
+            boolean flag = goods.searchGoods();
+            if (flag == false) {
+                return new Message(2, "商品库存不足或者被删除或者被下架了，因此无法推荐");
+            }
+            // 3,商品推荐个数判断
+            Goods record = new Goods();
+            record.setRecommend((byte) 1);
+            int count = goodsMapper.selectCount(record);
+            if (count >= 3) {
+                return new Message(2, "商品推荐个数已达到上限(3个商品)，因此无法推荐");
+            }
+            // 4，置为推荐
+            goods.setRecommend((byte) 1);
+        } else {
+            // 置为不推荐
+            goods.setRecommend((byte) 0);
+        }
+
+        // 5，推荐或者取消推荐
+        goodsMapper.updateByPrimaryKeySelective(goods);
+
+        return new Message(1, "");
+    }
+
+    /**
+     * 查询推荐的商品
+     *
+     * @return
+     */
+    public List<GoodsSVBo> queryRecommendGoods() {
+        // 1，查询推荐的商品
+        Goods record = new Goods();
+        record.setRecommend((byte) 1);
+        List<Goods> goodsList = goodsMapper.select(record);
+        if (goodsList == null) {
+            return null;
+        }
+        // 2，封装数据
+        List<GoodsSVBo> goodsSVBosList = new ArrayList<>();
+        for (int i = 0; i < goodsList.size(); i++) {
+            Goods good = goodsList.get(i);
+            GoodsDetail goodsDetail = goodsDetailMapper.selectByPrimaryKey(good.getId());
+            GoodsSVBo goodsSVBo = GoodsSVBo.generateGoodsSVBo(good, goodsDetail);
+            goodsSVBosList.add(goodsSVBo);
+        }
+        return goodsSVBosList;
+
     }
 }

@@ -272,6 +272,24 @@ public class GoodsController {
         return Message.generateResponseEntity(Message.MESSAGE_STATE_ERROR, "商品批量下架失败");
     }
 
+    /**
+     * 推荐或者取消推荐商品
+     *
+     * @param type    1:推荐 2:取消推荐
+     * @param goodsId
+     * @return
+     */
+    @GetMapping(path = "/recommend")
+    public ResponseEntity<Message> recommendGoods(@RequestParam("type") Integer type, @RequestParam("goodsId") Long goodsId) {
+        try {
+            Message message = this.goodsService.recommendGoods(type, goodsId);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            LOGGER.info("商品批量下架失败：服务器内部错误：{}", e.getMessage());
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
 
 
 }

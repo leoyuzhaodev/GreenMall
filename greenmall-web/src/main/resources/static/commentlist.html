@@ -13,6 +13,7 @@
     <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
 
     <!-- 引入 vue，以及相关工具js -->
+    <script src="http://www.greenmall.com/js/math.js"></script>
     <script src="http://www.greenmall.com/js/validate.js"></script>
     <script src="http://www.greenmall.com/js/vue/vue.js"></script>
     <script src="http://www.greenmall.com/js/vue/vuetify.js"></script>
@@ -239,7 +240,7 @@
                             // 清空 localStorage 中的内容
                             gm.store.set("commentOrder", {});
                             // 回到订单管理页面
-                            window.location.href = "http://www.greenmall.com/personalcenter.html?open=forder"
+                            window.top.location.href = "http://www.greenmall.com/personalcenter.html?open=forder"
                         } else {
                             alert("发表评论失败!");
                         }

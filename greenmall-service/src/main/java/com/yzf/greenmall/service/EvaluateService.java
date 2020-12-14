@@ -244,6 +244,9 @@ public class EvaluateService {
             // 设置评论时间
             item.setCreateTime(new Date());
 
+            // 设置评论是否有效
+            item.setValid(Evaluate.VALID_YES);
+
             // 存入数据库中
             evaluateMapper.insertSelective(item);
 

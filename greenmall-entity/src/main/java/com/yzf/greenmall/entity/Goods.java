@@ -29,6 +29,7 @@ public class Goods implements Serializable {
     private Date createTime;// 创建时间
     private Date lastUpdateTime;// 最后修改时间 last_update_time lastUpdateTime
     private Boolean valid;// 是否有效，逻辑删除用，true:有效 false:无效
+    private Byte recommend;  // 推荐 1：推荐 0：未推荐
     @Transient
     private Long salesVolume;// 销量
     @Transient
@@ -37,6 +38,7 @@ public class Goods implements Serializable {
     private GoodsDetail goodsDetail;
     @Transient
     private Long stock; // 商品库存
+
 
     public Goods() {
     }
@@ -63,7 +65,7 @@ public class Goods implements Serializable {
         queryMap.put("title,subTitle,id", "");
         queryMap.put("saleable", "1");
         queryMap.put("valid", "1");
-        queryMap.put("valid", "1");
+        queryMap.put("recommend", "0");
         return queryMap;
     }
 

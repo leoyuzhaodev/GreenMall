@@ -204,33 +204,22 @@
                                 <img src="images/2020.png "></img>
                                 <p>今日<br>推荐</p>
                             </div>
-                            <div class="am-u-sm-4 am-u-lg-3 ">
+
+                            <div v-for="(item,index) in recommendList" :key="index+'recommend'"
+                                 class="am-u-sm-4 am-u-lg-3 ">
                                 <div class="info ">
-                                    <h3>真的有鱼</h3>
-                                    <h4>开年福利篇</h4>
+                                    <h3>{{item.goodsTitle.length > 15 ? item.goodsTitle.substring(0,15) +
+                                        '...': item.goodsTitle}}</h3>
+                                    <span class="e-price ">￥{{gm.gmFormatPrice(item.goodsPrice)}}</span>
                                 </div>
                                 <div class="recommendationMain ">
-                                    <img src="images/tj.png "></img>
+                                    <a :href="'http://www.greenmall.com/goods/introduction/'+item.goodsId+'.html'"
+                                       style="cursor: pointer">
+                                        <img height="120px" width="120px" :src="item.goodsImage"/>
+                                    </a>
                                 </div>
                             </div>
-                            <div class="am-u-sm-4 am-u-lg-3 ">
-                                <div class="info ">
-                                    <h3>囤货过冬</h3>
-                                    <h4>让爱早回家</h4>
-                                </div>
-                                <div class="recommendationMain ">
-                                    <img src="images/tj1.png "></img>
-                                </div>
-                            </div>
-                            <div class="am-u-sm-4 am-u-lg-3 ">
-                                <div class="info ">
-                                    <h3>浪漫情人节</h3>
-                                    <h4>甜甜蜜蜜</h4>
-                                </div>
-                                <div class="recommendationMain ">
-                                    <img src="images/tj2.png "></img>
-                                </div>
-                            </div>
+
 
                         </div>
                         <div class="clear "></div>
@@ -336,7 +325,8 @@
             flag: 1,
             userInfo: null,
             newGoodsList: [],
-            topSVGoods: []
+            topSVGoods: [],
+            recommendList: []
         }, created() {
             // 1，加载分类树
             this.loadCategoryTree();
@@ -346,6 +336,8 @@
             this.loadNewGoodsList();
             // 4，加载销量前12的商品
             this.loadTopSVGoods();
+            // 5，加载推荐商品
+            this.loadRecommendGoods();
         },
         components: {
             gmTop: () => import("http://www.greenmall.com/js/pages/top.js"),
@@ -420,6 +412,20 @@
                             var data = resp.data;
                             if (gm.isCollectionNotEmpty(data)) {
                                 this.topSVGoods = data;
+                            }
+                        }
+                    })
+                    .catch(() => {
+                    })
+            },
+            /* 加载推荐商品 */
+            loadRecommendGoods() {
+                gm.http.get("/goods/queryRecommendGoods")
+                    .then(resp => {
+                        if (resp.status === 200) {
+                            var data = resp.data;
+                            if (gm.isCollectionNotEmpty(data)) {
+                                this.recommendList = data;
                             }
                         }
                     })

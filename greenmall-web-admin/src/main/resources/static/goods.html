@@ -42,6 +42,9 @@
                                     <div class="layui-input-inline" style="width: 80px">
                                         <input type="checkbox" name="valid" lay-skin="switch" lay-text="已删除|未删除">
                                     </div>
+                                    <div class="layui-input-inline" style="width: 80px">
+                                        <input type="checkbox" name="recommend" lay-skin="switch" lay-text="已推荐|未推荐">
+                                    </div>
                                     <button id="goodsSerach" lay-submit lay-filter="reload" class="layui-btn"
                                             data-type="reload">搜索
                                     </button>
@@ -75,6 +78,12 @@
                         <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="goodsDown">下架</a>
                         {{# }else{  }}
                         <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="goodsUp">上架</a>
+                        {{# }  }}
+
+                        {{#  if(d.recommend == 1){  }}
+                        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="unRecommendGoods">取消推荐</a>
+                        {{# }else if(d.saleable == true && d.valid == true){  }}
+                        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="recommendGoods">推荐商品</a>
                         {{# }  }}
 
 
@@ -316,8 +325,31 @@
                         "json"
                     );
                 });
+            } else if (obj.event === 'recommendGoods') {
+                // 推荐商品
+                recommendGoods(1, goodsId);
+            } else if (obj.event === 'unRecommendGoods') {
+                // 取消推荐
+                recommendGoods(2, goodsId);
             }
         });
+
+        function recommendGoods(type, goodsId) {
+            var tipInfo = (type == 1) ? "推荐" : "取消推荐";
+            greenMallGet("/goods/recommend", {type: type, goodsId: goodsId},
+                function (data) {
+                    if (data.state == 1) {
+                        layer.msg(tipInfo + "商品成功");
+                        reloadTable();
+                    } else {
+                        layer.msg(tipInfo + "商品失败：" + data.info)
+                    }
+                },
+                function () {
+                    layer.msg(tipInfo + "商品异常");
+                }
+            )
+        }
 
         // 表格重载
         var $ = layui.$, active = {
@@ -346,6 +378,13 @@
             } else {
                 searchData['valid'] = 1;
             }
+
+            if (!(undefined == searchFromData['recommend'])) {
+                searchData['recommend'] = 1;
+            } else {
+                searchData['recommend'] = 0;
+            }
+
 
             if (!(undefined == searchFromData['saleable'])) {
                 searchData['saleable'] = 0;

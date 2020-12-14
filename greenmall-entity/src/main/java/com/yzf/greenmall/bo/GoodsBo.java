@@ -33,6 +33,7 @@ public class GoodsBo extends GoodsDetail implements Serializable {
         goods.setLastUpdateTime(new Date(System.currentTimeMillis()));
         goods.setValid(true);
         goods.setSalesVolume(0L);
+        goods.setRecommend((byte) 0);
         return goods;
     }
 
