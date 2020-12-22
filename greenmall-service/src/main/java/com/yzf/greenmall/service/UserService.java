@@ -89,6 +89,11 @@ public class UserService {
             this.amqpTemplate.convertAndSend("greenmall.sms.exchange", "sms.verify.code", map);
             // 3，将验证码存放在redis中，有效时间为5分钟
             if (keyType == 1) {
+                // 根据key获取验证码，判断用户是否频繁获取验证码
+                String flagStr = this.redisTemplate.opsForValue().get(KEY_PREFIX + phone);
+                if (StringUtils.isNotBlank(flagStr)) {
+                    return false;
+                }
                 // 登录验证码
                 this.redisTemplate.opsForValue().set(KEY_PREFIX + phone, code, 5, TimeUnit.MINUTES);
             } else if (keyType == 2) {

@@ -525,7 +525,6 @@ axios.defaults.timeout = 5000;
 axios.defaults.withCredentials = true
 
 
-
 // 配置对象
 const gm = greemmall = {
     /* 格式化时间 */
@@ -654,7 +653,7 @@ const gm = greemmall = {
      * @returns {boolean}
      */
     isObjectNotEmpty(obj) {
-        if (obj !== undefined && obj != null) {
+        if (obj !== undefined && obj != null && obj != "") {
             return true;
         } else {
             return false;

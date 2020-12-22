@@ -59,11 +59,11 @@
                                 <span class="gmErrorInfo" style="color: red;">{{ errors.first('phone') }}</span>
                                 <div class="verification">
                                     <label for="code"><i class="am-icon-code-fork"></i></label>
-                                    <input type="tel" id="code" placeholder="请输入验证码"
+                                    <input style="width: 150px;" type="tel" id="code" placeholder="请输入验证码"
                                            v-model="user.code" name="code" v-validate="'required'" data-vv-as="验证码">
                                     <a class="btn" href="javascript:void(0);"
                                        id="sendMobileCode">
-                                        <span @click="createVerifyCode" id="dyMobileButton">获取</span></a>
+                                        <span style="width: 140px;" @click="createVerifyCode" id="dyMobileButton">{{verifyCodeTip}}</span></a>
                                 </div>
                                 <span class="gmErrorInfo">{{ errors.first('code') }}</span>
                                 <div class="user-pass">
@@ -127,7 +127,9 @@
                 confirmPassword: '',
                 phone: '',
                 code: ''
-            }
+            },
+            sendVerifyFlag: true, // 验证码发送 flag
+            verifyCodeTip: "获取验证码" // 验证码获取按钮标识
         }, created() {
             /* 手机是否重复验证 */
             this.$validator.extend('useful', {
@@ -165,8 +167,18 @@
             /* 生成短信验证码 */
             createVerifyCode() {
                 this.$validator.validate("phone").then(r => {
+                    // 频繁获取验证码验证
+                    if (this.sendVerifyFlag == false) {
+                        alert("请勿频繁获取验证码!");
+                        return;
+                    }
                     if (r) {
-                        gm.http.post("/user/code", "phone=" + this.user.phone);
+                        gm.http.post("/user/code", "phone=" + this.user.phone)
+                            .then(resp => {
+                                if (resp.status === 200) {
+                                    this.checkVerifyFlag(5*60);
+                                }
+                            }).catch(() => alert("验证码发送失败，请稍后再试！"));
                     }
                 });
             },
@@ -186,6 +198,24 @@
                             .catch(() => alert("注册失败！"))
                     }
                 })
+            },
+            /* 检查刷新验证码发送标识 */
+            checkVerifyFlag(secondVal) {
+                alert("验证码发送成功!");
+                // 1，修改发送标识为：false
+                this.sendVerifyFlag = false;
+                // 2，60 秒后将标识修改成 true
+                let count = 0;
+                let tempThis = this;
+                let timer = setInterval(function () {
+                    count++;
+                    tempThis.verifyCodeTip = (secondVal - count) + "秒后再次获取";
+                    if (count >= secondVal) {
+                        tempThis.sendVerifyFlag = true;
+                        tempThis.verifyCodeTip = "获取验证码";
+                        window.clearInterval(timer);
+                    }
+                }, 1000);
             }
         }
     });

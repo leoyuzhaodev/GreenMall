@@ -57,9 +57,6 @@ public class RefundController {
         try {
             UserInfo loginUser = LoginInterceptor.getLoginUser();
             List<Refund> refundList = refundService.findRefund(loginUser);
-            if (CollectionUtils.isEmpty(refundList)){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
             return ResponseEntity.ok(refundList);
         } catch (Exception e) {
             e.printStackTrace();

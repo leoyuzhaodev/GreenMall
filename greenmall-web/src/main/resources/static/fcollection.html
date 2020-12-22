@@ -113,11 +113,9 @@
                         .then(resp => {
                             var data = resp.data;
                             if (resp.status === 200) {
-                                this.collectList = data;
-                            } else if (resp.status === 404) {
-                                // alert("收藏夹空空如也!")
-                            } else {
-                                alert("加载收藏夹失败!")
+                                if (gm.isObjectNotEmpty(data)) {
+                                    this.collectList = data;
+                                }
                             }
                         })
                         .catch(() => {

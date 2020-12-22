@@ -55,8 +55,11 @@
         <div class="clear"></div>
     </div>
 
-    <table width="100%">
+    <div v-if="gm.isCollectionNotEmpty(billList) == false">
+        <p style="line-height: 100px; text-align: center;">这里什么也没有，空空如也...￣□￣｜｜</p>
+    </div>
 
+    <table v-if="gm.isCollectionNotEmpty(billList)" width="100%">
         <thead>
         <tr>
             <th class="memo"></th>
@@ -66,11 +69,13 @@
             <th class="action">状态</th>
         </tr>
         </thead>
-
-        <tbody v-if="gm.isCollectionNotEmpty(billList)">
+        <tbody>
         <tr v-for="(item,index) in billList" :key="index+'billList'">
             <td class="img" style="padding: 10px;">
-                <i><img width="50px" height="50px" :src="item.goodsImage"></i>
+                <a target="_blank"
+                   :href="'http://www.greenmall.com/goods/introduction/'+item.goodsId+'.html'">
+                    <i><img width="50px" height="50px" :src="item.goodsImage"></i>
+                </a>
             </td>
             <td class="time" style="padding-top: 20px">
                 <p class="content">
@@ -78,7 +83,8 @@
                 </p>
             </td>
             <td class="title name" style="width: 30%;padding-top: 20px;cursor: pointer">
-                <a @click="goIntroduction(item.goodsId)">
+                <a target="_blank"
+                   :href="'http://www.greenmall.com/goods/introduction/'+item.goodsId+'.html'">
                     {{item.goodsTitle.length > 20 ? item.goodsTitle.substring(0,20) +
                     '...': item.goodsTitle}}
                 </a>
@@ -94,10 +100,6 @@
             </td>
         </tr>
         </tbody>
-        <!-- <tbody v-else>
-         <p style="line-height: 100px;text-align: center">这里什么也没有，空空如也...￣□￣｜｜</p>
-         </tbody>-->
-
     </table>
 
     <!-- ——--------------------------------------- 保留 ——--------------------------------------- -->
@@ -160,8 +162,9 @@
                 gm.http.get("/order/auth/queryUserOrderDetailItem/" + type).then(resp => {
                     var data = resp.data;
                     if (resp.status === 200) {
-                        this.billList = data;
-                    } else {
+                        if (gm.isObjectNotEmpty(data)) {
+                            this.billList = data;
+                        }
                     }
                 }).catch(() => {
                     alert("加载用户订单信息异常!")

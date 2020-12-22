@@ -51,12 +51,14 @@ public class UserAddressController {
      */
     @GetMapping(path = "/queryUserAddress")
     public ResponseEntity<List<UserAddress>> queryUserAddress() {
-        UserInfo loginUser = LoginInterceptor.getLoginUser();
-        List<UserAddress> list = userAddressService.findUserAddress(loginUser);
-        if (CollectionUtils.isEmpty(list)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        try {
+            UserInfo loginUser = LoginInterceptor.getLoginUser();
+            List<UserAddress> list = userAddressService.findUserAddress(loginUser);
+            return ResponseEntity.ok(list);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return ResponseEntity.ok(list);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
     /**

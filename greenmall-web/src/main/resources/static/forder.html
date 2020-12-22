@@ -99,7 +99,8 @@
 
                                         <li class="td td-item">
                                             <div class="item-pic">
-                                                <a :href="'http://www.greenmall.com/goods/introduction/'+od.goodsId+'.html'"
+                                                <a target="_blank"
+                                                   :href="'http://www.greenmall.com/goods/introduction/'+od.goodsId+'.html'"
                                                    class="J_MakePoint">
                                                     <!-- 图片 -->
                                                     <img width="80px"
@@ -290,7 +291,7 @@
 
                                         <li class="td td-item">
                                             <div class="item-pic">
-                                                <a :href="'http://www.greenmall.com/goods/introduction/'+od.goodsId+'.html'"
+                                                <a target="_blank" :href="'http://www.greenmall.com/goods/introduction/'+od.goodsId+'.html'"
                                                    class="J_MakePoint">
                                                     <!-- 图片 -->
                                                     <img width="80px"
@@ -407,7 +408,7 @@
 
                                         <li class="td td-item">
                                             <div class="item-pic">
-                                                <a :href="'http://www.greenmall.com/goods/introduction/'+od.goodsId+'.html'"
+                                                <a target="_blank" :href="'http://www.greenmall.com/goods/introduction/'+od.goodsId+'.html'"
                                                    class="J_MakePoint">
                                                     <!-- 图片 -->
                                                     <img width="80px"
@@ -520,7 +521,7 @@
 
                                         <li class="td td-item">
                                             <div class="item-pic">
-                                                <a :href="'http://www.greenmall.com/goods/introduction/'+od.goodsId+'.html'"
+                                                <a target="_blank" :href="'http://www.greenmall.com/goods/introduction/'+od.goodsId+'.html'"
                                                    class="J_MakePoint">
                                                     <!-- 图片 -->
                                                     <img width="80px"
@@ -645,11 +646,11 @@
                     .then(resp => {
                         var data = resp.data;
                         if (resp.status === 200) {
-                            this.allOrderList = data;
-                            // 将 allOrderList 进行分流
-                            this.classifyOrderList();
-                        } else {
-
+                            if (gm.isObjectNotEmpty(data)) {
+                                this.allOrderList = data;
+                                // 将 allOrderList 进行分流
+                                this.classifyOrderList();
+                            }
                         }
                     })
                     .catch(() => {

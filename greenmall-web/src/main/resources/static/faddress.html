@@ -68,7 +68,7 @@
         <ul v-else class="am-avg-sm-1 am-avg-md-3 am-thumbnails" style="padding: 20px">
             <!-- 单个收货地址 -->
             <li class="user-addresslist" style="line-height: 100px">
-                <p>你还没有收货地址了。。。￣□￣｜｜</p>
+                <p>你还没有收货地址呢。。。￣□￣｜｜</p>
             </li>
         </ul>
 
@@ -367,14 +367,16 @@
                         .then(resp => {
                             var data = resp.data;
                             if (resp.status === 200) {
-                                this.userAddressList = data;
+                                console.log(gm.isObjectNotEmpty(data));
+
+                                this.userAddressList = gm.isObjectNotEmpty(data) ? data : [];
                             } else if (resp.status === 404) {
                                 // alert("一级行政区域数据空空如也!")
                             } else {
                                 alert("加载用户地址数据失败!")
                             }
                         })
-                        .catch(() => {
+                        .catch(resp => {
                             alert("加载用户地址数据异常!")
                         })
                 }

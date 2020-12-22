@@ -64,9 +64,6 @@ public class EvaluateController {
         try {
             UserInfo loginUser = LoginInterceptor.getLoginUser();
             List<Evaluate> eList = evaluateService.findComment(loginUser);
-            if (CollectionUtils.isEmpty(eList)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
             return ResponseEntity.ok(eList);
         } catch (Exception e) {
             e.printStackTrace();

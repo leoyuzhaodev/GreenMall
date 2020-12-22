@@ -334,6 +334,7 @@
 
                             } else {
                                 alert("您还没有设置收货地址，请在 个人中心->个人资料->收货地址 设置!");
+                                window.top.location.href = "http://www.greenmall.com/personalcenter.html?open=faddress";
                             }
                         } else if (resp.status === 404) {
                             // alert("一级行政区域数据空空如也!")

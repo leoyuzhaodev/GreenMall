@@ -63,18 +63,15 @@ public class UserCollectController {
      */
     @GetMapping(path = "/queryCollect/{loadNum}")
     public ResponseEntity<List<UserCollectBo>> queryCollect(@PathVariable(name = "loadNum") Long loadNum) {
-        UserInfo loginUser = LoginInterceptor.getLoginUser();
-        if (loginUser == null) {
-            throw new RuntimeException("用户信息加载异常...");
+        try {
+            UserInfo loginUser = LoginInterceptor.getLoginUser();
+            List<UserCollectBo> lists = userCollectService.findCollect(loginUser, loadNum);
+            return ResponseEntity.ok(lists);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
         }
-        List<UserCollectBo> lists = userCollectService.findCollect(loginUser, loadNum);
-        if (CollectionUtils.isEmpty(lists)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        return ResponseEntity.ok(lists);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-
-    /*deleteCollection*/
 
     /**
      * 删除收藏

@@ -74,7 +74,9 @@
                                 <ul class="item-list">
                                     <li class="td td-item" style="width: 30%">
                                         <div class="item-pic">
-                                            <a href="#" class="J_MakePoint">
+                                            <a target="_blank"
+                                               :href="'http://www.greenmall.com/goods/introduction/'+item.goodsId+'.html'"
+                                               class="J_MakePoint">
                                                 <img style="width: 80px;height: 80px;"
                                                      :src="item.goodsImage" class="itempic J_ItemImg">
                                             </a>
@@ -173,11 +175,9 @@
                     .then(resp => {
                         var data = resp.data;
                         if (resp.status === 200) {
-                            this.userRefundData = data;
-                        } else if (resp.status === 404) {
-                            // alert("一级行政区域数据空空如也!")
-                        } else {
-                            alert("加载退款数据失败!")
+                            if (gm.isObjectNotEmpty(data)) {
+                                this.userRefundData = data;
+                            }
                         }
                     })
                     .catch(() => {

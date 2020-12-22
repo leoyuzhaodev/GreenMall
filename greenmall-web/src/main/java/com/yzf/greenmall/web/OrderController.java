@@ -56,9 +56,6 @@ public class OrderController {
         try {
             UserInfo loginUser = LoginInterceptor.getLoginUser();
             List<Order> list = orderService.findOrder(loginUser);
-            if (CollectionUtils.isEmpty(list)) {
-                return ResponseEntity.notFound().build();
-            }
             return ResponseEntity.ok(list);
         } catch (Exception e) {
             e.printStackTrace();
@@ -111,9 +108,6 @@ public class OrderController {
         try {
             UserInfo loginUser = LoginInterceptor.getLoginUser();
             List<OrderDetailItemBo> items = orderService.findUserOrderDetailItem(type, loginUser);
-            if (CollectionUtils.isEmpty(items)) {
-                return ResponseEntity.notFound().build();
-            }
             return ResponseEntity.ok(items);
         } catch (Exception e) {
             e.printStackTrace();

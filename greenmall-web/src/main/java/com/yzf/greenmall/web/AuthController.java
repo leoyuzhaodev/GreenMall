@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * @description:
+ * @description:AuthController
  * @author:leo_yuzhao
  * @date:2020/11/21
  */

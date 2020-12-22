@@ -65,7 +65,8 @@
                             </div>
                             <li class="td td-item">
                                 <div class="item-pic">
-                                    <a href="#" class="J_MakePoint">
+                                    <a target="_blank"
+                                       :href="'http://www.greenmall.com/goods/introduction/'+item.goodsId+'.html'" class="J_MakePoint">
                                         <img width="80px" height="80px" :src="item.goodsImage" class="itempic">
                                     </a>
                                 </div>
@@ -81,7 +82,8 @@
                                     <div class="item-name">
                                         <a href="#">
                                             <p class="item-basic-info">
-                                                <a @click="goIntroduction(item.goodsId)">
+                                                <a target="_blank"
+                                                   :href="'http://www.greenmall.com/goods/introduction/'+item.goodsId+'.html'">
                                                     商品名称:【{{item.goodsTitle.length > 10 ?
                                                     item.goodsTitle.substring(0,10)
                                                     + '...':
@@ -131,7 +133,9 @@
                             </div>
                             <li class="td td-item">
                                 <div class="item-pic">
-                                    <a href="#" class="J_MakePoint">
+                                    <a target="_blank"
+                                       :href="'http://www.greenmall.com/goods/introduction/'+item.goodsId+'.html'"
+                                       class="J_MakePoint">
                                         <img width="80px" height="80px" :src="item.goodsImage" class="itempic">
                                     </a>
                                 </div>
@@ -144,7 +148,8 @@
                                     <div v-else-if="item.score>=3" class="item-opinion">中评</div>
                                     <div v-else="item.score>=1" class="item-opinion">差评</div>
                                     <div class="item-name">
-                                        <a @click="goIntroduction(item.goodsId)">
+                                        <a target="_blank"
+                                           :href="'http://www.greenmall.com/goods/introduction/'+item.goodsId+'.html'">
                                             商品名称:【{{item.goodsTitle.length > 10 ? item.goodsTitle.substring(0,10) +
                                             '...':
                                             item.goodsTitle}}】
@@ -234,10 +239,10 @@
                     .then(resp => {
                         var data = resp.data;
                         if (resp.status === 200) {
-                            this.commentList = data;
-                            this.typeCommentList(this.commentList);
-                        } else {
-
+                            if (gm.isObjectNotEmpty(data)) {
+                                this.commentList = data;
+                                this.typeCommentList(this.commentList);
+                            }
                         }
                     })
                     .catch(() => {

@@ -23,7 +23,7 @@
     <div class="layui-row layui-col-space15">
         <div class="layui-col-md12">
             <div class="layui-card">
-                <div class="layui-card-header">用户数据表</div>
+                <div class="layui-card-header">商品评论表</div>
                 <div class="layui-card-body">
                     <!-- 搜索 -->
                     <div class="demoTable">
@@ -56,6 +56,7 @@
                         {{# }else if(d.valid == 0){  }}
                         <a class="layui-btn layui-btn-xs" lay-event="release">撤销</a>
                         {{# }  }}
+                        <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="showImages">查看图片</a>
                     </script>
                     <!-- 功能键 -->
                     <script type="text/html" id="toolbarDemo">
@@ -69,13 +70,21 @@
 </div>
 
 </body>
+
+<div class="site-demo-flow" style="display: none;padding: 20px" id="LAY_demo3">
+    <img lay-src="https://gw.alicdn.com/bao/uploaded/i2/701696736/TB2PNl5ahQa61Bjy0FhXXaalFXa_!!701696736.jpg_400x400q90.jpg?t=1608647315873">
+    <img lay-src="https://gw.alicdn.com/bao/uploaded/i2/162734861/TB2V5rsX_gc61BjSZFkXXcTkFXa_!!162734861.jpg_400x400q90.jpg?t=1608647315873">
+    <img lay-src="https://gw.alicdn.com/bao/uploaded/i4/69476562/TB2htq4XTka61BjSszfXXXN8pXa_!!69476562.jpg_400x400q90.jpg?t=1608647315873">
+    <img lay-src="https://gw.alicdn.com/bao/uploaded/i4/TB1XzupNFXXXXcpXXXXXXXXXXXX_!!0-item_pic.jpg_400x400q90.jpg?t=1608647315873">
+</div>
+
 <script src="http://manager.greenmall.com/layui/layui.js"></script>
 <script src="http://manager.greenmall.com/layui/jquery-3.5.1.min.js" charset="utf-8"></script>
 <script src="http://manager.greenmall.com/layui/GreenMall.js"></script>
 <script src="http://manager.greenmall.com/js/GMVerify.js" charset="utf-8"></script>
 <script>
     //JavaScript代码区域
-    layui.use(['transfer', 'form', 'jquery', 'element', 'tree', 'util', 'table'], function () {
+    layui.use(['flow', 'transfer', 'form', 'jquery', 'element', 'tree', 'util', 'table'], function () {
         var $ = layui.jquery;
         var element = layui.element;
         var tree = layui.tree;
@@ -85,6 +94,8 @@
         var transfer = layui.transfer;
         var table = layui.table;
         var searchData = {};
+        var flow = layui.flow;
+
 
         // 1，加载数据表格
         table.render({
@@ -129,6 +140,46 @@
             } else if (obj.event === 'forbidden') {
                 // 禁用
                 evaluateSearch(1, evaluateId);
+            } else if (obj.event === 'showImages') {
+                var imagesStr = data.images
+                if (isStringEmpty(imagesStr)) {
+                    layer.msg("该评论没有图片!");
+                } else {
+                    var imageArray = imagesStr.split(",");
+
+                    // 清空
+                    $("#LAY_demo3").empty();
+
+                    // 将图片存入容器中
+                    imageArray.forEach(imageVal => {
+                        var tempImage = '<img width="200px" height="200px" style="margin-left: 10px; margin-top: 10px;" lay-src="' + imageVal + '">';
+                        $("#LAY_demo3").append(tempImage);
+                    })
+
+                    //按屏加载图片
+                    flow.lazyimg({
+                        elem: '#LAY_demo3 img'
+                        , scrollElem: '#LAY_demo3' //一般不用设置，此处只是演示需要。
+                    });
+
+                    // 成功回调
+                    layer.open({
+                        type: 1
+                        , offset: 'auto'
+                        , id: 'imagesLayer'
+                        , title: "评价图片信息"
+                        , area: ['500px', '340px']
+                        , content: $("#LAY_demo3")
+                        , btn: '关闭'
+                        , btnAlign: 'c' //按钮居中
+                        , shade: 0 //不显示遮罩
+                        , yes: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                }
+
+
             }
         });
 

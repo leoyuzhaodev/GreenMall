@@ -48,6 +48,8 @@ public class UserAddressService {
             // 判断是否是新增的第一个地址如果是，就设置为默认
             UserAddress record = new UserAddress();
             record.setAccountId(loginUser.getId());
+            // 有效地址
+            record.setValid((byte) 1);
             int i = userAddressMapper.selectCount(record);
             if (i <= 0) {
                 userAddress.setIsDefault((byte) 1);
@@ -74,6 +76,8 @@ public class UserAddressService {
         UserAddress userAddress = new UserAddress();
         userAddress.setValid((byte) 0);
         userAddress.setId(addressId);
+        // 清除默认地址标识
+        userAddress.setIsDefault((byte) 0);
         userAddressMapper.updateByPrimaryKeySelective(userAddress);
     }
 
